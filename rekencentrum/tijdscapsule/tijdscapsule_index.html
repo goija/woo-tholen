@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VORTEX OS — Dynamische Tijdscapsule Index</title>
+  <style>
+    :root { --bg: #030712; --panel: rgba(15,23,42,0.95); --cyan: #00e5ff; --gold: #ffcc33; --green: #00ff88; --magenta: #ff3385; --text: #f1f5f9; --font: 'Fira Code', monospace; }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); padding: 2rem; line-height: 1.6; }
+    .container { max-width: 1100px; margin: 0 auto; background: var(--panel); border: 1px solid var(--cyan); box-shadow: 0 0 30px rgba(0,229,255,0.25); border-radius: 8px; padding: 2rem; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--cyan); padding-bottom: 0.8rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    h1 { color: var(--gold); font-size: 1.4rem; }
+    .status-bar { display: flex; gap: 15px; align-items: center; font-size: 0.85rem; }
+    .badge-live { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid var(--green); padding: 4px 12px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+    .pulse-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .card { background: #02040a; border: 1px solid #1e293b; padding: 1rem; border-radius: 6px; }
+    .card-title { color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px dashed rgba(255,204,51,0.3); padding-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.82rem; }
+    th, td { border: 1px solid #1e293b; padding: 6px 10px; text-align: left; }
+    th { background: #0f172a; color: var(--cyan); }
+    .telemetry-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; font-size: 0.8rem; }
+    .telemetry-bar-bg { width: 60%; background: #1e293b; height: 10px; border-radius: 3px; overflow: hidden; border: 1px solid #334155; }
+    .telemetry-bar-fill { height: 100%; background: var(--green); width: 0%; transition: width 0.5s ease-in-out, background 0.5s; }
+    pre { background: #010206; border: 1px solid var(--cyan); padding: 1rem; border-radius: 6px; color: var(--green); overflow-x: auto; font-size: 0.78rem; max-height: 280px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>⌛ REKENCENTRUM DYNAMISCHE TIJDSCAPSULE</h1>
+      <p style="font-size:0.75rem; color:#94a3b8;">Real-time gegevenssynchronisatie & JSON Telemetrie (VORTEX OS)</p>
+    </div>
+    <div class="status-bar">
+      <div id="sysClock" style="color: var(--magenta); font-weight: bold;">--:--:--</div>
+      <div class="badge-live"><span class="pulse-dot"></span><span id="liveStatus">INITIALISATIE...</span></div>
+    </div>
+  </header>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">📡 Update Metadata</div>
+      <table>
+        <tr><th>Laatste Sync</th><td id="syncTime">Laden...</td></tr>
+        <tr><th>Versie / Release</th><td id="sysVersion">v159.2 Live</td></tr>
+      </table>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-title" style="color:var(--green);">📊 Live Telemetrie Analyse</div>
+      <div id="analyseTool">
+        <div class="telemetry-row"><span>Azimut</span><div class="telemetry-bar-bg"><div id="barAzimut" class="telemetry-bar-fill" style="background: var(--cyan);"></div></div><span id="valAzimut">0°</span></div>
+        <div class="telemetry-row"><span>Elevatie</span><div class="telemetry-bar-bg"><div id="barElevatie" class="telemetry-bar-fill" style="background: var(--magenta);"></div></div><span id="valElevatie">0°</span></div>
+        <div class="telemetry-row"><span>Illuminatie</span><div class="telemetry-bar-bg"><div id="barIllum" class="telemetry-bar-fill" style="background: var(--gold);"></div></div><span id="valIllum">0%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-title">🌕 Realtime Maanefemeriden</div>
+    <table>
+      <thead><tr><th>Component</th><th>Waarde</th></tr></thead>
+      <tbody id="astroBody"><tr><td colspan="2">Laden...</td></tr></tbody>
+    </table>
+  </div>
+
+  <h2>📂 Dynamische Bronbestanden & JSON Stream</h2>
+  <pre id="jsonDisplay">Bezig met ophalen...</pre>
+</div>
+
+<script>
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('sysClock').textContent = now.toLocaleTimeString('nl-NL') + ' Lokaal | ' + now.toISOString().substring(11, 19) + ' UTC';
+  }, 1000);
+
+  async function loadDynamicTijdscapsule() {
+    try {
+      const res = await fetch('./tijdscapsule_data.json?cb=' + new Date().getTime(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('Netwerk fout');
+      const data = await res.json();
+      
+      if (data.tijdscapsule_metadata) {
+        document.getElementById('syncTime').textContent = data.tijdscapsule_metadata.timestamp_lock || '';
+        document.getElementById('sysVersion').textContent = data.tijdscapsule_metadata.versie || '';
+      }
+      if (data.realtime_maan_status) {
+        const m = data.realtime_maan_status;
+        document.getElementById('barAzimut').style.width = Math.min(Math.max((m.azimut_deg / 360) * 100, 0), 100) + '%';
+        document.getElementById('valAzimut').textContent = m.azimut_deg + '°';
+        document.getElementById('barElevatie').style.width = Math.min(Math.max(((parseFloat(m.elevatie_deg) + 90) / 180) * 100, 0), 100) + '%';
+        document.getElementById('valElevatie').textContent = m.elevatie_deg + '°';
+        document.getElementById('barIllum').style.width = Math.min(Math.max(m.verlichting_percentage, 0), 100) + '%';
+        document.getElementById('valIllum').textContent = m.verlichting_percentage + '%';
+        document.getElementById('astroBody').innerHTML = `<tr><td>Actuele Maanstand</td><td>Azimut ${m.azimut_deg}° | Elevatie ${m.elevatie_deg}°</td></tr>`;
+      }
+      document.getElementById('jsonDisplay').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('liveStatus').textContent = 'DATA SYNC OK';
+      document.getElementById('liveStatus').style.color = "var(--green)";
+    } catch(err) {
+      document.getElementById('liveStatus').textContent = 'OFFLINE';
+      document.getElementById('liveStatus').style.color = "var(--magenta)";
+    }
+  }
+  window.addEventListener('DOMContentLoaded', () => { loadDynamicTijdscapsule(); setInterval(loadDynamicTijdscapsule, 5000); });
+</script>
+</body>
+</html>

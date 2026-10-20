@@ -1,0 +1,21 @@
+{
+  "tijdscapsule_metadata": {
+    "timestamp_lock": "2026-10-20 20:26:00",
+    "versie": "v159.2 Live (Direct Bash)"
+  },
+  "realtime_maan_status": {
+    "object": "Maan",
+    "rechte_klimming_ra_deg": "14.5",
+    "declinatie_dec_deg": "-5.2",
+    "azimut_deg": "180.5",
+    "elevatie_deg": "45.0",
+    "verlichting_percentage": "85.2"
+  },
+  "maan_omlooptijden_en_cycli": {
+    "siderische_maand_weergave": "27,3 dagen",
+    "synodische_maand_weergave": "29,5 dagen",
+    "draconische_maand_weergave": "27,2 dagen",
+    "anomalistische_maand_weergave": "27,5 dagen",
+    "saros_cyclus_weergave": "6585 dagen"
+  }
+}
