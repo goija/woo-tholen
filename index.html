@@ -227,11 +227,11 @@
         <!-- 1. Zeegrid & OpenSeaMap als allereerste hoofdoptie -->
         <button id="btn-seagrid" class="active" onclick="toggleSeaGrid()">⚓ 1. Zeegrid + OpenSeaMap: AAN</button>
 
-        <!-- 2. Kaartproviders zonder API-sleutel (incl. Kadaster BRK Perceelgrenzen) -->
+        <!-- 2. Kaartproviders: PDOK BRT als EERSTE in de selectielijst gezet -->
         <select id="map-provider-sel" onchange="switchMapProvider(this.value)">
+            <option value="pdok_brt" selected>🇳🇱 PDOK Topografisch BRT (Nederland)</option>
             <option value="opensea_first">🌊 Zeegrid + OpenSeaMap + Carto Dark (Default)</option>
             <option value="pdok_kadaster">📐 PDOK Kadastrale Perceelgrenzen (BRK + Luchtfoto)</option>
-            <option value="pdok_brt">🇳🇱 PDOK Topografisch BRT (Nederland)</option>
             <option value="esri_ocean">🌊 Esri World Ocean & Bathymetrie</option>
             <option value="esri_sat">🛰️ Esri World Imagery (Satelliet)</option>
             <option value="osm_std">🌍 OpenStreetMap Standard</option>
@@ -551,6 +551,94 @@
 </main>
 
 <script>
+    // =========================================================================================
+    // 0. MAPLIBRE & PLANIMETER FUNCTIES (EXACT GEPLAATST ALS EERST IN DE CODE)
+    // =========================================================================================
+    function initMapLibre() {
+      try {
+        map = new maplibregl.Map({
+          container: 'maplibre-canvas',
+          style: {
+            version: 8,
+            sources: {
+              'pdok-brt': {
+                type: 'raster',
+                tiles: ['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'],
+                tileSize: 256,
+                attribution: '&copy; Kadaster / PDOK BRT Standaard'
+              }
+            },
+            layers: [{
+              id: 'pdok-brt-layer',
+              type: 'raster',
+              source: 'pdok-brt',
+              paint: {
+                'raster-opacity': 1.0
+              }
+            }]
+          },
+          center: [state.anchorLng, state.anchorLat],
+          zoom: 13
+        });
+
+        const el = document.createElement('div');
+        el.style.width = '14px';
+        el.style.height = '14px';
+        el.style.borderRadius = '50%';
+        el.style.border = '2px solid #00e5ff';
+        el.style.background = 'rgba(251, 191, 36, 0.75)';
+        el.style.boxShadow = '0 0 10px #00e5ff';
+
+        mapCursorMarker = new maplibregl.Marker({ element: el })
+          .setLngLat([state.anchorLng, state.anchorLat])
+          .addTo(map);
+
+        map.on('move', () => {
+          const c = map.getCenter();
+          state.anchorLng = c.lng;
+          state.anchorLat = c.lat;
+          document.getElementById('vp-map-coord').textContent = `${c.lat.toFixed(4)}°N, ${c.lng.toFixed(4)}°E`;
+        });
+      } catch (err) {}
+    }
+
+    function jumpToPreset(val) {
+      const [lng, lat, z] = val.split(',').map(Number);
+      state.anchorLng = lng;
+      state.anchorLat = lat;
+      if (map) map.flyTo({ center: [lng, lat], zoom: z, essential: true });
+    }
+
+    function updatePlanimeter(tx, ty) {
+      state.tx = tx;
+      state.ty = ty;
+
+      const px = 0, py = -300;
+      const R = 300, L = 430;
+      const dx = tx - px, dy = ty - py;
+      let d = Math.hypot(dx, dy);
+      if (d > R + L - 2) d = R + L - 2;
+      if (d < Math.abs(R - L) + 2) d = Math.abs(R - L) + 2;
+
+      const a = (R * R - L * L + d * d) / (2 * d);
+      const h = Math.sqrt(Math.max(0, R * R - a * a));
+      const mx = px + a * (dx / d);
+      const my = py + a * (dy / d);
+      const gx = mx - h * (dy / d);
+      const gy = my + h * (dx / d);
+
+      const deg = (Math.atan2(ty, tx) * 180 / Math.PI + 90 + 360) % 360;
+      const nonius = Math.round((deg / 360) * 3630);
+      const area = (nonius * 0.1).toFixed(1);
+      const syIdx = Math.floor(deg / 5.625) % 64;
+
+      state.theta = deg;
+      state.nonius = nonius;
+      state.syIdx = syIdx;
+
+      recalcLarmorHeterodyne();
+    }
+
     if (window['pdfjsLib']) {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
@@ -706,6 +794,10 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     // 2. MAP_PROVIDERS GEINTEGREERD MET KADASTER, PDOK, CARTO & ESRI ENDPOINTS
     // =========================================================================================
     const MAP_PROVIDERS = {
+        pdok_brt: {
+            tiles: ['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'],
+            maxzoom: 19
+        },
         opensea_first: {
             tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
             maxzoom: 19
@@ -714,10 +806,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
             tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'],
             maxzoom: 19,
             kadasterWms: true
-        },
-        pdok_brt: {
-            tiles: ['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'],
-            maxzoom: 19
         },
         esri_ocean: {
             tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}'],
@@ -760,7 +848,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }
 
     function buildMapStyle(providerKey) {
-        const prov = MAP_PROVIDERS[providerKey] || MAP_PROVIDERS.opensea_first;
+        const prov = MAP_PROVIDERS[providerKey] || MAP_PROVIDERS.pdok_brt;
         const sources = {
             'base-tiles': { type: 'raster', tiles: prov.tiles, tileSize: 256, maxzoom: prov.maxzoom },
             'openseamap-tiles': { type: 'raster', tiles: ['https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 18 },
@@ -815,7 +903,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
             container: 'mapglobe-bg',
             preserveDrawingBuffer: true,
             attributionControl: false,
-            style: buildMapStyle('opensea_first'),
+            style: buildMapStyle('pdok_brt'),
             center: [state.centerLon, state.centerLat],
             zoom: 15.2,
             pitch: 30
