@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WOO-THOLEN // GEODATACENTRUM & KLANTCONTACT (VP-01 WEBRTC & PLANIMETER)</title>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <style>
+    :root {
+      --bg-0: #070a0f;
+      --bg-1: #0d131c;
+      --bg-2: #131c29;
+      --border: #24344d;
+      --accent: #00e5ff;
+      --accent-amber: #ffb300;
+      --accent-green: #00e676;
+      --accent-red: #ff5252;
+      --text-main: #e2e8f0;
+      --text-dim: #94a3b8;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg-0);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOPBAR: ZOEKFUNCTIE (🔍) & VP LAYOUT: */
+    .topbar {
+      height: 46px;
+      background: var(--bg-1);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 2000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .brand span.badge {
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+
+    /* Zoekfunctie: Aangeduid met een vergrootglas-icoon (🔍) */
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--bg-0);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      flex: 1;
+      max-width: 420px;
+    }
+
+    .search-box span.search-icon {
+      font-size: 13px;
+      margin-right: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+    }
+
+    .search-box button {
+      background: var(--bg-2);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .search-box button:hover {
+      border-color: var(--accent);
+    }
+
+    /* Lay-outselectie: VP LAYOUT: */
+    .vp-layout-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .vp-layout-label {
+      color: var(--accent-amber);
+      font-weight: 700;
+      font-size: 11px;
+      margin-right: 2px;
+    }
+
+    .btn {
+      background: var(--bg-2);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 5px 9px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn.active {
+      background: rgba(0, 229, 255, 0.16);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .btn-amber {
+      border-color: rgba(255, 179, 0, 0.5);
+      color: var(--accent-amber);
+    }
+
+    .btn-amber:hover:not(:disabled) {
+      background: rgba(255, 179, 0, 0.15);
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+
+    .btn-green {
+      border-color: rgba(0, 230, 118, 0.5);
+      color: var(--accent-green);
+    }
+
+    .btn-green:hover:not(:disabled) {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .btn-red {
+      border-color: rgba(255, 82, 82, 0.5);
+      color: var(--accent-red);
+    }
+
+    .btn-red:hover:not(:disabled) {
+      background: rgba(255, 82, 82, 0.15);
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    /* WORKSPACE GRID (VP-01, VP-02, VP-03) */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.45fr 0.95fr 1.05fr;
+      gap: 6px;
+      padding: 6px;
+      overflow: hidden;
+      background: var(--bg-0);
+    }
+
+    .workspace.layout-1vp {
+      grid-template-columns: 1fr;
+    }
+    .workspace.layout-1vp #vp02,
+    .workspace.layout-1vp #vp03 {
+      display: none;
+    }
+
+    .workspace.layout-2vp {
+      grid-template-columns: 1.35fr 1fr;
+    }
+    .workspace.layout-2vp #vp02 {
+      display: none;
+    }
+
+    .viewport {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .vp-header {
+      height: 32px;
+      background: var(--bg-2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .vp-header .vp-status {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 10px;
+    }
+
+    .vp-body {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* UITKLAPVENSTER VOOR KAARTEN EN CAMERA IN VP-01 */
+    details.map-camera-drawer {
+      background: rgba(13, 19, 28, 0.96);
+      border-bottom: 1px solid var(--border);
+      z-index: 1005;
+      flex-shrink: 0;
+      max-height: 55%;
+      overflow-y: auto;
+    }
+
+    details.map-camera-drawer > summary {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent-amber);
+      background: rgba(19, 28, 41, 0.95);
+      border-bottom: 1px solid rgba(36, 52, 77, 0.6);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    details.map-camera-drawer > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.map-camera-drawer > summary::after {
+      content: '▼';
+      font-size: 10px;
+      color: var(--accent);
+      transition: transform 0.2s ease;
+    }
+
+    details.map-camera-drawer[open] > summary::after {
+      transform: rotate(180deg);
+    }
+
+    .drawer-content {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .step-block {
+      background: var(--bg-0);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .step-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    select, input[type="text"], input[type="email"], textarea {
+      background: var(--bg-1);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 5px 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      outline: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .slider-group {
+      display: grid;
+      grid-template-columns: 95px 1fr 48px;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+      width: 100%;
+      cursor: pointer;
+    }
+
+    /* KAART CONTAINER IN VP-01 */
+    #mapContainer {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #05070a;
+      overflow: hidden;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* ZWEVEND WEBRTC CAMERA VENSTER OP VP-01 */
+    .webrtc-floating-cam {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 240px;
+      background: rgba(7, 10, 15, 0.94);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      z-index: 950;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+    }
+
+    .webrtc-floating-cam.active {
+      display: flex;
+    }
+
+    .cam-header {
+      padding: 4px 8px;
+      background: var(--bg-2);
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #webrtcVideo {
+      width: 100%;
+      height: 145px;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .cam-footer {
+      padding: 5px;
+      display: flex;
+      gap: 4px;
+      justify-content: space-between;
+    }
+
+    /* NIEUW: PLANIMETER OUTPUT AFBEELDING IN HET VP-01 SCHERM (HUD OVERLAY) */
+    .vp01-planimeter-hud {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      width: 310px;
+      background: rgba(7, 10, 15, 0.95);
+      border: 1px solid var(--accent-green);
+      border-radius: 4px;
+      z-index: 960;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.85);
+    }
+
+    .vp01-planimeter-hud.active {
+      display: flex;
+    }
+
+    .hud-header {
+      padding: 5px 8px;
+      background: rgba(0, 230, 118, 0.14);
+      border-bottom: 1px solid rgba(0, 230, 118, 0.4);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent-green);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hud-body {
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    #vp01PlanimeterOutputImg {
+      width: 100%;
+      height: auto;
+      max-height: 175px;
+      object-fit: contain;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: #05080c;
+    }
+
+    .hud-metrics {
+      font-size: 10px;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    /* PLANIMETER & TELEMETRIE BALK ONDERAAN VP-01 */
+    .vp01-footer {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+      padding: 6px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      z-index: 1000;
+    }
+
+    .metric-pill {
+      background: var(--bg-0);
+      border: 1px solid var(--border);
+      padding: 3px 7px;
+      border-radius: 3px;
+      color: var(--accent-green);
+      font-weight: 700;
+    }
+
+    /* VP-02 & VP-03 INTERNE INDELING */
+    .panel-scroll {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--bg-0);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-amber);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #pdfViewerFrame {
+      width: 100%;
+      height: 220px;
+      border: 1px solid var(--border);
+      background: #090d14;
+      border-radius: 3px;
+    }
+
+    .chat-log {
+      height: 145px;
+      overflow-y: auto;
+      background: #05080c;
+      border: 1px solid var(--border);
+      padding: 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chat-entry {
+      line-height: 1.4;
+      border-bottom: 1px dashed rgba(36, 52, 77, 0.4);
+      padding-bottom: 3px;
+    }
+
+    .chat-entry .time {
+      color: var(--text-dim);
+      font-size: 10px;
+      margin-right: 5px;
+    }
+
+    .contact-attachment-preview {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: #05080c;
+      border: 1px solid var(--accent-green);
+      border-radius: 3px;
+      padding: 6px;
+    }
+
+    .contact-attachment-preview.active {
+      display: flex;
+    }
+
+    #vp03PlanimeterImg {
+      width: 100%;
+      max-height: 140px;
+      object-fit: contain;
+      border: 1px solid var(--border);
+    }
+
+    .leaflet-oldmap-overlay {
+      pointer-events: none;
+      transition: opacity 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ALGEMENE INTERFACE-ELEMENTEN (TOPBAR) -->
+  <header class="topbar">
+    <div class="brand">
+      <span>🏛️ WOO-THOLEN // KLANTCONTACT & GEODATA</span>
+      <span class="badge">VP-01 WEBRTC & PLANIMETER</span>
+    </div>
+
+    <!-- Zoekfunctie: Aangeduid met een vergrootglas-icoon (🔍) -->
+    <div class="search-box" title="Zoek op adres, perceel, kadastrale sectie of plaats in PDOK">
+      <span class="search-icon" id="searchIconBtn">🔍</span>
+      <input
+        type="text"
+        id="globalSearchInput"
+        placeholder="Zoek locatie, perceel of dossier (bijv. Scherpenisse, Westkerke)..."
+      />
+      <button type="button" id="searchSubmitBtn">ZOEK</button>
+    </div>
+
+    <!-- Lay-outselectie: Een sectie genaamd VP LAYOUT: -->
+    <div class="vp-layout-bar">
+      <span class="vp-layout-label">VP LAYOUT:</span>
+      <button type="button" class="btn" data-layout="1vp" onclick="setVpLayout('1vp', this)">1VP (VP-01)</button>
+      <button type="button" class="btn" data-layout="2vp" onclick="setVpLayout('2vp', this)">2VP (KAART + CONTACT)</button>
+      <button type="button" class="btn active" data-layout="3vp" onclick="setVpLayout('3vp', this)">3VP (VOLLEDIG)</button>
+    </div>
+  </header>
+
+  <!-- HOOFDGRID MET VIEWPORTS -->
+  <main class="workspace" id="workspaceGrid">
+
+    <!-- =====================================================================
+         VIEWPORT 1 (VP-01): GEODATACENTRUM + UITKLAPVENSTER KAARTEN & WEBRTC
+         ===================================================================== -->
+    <section class="viewport" id="vp01">
+      <div class="vp-header">
+        <span>VP-01 // GEODATACENTRUM, KAARTLAGEN & WEBRTC OUDE KAART CAMERA</span>
+        <span class="vp-status" id="vp01Coords">51.54780° N, 4.10310° E (Scherpenisse)</span>
+      </div>
+
+      <div class="vp-body">
+        <!-- Uitklapvenster voor kaarten en camera -->
+        <details class="map-camera-drawer" id="mapCameraDrawer" open>
+          <summary>🗺️ UITKLAPVENSTER KAARTEN, RASTERS & OUDE KAART CAMERA</summary>
+
+          <div class="drawer-content">
+            <!-- STAP 1: KIES KAARTLAAG (START OP NULL) -->
+            <div class="step-block">
+              <div class="step-title">1. KIES KAARTLAAG (START OP NULL):</div>
+              <div class="control-row">
+                <select id="mapLayerSelect" style="flex: 1;">
+                  <option value="null" selected>-- NULL (Geen extra kaartlaag / Standaard Carto Dark) --</option>
+                  <option value="pdok_brt">PDOK Topografisch BRT (WMTS Standaard)</option>
+                  <option value="pdok_luchtfoto">PDOK Actueel Ortho Luchtfoto (25cm RGB)</option>
+                  <option value="pdok_kadaster">PDOK Kadastrale Kaart v5 (Perceelgrenzen WMS)</option>
+                  <option value="pdok_ahn">PDOK AHN4 Hoogtekaart (DSM Maaiveld WMS)</option>
+                  <option value="oat_1832">Historisch Kadastraal Minuutplan 1832 (Scherpenisse/Tholen)</option>
+                </select>
+
+                <select id="rasterLayerSelect" title="Wiskundig of Geodetisch Raster over VP-01">
+                  <option value="null" selected>Raster: NULL (Uit)</option>
+                  <option value="voronoi">Raster: Voronoi Geodetische Cellen</option>
+                  <option value="penrose">Raster: Penrose P3 Harmonisch</option>
+                  <option value="rd_grid">Raster: WGS84 / RD Coördinatennet</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- STAP 2: OUDE KAART INLEZEN MET WEBRTC CAMERA OF AFBEELDING -->
+            <div class="step-block">
+              <div class="step-title">2. OUDE KAART INLEZEN MET WEBRTC CAMERA OF AFBEELDING:</div>
+
+              <div class="control-row">
+                <!-- Verborgen bestandskanaal + Zichtbare knop 🖼️ Upload Oude Kaart... -->
+                <input type="file" id="oldMapFileInput" accept="image/*" style="display: none;" />
+                <button type="button" class="btn btn-amber" id="uploadOldMapBtn">
+                  🖼️ Upload Oude Kaart...
+                </button>
+
+                <!-- WebRTC Camera bediening voor het live inlezen van een oude kaart -->
+                <button type="button" class="btn btn-green" id="startWebrtcCamBtn">
+                  📷 Start WebRTC Camera
+                </button>
+                <button type="button" class="btn" id="captureCamToMapBtn" disabled>
+                  📸 Projecteer Camera op Kaart
+                </button>
+                <button type="button" class="btn" id="liveVideoOverlayBtn" disabled>
+                  📡 Live Video-Overlay op Kaart
+                </button>
+                <button type="button" class="btn btn-red" id="clearOldMapOverlayBtn">
+                  🗑️ Wis Overlay
+                </button>
+              </div>
+
+              <!-- Georeferentie & Transparantie Regelaars voor de ingeladen Oude Kaart / WebRTC-laag -->
+              <div class="slider-group">
+                <span>Transparantie:</span>
+                <input type="range" id="overlayOpacitySlider" min="0" max="100" value="75" />
+                <span id="overlayOpacityVal">75%</span>
+              </div>
+
+              <div class="slider-group">
+                <span>Schaal (bereik):</span>
+                <input type="range" id="overlayScaleSlider" min="20" max="300" value="100" />
+                <span id="overlayScaleVal">100%</span>
+              </div>
+
+              <div class="slider-group">
+                <span>Rotatie (°):</span>
+                <input type="range" id="overlayRotateSlider" min="-180" max="180" value="0" />
+                <span id="overlayRotateVal">0°</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- KAART, ZWEVENDE WEBRTC CAMERA & PLANIMETER OUTPUT SCHERM IN VP-01 -->
+        <div id="mapContainer">
+          <div id="map"></div>
+
+          <!-- Zwevend WebRTC Cameravenster binnen VP-01 -->
+          <div class="webrtc-floating-cam" id="webrtcFloatingCam">
+            <div class="cam-header">
+              <span>📷 WEBRTC OUDE KAART SCANNER</span>
+              <button type="button" class="btn btn-red" id="stopWebrtcCamBtn" style="padding: 1px 5px; font-size: 10px;">SLUIT</button>
+            </div>
+            <video id="webrtcVideo" autoplay playsinline muted></video>
+            <canvas id="webrtcCaptureCanvas" style="display: none;"></canvas>
+            <div class="cam-footer">
+              <button type="button" class="btn btn-green" id="snapFromFloatingBtn" style="flex:1;">📸 Vastleggen op Kaart</button>
+            </div>
+          </div>
+
+          <!-- PLANIMETER OUTPUT AFBEELDING RECHTSTREEKS IN HET VP-01 SCHERM -->
+          <div class="vp01-planimeter-hud" id="vp01PlanimeterHud">
+            <div class="hud-header">
+              <span>📐 A. OTT 573 PLANIMETER OUTPUT (VP-01)</span>
+              <div style="display:flex; gap:4px;">
+                <button type="button" class="btn" id="pinPlanimeterToMapBtn" style="padding:1px 5px; font-size:10px;" title="Projecteer deze planimeter-afbeelding als kaartlaag op VP-01">📌 Op Kaart</button>
+                <button type="button" class="btn" id="downloadPlanimeterImgBtn" style="padding:1px 5px; font-size:10px;" title="Download PNG">💾 PNG</button>
+                <button type="button" class="btn btn-red" id="closePlanimeterHudBtn" style="padding:1px 5px; font-size:10px;">✕</button>
+              </div>
+            </div>
+            <div class="hud-body">
+              <img id="vp01PlanimeterOutputImg" alt="Planimeter Output VP-01" />
+              <div class="hud-metrics" id="vp01PlanimeterHudText">
+                Nog geen meting verricht.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VP-01 VOETBALK: A. OTT NR. 573 PLANIMETER & KOPPELING NAAR KLANTCONTACT -->
+        <div class="vp01-footer">
+          <div class="control-row">
+            <button type="button" class="btn active" id="togglePlanimeterBtn">📐 Planimeter (A. Ott 573): ACTIEF (Klik op kaart)</button>
+            <button type="button" class="btn" id="demoPlanimeterParcelBtn" title="Genereer direct een proefmeting op Scherpenisse en verstuur naar Klantcontact & VP-01">⚡ Proefmeting Perceel</button>
+            <button type="button" class="btn" id="resetPlanimeterBtn">↺ Reset Meting</button>
+            <button type="button" class="btn btn-amber" id="syncVp01ToContactBtn">
+              📤 Verstuur Planimeter Output naar Klantcontact & VP-01
+            </button>
+          </div>
+          <div class="metric-pill" id="planimeterReadout">
+            Oppervlakte: 0.00 m² | 0.0000 ha | 0.000 Gemeten
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         VIEWPORT 2 (VP-02): WOO-DOSSIER, ARCHIEF & PDF VIEWER
+         ===================================================================== -->
+    <section class="viewport" id="vp02">
+      <div class="vp-header">
+        <span>VP-02 // WOO-DOSSIER, ARCHIEFSTUKKEN & PDF VERIFICATIE</span>
+        <span class="vp-status" id="vp02Status">SHA-256 GEREED</span>
+      </div>
+
+      <div class="panel-scroll">
+        <div class="card">
+          <div class="card-title">
+            <span>📄 PDF DOSSIER & KADASTRALE LEGGER VIEWER</span>
+            <input type="file" id="pdfUploadInput" accept="application/pdf,image/*" style="display:none;" />
+            <button type="button" class="btn" onclick="document.getElementById('pdfUploadInput').click()">
+              📂 Laad PDF / Akte...
+            </button>
+          </div>
+          <iframe id="pdfViewerFrame" title="Woo Dossier Viewer"></iframe>
+          <div style="font-size:10px; color:var(--text-dim);" id="pdfHashOutput">
+            Integriteitshash (SHA-256): [Geen bestand geladen]
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>⚖️ WOO-PRECISERING & ARCHIEFNOTITIE (THOLEN / SCHERPENISSE)</span>
+          </div>
+          <textarea id="wooDossierNotes" rows="6" placeholder="Noteer hier kadastrale secties, perceelnummers (bijv. Scherpenisse Sectie E), minuutplans of bevindingen uit de WebRTC oude-kaartprojectie..."></textarea>
+          <div class="control-row">
+            <button type="button" class="btn btn-green" id="exportDossierJsonBtn">💾 Exporteer Dossier JSON</button>
+            <button type="button" class="btn" id="insertCoordsToNotesBtn">📍 Voeg Huidige Kaartpositie Toe</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         VIEWPORT 3 (VP-03): KLANTCONTACTCENTRUM, WEBRTC DATALINK & PROTONMAIL
+         ===================================================================== -->
+    <section class="viewport" id="vp03">
+      <div class="vp-header">
+        <span>VP-03 // KLANTCONTACTCENTRUM, PLANIMETER-OUTPUT & PROTONMAIL</span>
+        <span class="vp-status" id="webrtcChannelState">P2P KANAAL: LOKAAL ACTIEF</span>
+      </div>
+
+      <div class="panel-scroll">
+        <!-- Realtime WebRTC Klantcontact / Telemetrie Logboek -->
+        <div class="card">
+          <div class="card-title">
+            <span>📡 WEBRTC KLANTCONTACT & PLANIMETER TELEMETRIE</span>
+            <button type="button" class="btn btn-green" id="initP2pOfferBtn">🔗 Genereer P2P SDP</button>
+          </div>
+          <div class="chat-log" id="contactLog"></div>
+          <div class="control-row">
+            <input type="text" id="chatMessageInput" placeholder="Bericht of tijdstempel toevoegen aan klantcontact-log..." style="flex:1;" />
+            <button type="button" class="btn btn-amber" id="sendChatBtn">Verzend</button>
+          </div>
+        </div>
+
+        <!-- Ontvangen Planimeter Afbeelding in Klantcontact -->
+        <div class="contact-attachment-preview" id="vp03AttachmentBox">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--accent-green); font-weight:700;">
+            <span>📎 BIJLAGE VANUIT VP-01 PLANIMETER (GESYNCHRONISEERD)</span>
+            <span id="vp03AttachmentTime"></span>
+          </div>
+          <img id="vp03PlanimeterImg" alt="Planimeter Rapport Bijlage" />
+        </div>
+
+        <!-- Directe ProtonMail & Woo-Tholen Verzendmodule -->
+        <div class="card">
+          <div class="card-title">
+            <span>✉️ BEVEILIGDE VERZENDING (PROTONMAIL / WOO-LOKET)</span>
+          </div>
+          <div class="control-row">
+            <input type="email" id="contactEmailTo" value="woo-tholen@proton.me" style="flex:1;" title="Ontvanger e-mailadres" />
+            <input type="text" id="contactSubject" value="Woo-dossier & A. Ott 573 Planimeter Verificatie (Scherpenisse / Tholen)" style="flex:1;" />
+          </div>
+          <textarea id="contactMailBody" rows="6" placeholder="Geachte behandelaar, hierbij de geodetische en kadastrale bevindingen vanuit VP-01..."></textarea>
+          <div class="control-row">
+            <button type="button" class="btn btn-amber" id="openProtonMailBtn">
+              ✉️ Open in E-mailclient (ProtonMail)
+            </button>
+            <button type="button" class="btn" id="copyContactReportBtn">
+              📋 Kopieer Volledig Rapport
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /***************************************************************************
+     * 1. LAY-OUTSELECTIE (`VP LAYOUT:`)
+     ***************************************************************************/
+    function setVpLayout(mode, btnEl) {
+      const grid = document.getElementById('workspaceGrid');
+      grid.classList.remove('layout-1vp', 'layout-2vp', 'layout-3vp');
+      if (mode === '1vp') grid.classList.add('layout-1vp');
+      if (mode === '2vp') grid.classList.add('layout-2vp');
+
+      document.querySelectorAll('.vp-layout-bar .btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      setTimeout(() => {
+        if (window.vortexMap) window.vortexMap.invalidateSize();
+        drawMathRaster();
+      }, 180);
+    }
+
+    /***************************************************************************
+     * 2. INITIALISATIE VAN VP-01 KAART (STANDAARD CARTO DARK, KAARTLAAG = NULL)
+     ***************************************************************************/
+    const SCHERPENISSE_CENTER = [51.5478, 4.1031];
+    const map = L.map('map', {
+      center: SCHERPENISSE_CENTER,
+      zoom: 15,
+      zoomControl: true,
+      preferCanvas: true
+    });
+    window.vortexMap = map;
+
+    // Basiskaart met crossOrigin='anonymous' zodat canvas-export niet crasht op CORS
+    const baseDarkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20,
+      crossOrigin: 'anonymous',
+      attribution: '&copy; OpenStreetMap & CartoDB | WOO-THOLEN VP-01'
+    }).addTo(map);
+
+    // Correct geïnstantieerde GridLayer voor OAT 1832 Minuutplan (zonder constructor bug)
+    const Oat1832GridLayer = L.GridLayer.extend({
+      createTile: function(coords) {
+        const tile = document.createElement('canvas');
+        tile.width = 256;
+        tile.height = 256;
+        const ctx = tile.getContext('2d');
+        ctx.strokeStyle = 'rgba(255, 179, 0, 0.45)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, 256, 256);
+        ctx.fillStyle = 'rgba(255, 179, 0, 0.06)';
+        ctx.fillRect(0, 0, 256, 256);
+        ctx.fillStyle = '#ffb300';
+        ctx.font = '10px monospace';
+        ctx.fillText(`OAT 1832 MINUUTPLAN [${coords.z}/${coords.x}/${coords.y}]`, 10, 20);
+        ctx.fillText('Scherpenisse / Westkerke Kadaster', 10, 36);
+        return tile;
+      }
+    });
+
+    const thematicLayers = {
+      pdok_brt: L.tileLayer(
+        'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png',
+        { maxZoom: 19, opacity: 0.88, crossOrigin: 'anonymous', attribution: 'PDOK BRT' }
+      ),
+      pdok_luchtfoto: L.tileLayer(
+        'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg',
+        { maxZoom: 20, opacity: 0.90, crossOrigin: 'anonymous', attribution: 'PDOK Luchtfoto 25cm' }
+      ),
+      pdok_kadaster: L.tileLayer.wms(
+        'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0?',
+        {
+          layers: 'Kadastralekaart',
+          format: 'image/png',
+          transparent: true,
+          maxZoom: 21,
+          attribution: 'PDOK Kadaster'
+        }
+      ),
+      pdok_ahn: L.tileLayer.wms(
+        'https://service.pdok.nl/rws/ahn/wms/v1_0?',
+        {
+          layers: 'dsm_05m',
+          format: 'image/png',
+          transparent: true,
+          opacity: 0.75,
+          maxZoom: 20,
+          attribution: 'PDOK AHN4'
+        }
+      ),
+      oat_1832: new Oat1832GridLayer()
+    };
+
+    let activeThematicLayer = null;
+    let activeLayerName = 'null';
+
+    document.getElementById('mapLayerSelect').addEventListener('change', function(e) {
+      const val = e.target.value;
+      if (activeThematicLayer && map.hasLayer(activeThematicLayer)) {
+        map.removeLayer(activeThematicLayer);
+      }
+      activeThematicLayer = null;
+      activeLayerName = val;
+
+      if (val !== 'null' && thematicLayers[val]) {
+        activeThematicLayer = thematicLayers[val];
+        activeThematicLayer.addTo(map);
+        logContactEvent(`🗺️ Kaartlaag in VP-01 gewijzigd naar: ${e.target.options[e.target.selectedIndex].text}`);
+      } else {
+        logContactEvent('🗺️ Kaartlaag in VP-01 teruggezet naar NULL (Standaard Carto Dark).');
+      }
+    });
+
+    map.on('mousemove', function(e) {
+      document.getElementById('vp01Coords').textContent =
+        `${e.latlng.lat.toFixed(5)}° N, ${e.latlng.lng.toFixed(5)}° E`;
+    });
+
+    /***************************************************************************
+     * 3. WISKUNDIGE & GEODETISCHE RASTERS OVER VP-01 (VORONOI / PENROSE / RD)
+     ***************************************************************************/
+    const rasterCanvas = document.createElement('canvas');
+    rasterCanvas.style.position = 'absolute';
+    rasterCanvas.style.top = '0';
+    rasterCanvas.style.left = '0';
+    rasterCanvas.style.width = '100%';
+    rasterCanvas.style.height = '100%';
+    rasterCanvas.style.pointerEvents = 'none';
+    rasterCanvas.style.zIndex = '450';
+    document.getElementById('mapContainer').appendChild(rasterCanvas);
+
+    const ANCHOR_NODES = [
+      { name: 'Scherpenisse', lat: 51.5478, lng: 4.1031 },
+      { name: 'Westkerke', lat: 51.5392, lng: 4.0885 },
+      { name: 'Sint-Maartensdijk', lat: 51.5472, lng: 4.0806 },
+      { name: 'Poortvliet', lat: 51.5447, lng: 4.1481 },
+      { name: 'Tholen-Stad', lat: 51.5319, lng: 4.2203 },
+      { name: 'Reimerswaal (Verdronken)', lat: 51.4910, lng: 4.1460 }
+    ];
+
+    function drawMathRaster() {
+      const mode = document.getElementById('rasterLayerSelect').value;
+      const rect = document.getElementById('mapContainer').getBoundingClientRect();
+      rasterCanvas.width = Math.max(1, Math.floor(rect.width));
+      rasterCanvas.height = Math.max(1, Math.floor(rect.height));
+      const ctx = rasterCanvas.getContext('2d');
+      ctx.clearRect(0, 0, rasterCanvas.width, rasterCanvas.height);
+
+      if (mode === 'null') return;
+
+      if (mode === 'voronoi') {
+        const pts = ANCHOR_NODES.map(n => {
+          const p = map.latLngToContainerPoint([n.lat, n.lng]);
+          return { x: p.x, y: p.y, name: n.name };
+        });
+
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.38)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < pts.length; i++) {
+          for (let j = i + 1; j < pts.length; j++) {
+            ctx.beginPath();
+            ctx.moveTo(pts[i].x, pts[i].y);
+            ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.stroke();
+
+            const mx = (pts[i].x + pts[j].x) / 2;
+            const my = (pts[i].y + pts[j].y) / 2;
+            const dx = pts[j].x - pts[i].x;
+            const dy = pts[j].y - pts[i].y;
+            ctx.strokeStyle = 'rgba(255, 179, 0, 0.35)';
+            ctx.beginPath();
+            ctx.moveTo(mx - dy * 0.25, my + dx * 0.25);
+            ctx.lineTo(mx + dy * 0.25, my - dx * 0.25);
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.38)';
+          }
+        }
+
+        pts.forEach(p => {
+          ctx.fillStyle = '#00e5ff';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#e2e8f0';
+          ctx.font = '10px monospace';
+          ctx.fillText(p.name, p.x + 6, p.y - 5);
+        });
+      } else if (mode === 'penrose') {
+        const center = map.latLngToContainerPoint(map.getCenter());
+        const phi = (1 + Math.sqrt(5)) / 2;
+        ctx.strokeStyle = 'rgba(255, 179, 0, 0.42)';
+        ctx.lineWidth = 1;
+        for (let k = 0; k < 10; k++) {
+          const angle = (k * Math.PI) / 5;
+          ctx.beginPath();
+          ctx.moveTo(center.x, center.y);
+          ctx.lineTo(center.x + Math.cos(angle) * 600, center.y + Math.sin(angle) * 600);
+          ctx.stroke();
+        }
+        [45, 45 * phi, 45 * phi * phi, 45 * Math.pow(phi, 3)].forEach(r => {
+          ctx.beginPath();
+          ctx.arc(center.x, center.y, r, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+      } else if (mode === 'rd_grid') {
+        ctx.strokeStyle = 'rgba(0, 230, 118, 0.3)';
+        ctx.fillStyle = 'rgba(0, 230, 118, 0.8)';
+        ctx.font = '10px monospace';
+        const step = 80;
+        for (let x = step; x < rasterCanvas.width; x += step) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, rasterCanvas.height);
+          ctx.stroke();
+          const ll = map.containerPointToLatLng([x, 16]);
+          ctx.fillText(`${ll.lng.toFixed(3)}°E`, x + 4, 14);
+        }
+        for (let y = step; y < rasterCanvas.height; y += step) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(rasterCanvas.width, y);
+          ctx.stroke();
+          const ll = map.containerPointToLatLng([10, y]);
+          ctx.fillText(`${ll.lat.toFixed(3)}°N`, 6, y - 4);
+        }
+      }
+    }
+
+    document.getElementById('rasterLayerSelect').addEventListener('change', drawMathRaster);
+    map.on('move zoom resize', drawMathRaster);
+
+    /***************************************************************************
+     * 4. STAP 2: OUDE KAART INLEZEN MET WEBRTC CAMERA OF AFBEELDING IN VP-01
+     *    (Bugfix: rotatie via offscreen canvas i.p.v. conflict met Leaflet transform)
+     ***************************************************************************/
+    let oldMapOverlay = null;
+    let rawOverlayImage = null; // HTMLImageElement van de originele bron
+    let overlayCenterLatLng = L.latLng(SCHERPENISSE_CENTER[0], SCHERPENISSE_CENTER[1]);
+    let baseLatSpan = 0.015;
+    let baseLngSpan = 0.024;
+    let webrtcStream = null;
+    let liveVideoOverlayActive = false;
+    let liveVideoInterval = null;
+
+    function computeOverlayBounds() {
+      const scaleFactor = parseInt(document.getElementById('overlayScaleSlider').value, 10) / 100;
+      const dLat = (baseLatSpan * scaleFactor) / 2;
+      const dLng = (baseLngSpan * scaleFactor) / 2;
+      return L.latLngBounds(
+        [overlayCenterLatLng.lat - dLat, overlayCenterLatLng.lng - dLng],
+        [overlayCenterLatLng.lat + dLat, overlayCenterLatLng.lng + dLng]
+      );
+    }
+
+    function renderRotatedDataUrl(imgElement, angleDeg) {
+      const rad = (angleDeg * Math.PI) / 180;
+      const w = imgElement.naturalWidth || imgElement.width || 640;
+      const h = imgElement.naturalHeight || imgElement.height || 480;
+      const sin = Math.abs(Math.sin(rad));
+      const cos = Math.abs(Math.cos(rad));
+      const bw = Math.ceil(w * cos + h * sin);
+      const bh = Math.ceil(w * sin + h * cos);
+
+      const c = document.createElement('canvas');
+      c.width = bw;
+      c.height = bh;
+      const ctx = c.getContext('2d');
+      ctx.translate(bw / 2, bh / 2);
+      ctx.rotate(rad);
+      ctx.drawImage(imgElement, -w / 2, -h / 2, w, h);
+      return c.toDataURL('image/png');
+    }
+
+    function applyOldMapImageToViewport(dataUrl, sourceLabel, keepCenter = false) {
+      const img = new Image();
+      img.onload = function() {
+        rawOverlayImage = img;
+        if (!keepCenter) {
+          overlayCenterLatLng = map.getCenter();
+        }
+        const bounds = computeOverlayBounds();
+        const opacity = parseInt(document.getElementById('overlayOpacitySlider').value, 10) / 100;
+        const deg = parseFloat(document.getElementById('overlayRotateSlider').value) || 0;
+        const rotatedUrl = deg === 0 ? dataUrl : renderRotatedDataUrl(img, deg);
+
+        if (oldMapOverlay && map.hasLayer(oldMapOverlay)) {
+          oldMapOverlay.setUrl(rotatedUrl);
+          oldMapOverlay.setBounds(bounds);
+          oldMapOverlay.setOpacity(opacity);
+        } else {
+          oldMapOverlay = L.imageOverlay(rotatedUrl, bounds, {
+            opacity: opacity,
+            interactive: false,
+            className: 'leaflet-oldmap-overlay'
+          }).addTo(map);
+        }
+
+        if (sourceLabel) {
+          logContactEvent(`🖼️ Kaart/Overlay geplaatst in VP-01 (${sourceLabel}) op ${overlayCenterLatLng.lat.toFixed(4)}°N, ${overlayCenterLatLng.lng.toFixed(4)}°E.`);
+        }
+      };
+      img.src = dataUrl;
+    }
+
+    // Knop: 🖼️ Upload Oude Kaart...
+    document.getElementById('uploadOldMapBtn').addEventListener('click', () => {
+      document.getElementById('oldMapFileInput').click();
+    });
+
+    document.getElementById('oldMapFileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        applyOldMapImageToViewport(evt.target.result, `Bestand: ${file.name}`);
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    });
+
+    // Regelaars voor Transparantie, Schaal en Rotatie
+    document.getElementById('overlayOpacitySlider').addEventListener('input', function(e) {
+      const val = e.target.value;
+      document.getElementById('overlayOpacityVal').textContent = `${val}%`;
+      if (oldMapOverlay) oldMapOverlay.setOpacity(val / 100);
+    });
+
+    document.getElementById('overlayScaleSlider').addEventListener('input', function(e) {
+      const val = e.target.value;
+      document.getElementById('overlayScaleVal').textContent = `${val}%`;
+      if (oldMapOverlay) oldMapOverlay.setBounds(computeOverlayBounds());
+    });
+
+    document.getElementById('overlayRotateSlider').addEventListener('input', function(e) {
+      const val = parseFloat(e.target.value) || 0;
+      document.getElementById('overlayRotateVal').textContent = `${val}°`;
+      if (oldMapOverlay && rawOverlayImage) {
+        const rotatedUrl = renderRotatedDataUrl(rawOverlayImage, val);
+        oldMapOverlay.setUrl(rotatedUrl);
+      }
+    });
+
+    document.getElementById('clearOldMapOverlayBtn').addEventListener('click', function() {
+      if (liveVideoInterval) {
+        clearInterval(liveVideoInterval);
+        liveVideoInterval = null;
+        liveVideoOverlayActive = false;
+        const liveBtn = document.getElementById('liveVideoOverlayBtn');
+        liveBtn.classList.remove('active');
+        liveBtn.textContent = '📡 Live Video-Overlay op Kaart';
+      }
+      if (oldMapOverlay && map.hasLayer(oldMapOverlay)) {
+        map.removeLayer(oldMapOverlay);
+        oldMapOverlay = null;
+        rawOverlayImage = null;
+        logContactEvent('🗑️ Oude kaart / WebRTC-overlay verwijderd uit VP-01.');
+      }
+    });
+
+    // WebRTC Camera Starten & Projecteren op VP-01 Kaart
+    const videoEl = document.getElementById('webrtcVideo');
+    const captureCanvas = document.getElementById('webrtcCaptureCanvas');
+    const floatingCam = document.getElementById('webrtcFloatingCam');
+
+    document.getElementById('startWebrtcCamBtn').addEventListener('click', async function() {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('WebRTC mediaDevices API niet ondersteund in deze context (vereist HTTPS of localhost).');
+        }
+        webrtcStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        videoEl.srcObject = webrtcStream;
+        floatingCam.classList.add('active');
+        document.getElementById('captureCamToMapBtn').disabled = false;
+        document.getElementById('liveVideoOverlayBtn').disabled = false;
+        logContactEvent('📷 WebRTC Camera gestart in VP-01 voor het inlezen van oude kaarten.');
+      } catch (err) {
+        logContactEvent(`⚠️ WebRTC Camera melding: ${err.message}`);
+        alert('Kan WebRTC camera niet openen (' + err.message + '). Gebruik "🖼️ Upload Oude Kaart..." of "⚡ Proefmeting Perceel".');
+      }
+    });
+
+    function captureWebrtcFrameToMap(label = 'WebRTC Camera Snapshot') {
+      if (!webrtcStream) return;
+      captureCanvas.width = videoEl.videoWidth || 640;
+      captureCanvas.height = videoEl.videoHeight || 480;
+      const ctx = captureCanvas.getContext('2d');
+      ctx.drawImage(videoEl, 0, 0, captureCanvas.width, captureCanvas.height);
+      const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.88);
+      applyOldMapImageToViewport(dataUrl, label);
+    }
+
+    document.getElementById('captureCamToMapBtn').addEventListener('click', () => {
+      captureWebrtcFrameToMap('WebRTC Camera Opname');
+    });
+
+    document.getElementById('snapFromFloatingBtn').addEventListener('click', () => {
+      captureWebrtcFrameToMap('WebRTC Scanner Snapshot');
+    });
+
+    document.getElementById('liveVideoOverlayBtn').addEventListener('click', function() {
+      if (!webrtcStream) return;
+      if (!liveVideoOverlayActive) {
+        liveVideoOverlayActive = true;
+        this.classList.add('active');
+        this.textContent = '📡 Live Video-Overlay: AAN';
+        captureWebrtcFrameToMap('WebRTC Live Stream Start');
+        liveVideoInterval = setInterval(() => {
+          if (!webrtcStream || !oldMapOverlay) return;
+          captureCanvas.width = videoEl.videoWidth || 640;
+          captureCanvas.height = videoEl.videoHeight || 480;
+          captureCanvas.getContext('2d').drawImage(videoEl, 0, 0, captureCanvas.width, captureCanvas.height);
+          oldMapOverlay.setUrl(captureCanvas.toDataURL('image/jpeg', 0.72));
+        }, 250);
+      } else {
+        liveVideoOverlayActive = false;
+        this.classList.remove('active');
+        this.textContent = '📡 Live Video-Overlay op Kaart';
+        clearInterval(liveVideoInterval);
+        liveVideoInterval = null;
+      }
+    });
+
+    document.getElementById('stopWebrtcCamBtn').addEventListener('click', function() {
+      if (liveVideoInterval) {
+        clearInterval(liveVideoInterval);
+        liveVideoInterval = null;
+        liveVideoOverlayActive = false;
+      }
+      if (webrtcStream) {
+        webrtcStream.getTracks().forEach(t => t.stop());
+        webrtcStream = null;
+      }
+      floatingCam.classList.remove('active');
+      document.getElementById('captureCamToMapBtn').disabled = true;
+      document.getElementById('liveVideoOverlayBtn').disabled = true;
+      logContactEvent('⏹️ WebRTC Camera in VP-01 gestopt.');
+    });
+
+    /***************************************************************************
+     * 5. ZOEKFUNCTIE MET VERGROOTGLAS-ICOON (🔍) VIA PDOK LOCATIESERVER
+     ***************************************************************************/
+    async function executePdokSearch() {
+      const q = document.getElementById('globalSearchInput').value.trim();
+      if (!q) return;
+
+      try {
+        const res = await fetch(
+          `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(q)}&rows=1`
+        );
+        const data = await res.json();
+        if (data.response && data.response.docs && data.response.docs.length > 0) {
+          const doc = data.response.docs[0];
+          const match = doc.centroide_ll && doc.centroide_ll.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+          if (match) {
+            const lng = parseFloat(match[1]);
+            const lat = parseFloat(match[2]);
+            map.setView([lat, lng], 16);
+            L.popup()
+              .setLatLng([lat, lng])
+              .setContent(`<b>🔍 ${doc.weergavenaam}</b><br/>Type: ${doc.type}<br/>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`)
+              .openOn(map);
+            logContactEvent(`🔍 Gezocht en gecentreerd op: ${doc.weergavenaam} (${lat.toFixed(5)}°N, ${lng.toFixed(5)}°E)`);
+          }
+        } else {
+          logContactEvent(`🔍 Geen PDOK-locatie gevonden voor "${q}".`);
+        }
+      } catch (err) {
+        logContactEvent(`⚠️ Zoekfout PDOK: ${err.message}`);
+      }
+    }
+
+    document.getElementById('searchSubmitBtn').addEventListener('click', executePdokSearch);
+    document.getElementById('searchIconBtn').addEventListener('click', executePdokSearch);
+    document.getElementById('globalSearchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') executePdokSearch();
+    });
+
+    /***************************************************************************
+     * 6. A. OTT NR. 573 PLANIMETER IN VP-01 + AFBEELDING GENERATOR VOOR VP-01 & KLANTCONTACT
+     ***************************************************************************/
+    let planimeterActive = true; // Standaard direct actief zodat meten zonder extra klik werkt
+    let planimeterPoints = [];
+    let planimeterPolygon = null;
+    let planimeterMarkers = [];
+    let lastMeasuredAreaM2 = 0;
+    let lastMeasuredPerimeterM = 0;
+    let lastPlanimeterImageDataUrl = null;
+
+    document.getElementById('togglePlanimeterBtn').addEventListener('click', function() {
+      planimeterActive = !planimeterActive;
+      this.classList.toggle('active', planimeterActive);
+      this.textContent = planimeterActive
+        ? '📐 Planimeter (A. Ott 573): ACTIEF (Klik op kaart)'
+        : '📐 Planimeter (A. Ott 573): UIT';
+    });
+
+    function clearPlanimeterGeometry() {
+      planimeterPoints = [];
+      lastMeasuredAreaM2 = 0;
+      lastMeasuredPerimeterM = 0;
+      if (planimeterPolygon && map.hasLayer(planimeterPolygon)) map.removeLayer(planimeterPolygon);
+      planimeterMarkers.forEach(m => map.removeLayer(m));
+      planimeterMarkers = [];
+      document.getElementById('planimeterReadout').textContent =
+        'Oppervlakte: 0.00 m² | 0.0000 ha | 0.000 Gemeten';
+    }
+
+    document.getElementById('resetPlanimeterBtn').addEventListener('click', function() {
+      clearPlanimeterGeometry();
+      document.getElementById('vp01PlanimeterHud').classList.remove('active');
+      logContactEvent('↺ A. Ott Nr. 573 Planimeter gereset.');
+    });
+
+    // Geodetische oppervlakteberekening (Stelling van Green op sferische projectie)
+    function computeSphericalPolygonAreaM2(latlngs) {
+      if (latlngs.length < 3) return 0;
+      const R = 6371008.8;
+      let area = 0;
+      for (let i = 0; i < latlngs.length; i++) {
+        const p1 = latlngs[i];
+        const p2 = latlngs[(i + 1) % latlngs.length];
+        const x1 = (p1.lng * Math.PI) / 180 * R * Math.cos((p1.lat * Math.PI) / 180);
+        const y1 = (p1.lat * Math.PI) / 180 * R;
+        const x2 = (p2.lng * Math.PI) / 180 * R * Math.cos((p2.lat * Math.PI) / 180);
+        const y2 = (p2.lat * Math.PI) / 180 * R;
+        area += (x1 * y2 - x2 * y1);
+      }
+      return Math.abs(area) / 2.0;
+    }
+
+    function computePerimeterM(latlngs) {
+      if (latlngs.length < 2) return 0;
+      let dist = 0;
+      for (let i = 0; i < latlngs.length; i++) {
+        const p1 = L.latLng(latlngs[i]);
+        const p2 = L.latLng(latlngs[(i + 1) % latlngs.length]);
+        dist += p1.distanceTo(p2);
+      }
+      return dist;
+    }
+
+    /**
+     * Genereert een haarscherpe geodetische Planimeter-afbeelding (PNG DataURL)
+     * van de meting en plaatst deze:
+     * 1) In het VP-01 scherm (HUD + optionele kaart-overlay)
+     * 2) Rechtstreeks in het Klantcontactcentrum (VP-03 bijlage + rapport)
+     */
+    function renderPlanimeterOutputImage() {
+      const w = 680;
+      const h = 420;
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext('2d');
+
+      // Donkere geodetische achtergrond
+      ctx.fillStyle = '#070b12';
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtiel meetraster
+      ctx.strokeStyle = 'rgba(36, 52, 77, 0.55)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= w; x += 34) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= h; y += 34) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Indien er een oude kaart / WebRTC afbeelding geladen is, teken deze als achtergrondreferentie
+      if (rawOverlayImage) {
+        ctx.save();
+        ctx.globalAlpha = 0.35;
+        ctx.drawImage(rawOverlayImage, 40, 48, w - 80, h - 110);
+        ctx.restore();
+      }
+
+      // Kopbalk op het diagram
+      ctx.fillStyle = '#0d1522';
+      ctx.fillRect(0, 0, w, 38);
+      ctx.strokeStyle = '#00e676';
+      ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
+
+      ctx.fillStyle = '#00e5ff';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText('WOO-THOLEN // A. OTT NR. 573 COMPENSATIE-POOLPLANIMETER (VP-01 OUTPUT)', 12, 23);
+
+      const ha = (lastMeasuredAreaM2 / 10000).toFixed(4);
+      const gemeten = (lastMeasuredAreaM2 / 3924.0).toFixed(3);
+
+      // Teken het gemeten polygoon geschaald in het midden van het canvas
+      if (planimeterPoints.length >= 3) {
+        let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+        planimeterPoints.forEach(p => {
+          if (p.lat < minLat) minLat = p.lat;
+          if (p.lat > maxLat) maxLat = p.lat;
+          if (p.lng < minLng) minLng = p.lng;
+          if (p.lng > maxLng) maxLng = p.lng;
+        });
+
+        const padX = 90;
+        const padYTop = 65;
+        const padYBottom = 95;
+        const drawW = w - padX * 2;
+        const drawH = h - padYTop - padYBottom;
+
+        const spanLat = Math.max(maxLat - minLat, 0.0001);
+        const spanLng = Math.max(maxLng - minLng, 0.0001);
+
+        const mapped = planimeterPoints.map((p, idx) => {
+          const nx = (p.lng - minLng) / spanLng;
+          const ny = 1 - (p.lat - minLat) / spanLat;
+          return {
+            x: padX + nx * drawW,
+            y: padYTop + ny * drawH,
+            lat: p.lat,
+            lng: p.lng,
+            idx: idx + 1
+          };
+        });
+
+        // Polygoon vulling & omtrek
+        ctx.beginPath();
+        mapped.forEach((pt, i) => {
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(0, 230, 118, 0.24)';
+        ctx.fill();
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Hoekpunten + WGS84 labels
+        mapped.forEach(pt => {
+          ctx.fillStyle = '#ffb300';
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#e2e8f0';
+          ctx.font = '10px monospace';
+          ctx.fillText(`P${pt.idx} (${pt.lat.toFixed(4)}°N, ${pt.lng.toFixed(4)}°E)`, pt.x + 7, pt.y - 6);
+        });
+
+        // Zwaartepunt (Centroid) met oppervlakte-stempel
+        const cx = mapped.reduce((s, p) => s + p.x, 0) / mapped.length;
+        const cy = mapped.reduce((s, p) => s + p.y, 0) / mapped.length;
+        ctx.fillStyle = '#00e676';
+        ctx.font = 'bold 12px monospace';
+        ctx.fillText(`∮ GREEN = ${lastMeasuredAreaM2.toFixed(1)} m²`, cx - 65, cy);
+        ctx.fillStyle = '#ffb300';
+        ctx.font = '11px monospace';
+        ctx.fillText(`${ha} ha | ${gemeten} Zeeuwse gemeten`, cx - 80, cy + 16);
+      } else {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '12px monospace';
+        ctx.fillText('Klik minimaal 3 hoekpunten op de VP-01 kaart voor een polygoon-integratie.', 65, h / 2);
+      }
+
+      // Voetbalk met geodetische metadata
+      ctx.fillStyle = '#0d1522';
+      ctx.fillRect(0, h - 64, w, 64);
+      ctx.strokeStyle = '#24344d';
+      ctx.beginPath();
+      ctx.moveTo(0, h - 64);
+      ctx.lineTo(w, h - 64);
+      ctx.stroke();
+
+      ctx.fillStyle = '#00e676';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(
+        `OPPERVLAKTE: ${lastMeasuredAreaM2.toFixed(2)} m²  |  HECTARE: ${ha} ha  |  ZEEUWSE GEMETEN: ${gemeten}`,
+        12,
+        h - 42
+      );
+
+      const center = map.getCenter();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px monospace';
+      ctx.fillText(
+        `OMTREK: ${lastMeasuredPerimeterM.toFixed(1)} m | KAARTLAAG: ${activeLayerName.toUpperCase()} | CENTRUM: ${center.lat.toFixed(5)}°N, ${center.lng.toFixed(5)}°E | ${new Date().toISOString()}`,
+        12,
+        h - 20
+      );
+
+      return c.toDataURL('image/png');
+    }
+
+    /**
+     * Zet de planimeter-output zowel in het VP-01 scherm als in Klantcontact (VP-03)
+     */
+    function dispatchPlanimeterToVp01AndKlantcontact(triggerLabel = 'Planimeter Meting') {
+      const ha = (lastMeasuredAreaM2 / 10000).toFixed(4);
+      const gemeten = (lastMeasuredAreaM2 / 3924.0).toFixed(3);
+      const dataUrl = renderPlanimeterOutputImage();
+      lastPlanimeterImageDataUrl = dataUrl;
+
+      // 1. ZET AFBEELDING IN HET VP-01 SCHERM (HUD + optionele kaartprojectie)
+      const hud = document.getElementById('vp01PlanimeterHud');
+      const hudImg = document.getElementById('vp01PlanimeterOutputImg');
+      const hudTxt = document.getElementById('vp01PlanimeterHudText');
+      hudImg.src = dataUrl;
+      hudTxt.innerHTML =
+        `<b>${lastMeasuredAreaM2.toFixed(2)} m²</b> (${ha} ha | <b>${gemeten} Gemeten</b>)<br/>` +
+        `Hoekpunten: ${planimeterPoints.length} | Omtrek: ${lastMeasuredPerimeterM.toFixed(1)} m`;
+      hud.classList.add('active');
+
+      // 2. VERSTUUR OUTPUT RECHTSTREEKS NAAR KLANTCONTACT (VP-03)
+      const attachBox = document.getElementById('vp03AttachmentBox');
+      const attachImg = document.getElementById('vp03PlanimeterImg');
+      const attachTime = document.getElementById('vp03AttachmentTime');
+      attachImg.src = dataUrl;
+      attachTime.textContent = new Date().toLocaleTimeString('nl-NL');
+      attachBox.classList.add('active');
+
+      const center = map.getCenter();
+      const coordsList = planimeterPoints
+        .map((p, i) => `  P${i + 1}: ${p.lat.toFixed(6)}° N, ${p.lng.toFixed(6)}° E`)
+        .join('\n');
+
+      const summary = [
+        `=== A. OTT NR. 573 PLANIMETER RAPPORT (${triggerLabel}) ===`,
+        `Tijdstip: ${new Date().toISOString()}`,
+        `Kaartcentrum (VP-01): ${center.lat.toFixed(6)}° N, ${center.lng.toFixed(6)}° E (Zoom: ${map.getZoom()})`,
+        `Actieve Kaartlaag: ${activeLayerName}`,
+        `Gemeten Oppervlakte: ${lastMeasuredAreaM2.toFixed(2)} m² | ${ha} ha | ${gemeten} Zeeuwse gemeten`,
+        `Gemeten Omtrek: ${lastMeasuredPerimeterM.toFixed(2)} m (${planimeterPoints.length} hoekpunten)`,
+        coordsList ? `Hoekpunten (WGS84):\n${coordsList}` : `Hoekpunten: [Geen polygoonpunten]`,
+        `===========================================================`
+      ].join('\n');
+
+      const bodyEl = document.getElementById('contactMailBody');
+      bodyEl.value = summary;
+
+      logContactEvent(
+        `📐 Planimeter output (${lastMeasuredAreaM2.toFixed(1)} m² / ${gemeten} gemeten) in VP-01 scherm geplaatst én verzonden naar Klantcontact.`
+      );
+    }
+
+    function updatePlanimeterDrawingAndDispatch(triggerLabel) {
+      if (planimeterPolygon && map.hasLayer(planimeterPolygon)) {
+        map.removeLayer(planimeterPolygon);
+      }
+      if (planimeterPoints.length >= 2) {
+        planimeterPolygon = L.polygon(planimeterPoints, {
+          color: '#00e676',
+          weight: 2.5,
+          fillColor: '#00e676',
+          fillOpacity: 0.25
+        }).addTo(map);
+      }
+
+      lastMeasuredAreaM2 = computeSphericalPolygonAreaM2(planimeterPoints);
+      lastMeasuredPerimeterM = computePerimeterM(planimeterPoints);
+      const ha = lastMeasuredAreaM2 / 10000;
+      const zeeuwseGemeten = lastMeasuredAreaM2 / 3924.0;
+      document.getElementById('planimeterReadout').textContent =
+        `Oppervlakte: ${lastMeasuredAreaM2.toFixed(2)} m² | ${ha.toFixed(4)} ha | ${zeeuwseGemeten.toFixed(3)} Gemeten`;
+
+      if (planimeterPoints.length >= 3) {
+        dispatchPlanimeterToVp01AndKlantcontact(triggerLabel);
+      }
+    }
+
+    map.on('click', function(e) {
+      if (!planimeterActive) return;
+      planimeterPoints.push(e.latlng);
+      const marker = L.circleMarker(e.latlng, {
+        radius: 5,
+        color: '#ffb300',
+        fillColor: '#00e676',
+        fillOpacity: 1
+      }).addTo(map);
+      planimeterMarkers.push(marker);
+
+      updatePlanimeterDrawingAndDispatch('Live Kaartmeting VP-01');
+    });
+
+    // Knop: ⚡ Proefmeting Perceel (zet direct een kadastraal perceel in Scherpenisse op de kaart en stuurt de afbeelding naar VP-01 & Klantcontact)
+    document.getElementById('demoPlanimeterParcelBtn').addEventListener('click', function() {
+      clearPlanimeterGeometry();
+      const sampleParcel = [
+        L.latLng(51.54865, 4.10185),
+        L.latLng(51.54882, 4.10395),
+        L.latLng(51.54735, 4.10430),
+        L.latLng(51.54712, 4.10215)
+      ];
+      sampleParcel.forEach(latlng => {
+        planimeterPoints.push(latlng);
+        const m = L.circleMarker(latlng, {
+          radius: 5,
+          color: '#ffb300',
+          fillColor: '#00e676',
+          fillOpacity: 1
+        }).addTo(map);
+        planimeterMarkers.push(m);
+      });
+      map.panTo(SCHERPENISSE_CENTER);
+      updatePlanimeterDrawingAndDispatch('Kadastrale Perceelmeting Scherpenisse');
+    });
+
+    // Knop in de Planimeter HUD van VP-01 om de gegenereerde afbeelding ook als gegeorefereerde kaartlaag op de kaart zelf te projecteren
+    document.getElementById('pinPlanimeterToMapBtn').addEventListener('click', function() {
+      if (!lastPlanimeterImageDataUrl) {
+        dispatchPlanimeterToVp01AndKlantcontact('Handmatige Projectie');
+      }
+      applyOldMapImageToViewport(lastPlanimeterImageDataUrl, 'A. Ott 573 Planimeter Output Overlay', false);
+    });
+
+    document.getElementById('downloadPlanimeterImgBtn').addEventListener('click', function() {
+      if (!lastPlanimeterImageDataUrl) return;
+      const a = document.createElement('a');
+      a.href = lastPlanimeterImageDataUrl;
+      a.download = `planimeter-vp01-${Date.now()}.png`;
+      a.click();
+    });
+
+    document.getElementById('closePlanimeterHudBtn').addEventListener('click', function() {
+      document.getElementById('vp01PlanimeterHud').classList.remove('active');
+    });
+
+    document.getElementById('syncVp01ToContactBtn').addEventListener('click', function() {
+      dispatchPlanimeterToVp01AndKlantcontact('Handmatige Synchronisatie VP-01');
+      if (lastPlanimeterImageDataUrl) {
+        applyOldMapImageToViewport(lastPlanimeterImageDataUrl, 'Planimeter Output op VP-01 Kaart', true);
+      }
+    });
+
+    /***************************************************************************
+     * 7. VP-02 DOSSIER, SHA-256 HASHING & VP-03 KLANTCONTACT COMMUNICATIE
+     ***************************************************************************/
+    const contactLogEl = document.getElementById('contactLog');
+    const p2pBroadcast = ('BroadcastChannel' in window) ? new BroadcastChannel('woo_tholen_webrtc_bus') : null;
+    let activePdfBlobUrl = null;
+
+    function logContactEvent(msg, broadcast = true) {
+      const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      const div = document.createElement('div');
+      div.className = 'chat-entry';
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'time';
+      timeSpan.textContent = `[${now}]`;
+      const textSpan = document.createElement('span');
+      textSpan.textContent = msg;
+      div.appendChild(timeSpan);
+      div.appendChild(textSpan);
+      contactLogEl.appendChild(div);
+      contactLogEl.scrollTop = contactLogEl.scrollHeight;
+
+      if (broadcast && p2pBroadcast) {
+        p2pBroadcast.postMessage({ time: now, msg });
+      }
+    }
+
+    if (p2pBroadcast) {
+      p2pBroadcast.onmessage = (ev) => {
+        if (ev.data && ev.data.msg) {
+          logContactEvent(`[P2P SYNC] ${ev.data.msg}`, false);
+        }
+      };
+    }
+
+    // PDF Upload & SHA-256 Verificatie in VP-02 (met vrijgave van oude Blob-URL's)
+    document.getElementById('pdfUploadInput').addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (activePdfBlobUrl) URL.revokeObjectURL(activePdfBlobUrl);
+      activePdfBlobUrl = URL.createObjectURL(file);
+      document.getElementById('pdfViewerFrame').src = activePdfBlobUrl;
+
+      const buf = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buf);
+      const hashHex = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      document.getElementById('pdfHashOutput').textContent =
+        `Integriteitshash (SHA-256): ${hashHex}`;
+      logContactEvent(`📄 Dossierstuk geladen in VP-02: ${file.name} [SHA-256: ${hashHex.substring(0, 16)}...]`);
+    });
+
+    document.getElementById('insertCoordsToNotesBtn').addEventListener('click', function() {
+      const c = map.getCenter();
+      const notes = document.getElementById('wooDossierNotes');
+      notes.value += `\n[${new Date().toISOString()}] Positie VP-01: ${c.lat.toFixed(5)}°N, ${c.lng.toFixed(5)}°E | Laag: ${activeLayerName} | Planimeter: ${lastMeasuredAreaM2.toFixed(2)} m²`;
+    });
+
+    document.getElementById('exportDossierJsonBtn').addEventListener('click', function() {
+      const payload = {
+        project: 'woo-tholen',
+        timestamp: new Date().toISOString(),
+        vp01: {
+          center: map.getCenter(),
+          zoom: map.getZoom(),
+          activeLayer: activeLayerName,
+          planimeterAreaM2: lastMeasuredAreaM2,
+          planimeterGemeten: +(lastMeasuredAreaM2 / 3924.0).toFixed(4),
+          planimeterPoints: planimeterPoints,
+          planimeterImageDataUrl: lastPlanimeterImageDataUrl
+        },
+        vp02_notes: document.getElementById('wooDossierNotes').value,
+        vp03_mail_draft: document.getElementById('contactMailBody').value
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `woo-tholen-dossier-${Date.now()}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    });
+
+    // Klantcontact Chat & WebRTC P2P SDP Generator
+    document.getElementById('sendChatBtn').addEventListener('click', function() {
+      const input = document.getElementById('chatMessageInput');
+      if (!input.value.trim()) return;
+      logContactEvent(`💬 Klantcontact: ${input.value.trim()}`);
+      input.value = '';
+    });
+
+    document.getElementById('chatMessageInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('sendChatBtn').click();
+    });
+
+    document.getElementById('initP2pOfferBtn').addEventListener('click', async function() {
+      try {
+        const pc = new RTCPeerConnection();
+        pc.createDataChannel('woo_tholen_telemetry');
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        logContactEvent(`🔗 WebRTC DataChannel SDP Offer gegenereerd (${offer.sdp.length} bytes).`);
+        setTimeout(() => pc.close(), 1500);
+      } catch (err) {
+        logContactEvent(`⚠️ WebRTC SDP melding: ${err.message}`);
+      }
+    });
+
+    // ProtonMail / E-mail verzendknop
+    document.getElementById('openProtonMailBtn').addEventListener('click', function() {
+      const to = document.getElementById('contactEmailTo').value.trim();
+      const subj = encodeURIComponent(document.getElementById('contactSubject').value.trim());
+      const body = encodeURIComponent(document.getElementById('contactMailBody').value.trim());
+      window.location.href = `mailto:${to}?subject=${subj}&body=${body}`;
+    });
+
+    document.getElementById('copyContactReportBtn').addEventListener('click', async function() {
+      const txt = document.getElementById('contactMailBody').value;
+      try {
+        await navigator.clipboard.writeText(txt);
+        logContactEvent('📋 Klantcontact-rapport gekopieerd naar klembord.');
+      } catch (err) {
+        logContactEvent('⚠️ Klembord niet beschikbaar; selecteer de tekst handmatig.');
+      }
+    });
+
+    // Voer bij het opstarten direct een initiële perceelmeting uit zodat de Planimeter-output
+    // meteen zichtbaar is in het VP-01 scherm én klaarstaat in Klantcontact (VP-03).
+    window.addEventListener('DOMContentLoaded', () => {
+      logContactEvent('✅ WOO-THOLEN gestart. Kaartlaag staat op NULL. Planimeter (A. Ott Nr. 573) is gekoppeld aan VP-01 én Klantcontact.');
+      document.getElementById('demoPlanimeterParcelBtn').click();
+    });
+  </script>
+</body>
+</html>
