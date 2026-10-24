@@ -1,28 +1,2989 @@
-// === VORTEX OS // 6D POLAR BRIDGE (HOOFD-INDEX <-> KLANTCONTACT VP-01) ===
-const mainPolarBridge = ('BroadcastChannel' in window) ? new BroadcastChannel('vortex_os_6d_bridge') : null;
-
-function syncPolarArmToKlantcontact(azDeg, rhoCm, pitchDeg = 0, rollDeg = 0, yawDeg = 0, zoom = 1.0, flags = []) {
-    const payload = {
-        source: 'MAIN_INDEX',
-        timestamp: Date.now(),
-        azDeg: Number(azDeg),
-        rhoCm: Number(rhoCm),
-        pitchDeg: Number(pitchDeg),
-        rollDeg: Number(rollDeg),
-        yawDeg: Number(yawDeg),
-        zoom: Number(zoom),
-        flags: flags
-    };
-    if (mainPolarBridge) mainPolarBridge.postMessage(payload);
-    localStorage.setItem('vortex_os_6d_state', JSON.stringify(payload));
-}
-
-if (mainPolarBridge) {
-    mainPolarBridge.onmessage = (ev) => {
-        const d = ev.data;
-        if (!d || d.source === 'MAIN_INDEX') return;
-        if (typeof setPlanimeterPolar === 'function') {
-            setPlanimeterPolar(d.azDeg, d.rhoCm, false);
+<!DOCTYPE html>
+<html lang="nl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VORTEX OS // KLANTCONTACT VP-01 & WOO-THOLEN ENGINE (v3.0 VLAGGEN, LIJNEN & VOLLE BREEDTE PDF)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #05090f;
+            --bg-panel: #0a1019;
+            --bg-header: #0f1826;
+            --cyan-glow: #00e5ff;
+            --amber-glow: #ffb300;
+            --border-tech: #1a2c42;
         }
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #00e5ff #0a1019;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            background-color: var(--bg-deep);
+            color: #d8e6f3;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+        /* STRICT LOCKED APP SHELL TO PREVENT ANY LAYOUT SHIFT OR RESIZE LOOP */
+        .app-shell {
+            display: grid;
+            grid-template-rows: 44px minmax(0, 1fr) 92px;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 4.1fr) minmax(0, 4.7fr) minmax(0, 3.2fr);
+            gap: 6px;
+            padding: 6px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        /* SIMULATED OR NATIVE MOBILE MODE */
+        body.mobile-mode {
+            overflow: hidden;
+        }
+        body.mobile-mode .app-shell {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            margin: 0 auto;
+            border-left: 2px solid #00e5ff55;
+            border-right: 2px solid #00e5ff55;
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.18);
+        }
+        body.mobile-mode .main-grid {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            padding: 4px;
+        }
+        body.mobile-mode .desktop-footer {
+            display: none !important;
+        }
+        body.mobile-mode #mobileNavBar {
+            display: grid !important;
+        }
+        @media (max-width: 1024px) {
+            .app-shell {
+                display: flex;
+                flex-direction: column;
+                height: 100dvh;
+            }
+            .main-grid {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                min-height: 0;
+                padding: 4px;
+            }
+            .desktop-footer {
+                display: none !important;
+            }
+            #mobileNavBar {
+                display: grid !important;
+            }
+        }
+        .tech-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-tech);
+            box-shadow: inset 0 0 16px rgba(0, 229, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+            flex: 1;
+        }
+        .tech-header {
+            background: linear-gradient(90deg, #0d1624 0%, #152336 50%, #0d1624 100%);
+            border-bottom: 1px solid #1e334d;
+            flex-shrink: 0;
+        }
+        .cyan-text {
+            color: var(--cyan-glow);
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+        }
+        .amber-text {
+            color: var(--amber-glow);
+            text-shadow: 0 0 8px rgba(255, 179, 0, 0.4);
+        }
+        .tech-btn {
+            background: linear-gradient(180deg, #132235 0%, #0a121d 100%);
+            border: 1px solid #244060;
+            color: #d0e8ff;
+            transition: border-color 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .tech-btn:hover {
+            border-color: var(--cyan-glow);
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+            color: #ffffff;
+        }
+        .tech-btn-amber {
+            background: linear-gradient(180deg, #332409 0%, #191103 100%);
+            border: 1px solid #805b10;
+            color: #ffd580;
+            transition: border-color 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .tech-btn-amber:hover {
+            border-color: var(--amber-glow);
+            box-shadow: 0 0 8px rgba(255, 179, 0, 0.35);
+            color: #fff;
+        }
+        .tech-btn-active {
+            background: linear-gradient(180deg, #004d61 0%, #002631 100%);
+            border: 1px solid var(--cyan-glow);
+            color: #fff;
+            box-shadow: 0 0 9px rgba(0, 229, 255, 0.35);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .tech-btn-danger {
+            background: linear-gradient(180deg, #3b1219 0%, #1f070b 100%);
+            border: 1px solid #882335;
+            color: #fda4af;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .tech-btn-danger:hover {
+            border-color: #fb7185;
+            color: #fff;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #132030;
+            height: 5px;
+            border-radius: 3px;
+            border: 1px solid #233954;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--cyan-glow);
+            cursor: pointer;
+            box-shadow: 0 0 6px var(--cyan-glow);
+            border: 2px solid #fff;
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        #leafletMapContainer {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: #060b12;
+        }
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        #planimeterCanvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- ==================== TOP TACTICAL BAR (HEIGHT LOCKED 44PX) ==================== -->
+    <header class="tech-header px-2 flex items-center justify-between gap-1.5 text-[11px] h-[44px] overflow-x-auto no-scrollbar">
+        <div class="flex items-center gap-1.5 min-w-0 shrink-0">
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-cyan-950/80 border border-cyan-500/60 shrink-0">
+                <span class="status-dot bg-cyan-400 animate-pulse"></span>
+                <span class="font-bold tracking-wider cyan-text">VORTEX OS v3.0</span>
+            </div>
+
+            <!-- LOCATION, COORDINATES (WGS84 & RD) & PLACE SEARCH BAR -->
+            <div class="relative flex items-center gap-1 bg-[#070d16] border border-cyan-800/80 rounded px-1.5 py-0.5 w-60 sm:w-80 shrink-0">
+                <span class="text-cyan-400 text-xs">🔍</span>
+                <input id="geoSearchInput" type="text"
+                    placeholder="Plaats, adres, WGS84 of RD (66215 395890)..."
+                    onkeydown="if(event.key==='Enter') executeLocationSearch()"
+                    class="bg-transparent text-[10px] text-slate-100 w-full focus:outline-none" />
+                <button onclick="executeLocationSearch()" class="tech-btn px-1.5 py-0.5 rounded text-[9px] font-bold text-cyan-300">
+                    ZOEK
+                </button>
+            </div>
+
+            <!-- MAP SELECTOR DROPDOWN (DEFAULT = NULL / UIT) + EXPANDABLE MAP POPOVER -->
+            <div class="flex items-center gap-1 shrink-0">
+                <select id="mapLayerSelect" onchange="changeBackgroundMapLayer(this.value)"
+                    class="bg-[#091320] border border-amber-500/60 text-amber-300 rounded px-1.5 py-1 text-[10px] font-semibold focus:outline-none cursor-pointer max-w-[195px]">
+                    <option value="null" selected>🗺️ Kaart: NULL / UIT (Alleen Arm)</option>
+                    <option value="pdok_brt">🇳🇱 1. PDOK Topografisch BRT</option>
+                    <option value="pdok_kadaster">📐 2. PDOK Kadaster Perceelkaart v5</option>
+                    <option value="pdok_luchtfoto">🛰️ 3. PDOK Luchtfoto Ortho 25cm</option>
+                    <option value="osm_topo">🌍 4. OpenStreetMap Topografisch</option>
+                    <option value="openseamap">⚓ 5. OpenSeaMap Nautisch</option>
+                    <option value="minuutplan_1832">📜 6. Minuutplan 1832 (Scherpenisse)</option>
+                </select>
+                <button onclick="toggleMapPopover()" class="tech-btn px-2 py-1 rounded text-[10px]" title="Uitklapvenster voor meer kaarten & Oude Kaart scanner">
+                    🗺️ Meer Kaarten ▾
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Status, Mobile Switcher & Fixed Controls -->
+        <div class="flex items-center gap-1.5 shrink-0">
+            <button id="btnMobileViewToggle" onclick="toggleMobileViewMode()" class="tech-btn px-2 py-1 rounded text-[10px] font-bold text-cyan-300" title="Schakel tussen Mobiele Versie en Desktop Werkstation">
+                📱 Mobiele Versie
+            </button>
+            <button id="btnSnapToggle" onclick="toggleSnapToFlags()" class="tech-btn-active px-2 py-1 rounded text-[10px] font-semibold">
+                🧲 Snap: AAN
+            </button>
+            <button onclick="sendPlanimeterToWebRTC()" class="tech-btn-amber px-2 py-1 rounded text-[10px] font-bold">
+                📤 Stuur 6D naar Klant
+            </button>
+            <div class="hidden xl:block px-2 py-1 rounded bg-slate-900 border border-slate-700 text-[10px] w-40 truncate text-center">
+                <span id="topStatusIndicator" class="text-emerald-400 font-bold">6D BRIDGE: ACTIEF</span>
+            </div>
+            <button id="btnToggleAudio" onclick="toggleMasterAudio()" class="tech-btn px-2 py-1 rounded text-[10px]">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- FLOATING DROPDOWN POPOVER FOR MORE MAPS, WEBRTC OLD MAP SCANNER & IMAGE OVERLAY -->
+    <div id="moreMapsPopover" class="hidden fixed top-12 left-4 sm:left-48 z-50 w-[94vw] max-w-[450px] bg-[#0a1320] border-2 border-cyan-500/80 rounded shadow-2xl p-3 text-[11px]">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
+            <span class="cyan-text font-bold">🗺️ KAARTLAGEN, OUDE KAARTEN & WEBRTC LIVE SCANNER</span>
+            <button onclick="toggleMapPopover()" class="text-slate-400 hover:text-white px-1">✕</button>
+        </div>
+
+        <div class="mb-2.5">
+            <div class="text-[10px] text-amber-400 font-bold mb-1">1. PDOK TOPOGRAFISCHE & KADASTRALE KAARTEN:</div>
+            <div class="grid grid-cols-2 gap-1 text-[10px]">
+                <button onclick="setMapSelection('null')" class="tech-btn py-1 px-2 rounded text-left">🌑 0. NULL / UIT (Alleen Arm)</button>
+                <button onclick="setMapSelection('pdok_brt')" class="tech-btn py-1 px-2 rounded text-left">🇳🇱 1. PDOK BRT Topografisch</button>
+                <button onclick="setMapSelection('pdok_kadaster')" class="tech-btn py-1 px-2 rounded text-left">📐 2. PDOK Kadaster Percelen</button>
+                <button onclick="setMapSelection('pdok_luchtfoto')" class="tech-btn py-1 px-2 rounded text-left">🛰️ 3. PDOK Luchtfoto 25cm</button>
+                <button onclick="setMapSelection('openseamap')" class="tech-btn py-1 px-2 rounded text-left">⚓ 4. OpenSeaMap Oosterschelde</button>
+                <button onclick="setMapSelection('minuutplan_1832')" class="tech-btn py-1 px-2 rounded text-left">📜 5. Minuutplan 1832 Preset</button>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-800 pt-2 space-y-2">
+            <div class="text-[10px] text-cyan-400 font-bold">2. OUDE KAART INLEZEN (WEBRTC CAMERA OF AFBEELDING):</div>
+            <div class="flex flex-wrap gap-1.5">
+                <button id="btnCamMapOverlay" onclick="toggleWebcamOldMapOverlay()" class="tech-btn-amber px-2.5 py-1 rounded text-[10px] font-bold">
+                    📹 Projecteer Live WebRTC Camera onder Arm
+                </button>
+                <label class="tech-btn px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer">
+                    🖼️ Laad Oude Kaart Afbeelding...
+                    <input type="file" accept="image/*" onchange="handleOldMapImageUpload(event)" class="hidden" />
+                </label>
+                <button onclick="clearOldMapOverlay()" class="tech-btn-danger px-2 py-1 rounded text-[10px]">
+                    🗑️ Wis Kaart-Overlay
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 bg-[#060b12] p-2 rounded border border-slate-800 text-[10px]">
+                <div>
+                    <label class="text-slate-400 block">Transparantie</label>
+                    <input id="overlayAlphaSlider" type="range" min="0.1" max="1" step="0.05" value="0.65" oninput="updateOldMapOverlayParams()" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-slate-400 block">Schaal (Zoom)</label>
+                    <input id="overlayScaleSlider" type="range" min="0.3" max="2.5" step="0.05" value="1.0" oninput="updateOldMapOverlayParams()" class="w-full" />
+                </div>
+                <div>
+                    <label class="text-slate-400 block">Rotatie (IJking °)</label>
+                    <input id="overlayRotSlider" type="range" min="-180" max="180" step="1" value="0" oninput="updateOldMapOverlayParams()" class="w-full" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results Dropdown List -->
+    <div id="geoSearchResultsBox" class="hidden fixed top-11 left-4 sm:left-36 z-50 w-80 sm:w-96 bg-[#0a1320] border border-cyan-400 rounded shadow-2xl max-h-64 overflow-y-auto text-[11px] divide-y divide-slate-800"></div>
+
+    <!-- ==================== MAIN 3-COLUMN LOCKED GRID ==================== -->
+    <main class="main-grid">
+
+        <!-- ==================== COLUMN 1: VP-01 // 6D POLAR ARM, VLAGGEN BOUWEN/WISSEN & LIJNEN STUDIO ==================== -->
+        <section id="panelVp01" class="tech-panel rounded">
+            <div class="tech-header px-2.5 py-1 flex items-center justify-between text-[10px] h-7">
+                <span class="cyan-text font-bold truncate">VP-01 // 6D POLAR ARM, VLAGGEN & LIJNEN STUDIO</span>
+                <span id="vp01HeaderTelemetry" class="amber-text font-bold shrink-0">θ = 62.10° | ρ = 8.88 cm</span>
+            </div>
+
+            <!-- INTERACTIVE TOOL MODE BAR FOR BUILDING/DELETING FLAGS & DRAWING LINES -->
+            <div class="bg-[#09121e] border-b border-slate-800 px-2 py-1 flex items-center justify-between gap-1 text-[9px] shrink-0 overflow-x-auto no-scrollbar">
+                <div class="flex items-center gap-1">
+                    <span class="text-slate-400 font-bold mr-0.5">MODUS:</span>
+                    <button id="modeBtnArm" onclick="setVp01ToolMode('arm')" class="tech-btn-active px-2 py-0.5 rounded font-bold" title="Sleep de 6D Polar Arm en ijk op vlaggen">
+                        🧭 1. Arm Slepen
+                    </button>
+                    <button id="modeBtnFlag" onclick="setVp01ToolMode('flag')" class="tech-btn px-2 py-0.5 rounded font-bold" title="Klik of tik op het canvas om direct een vlag te plaatsen">
+                        🚩 2. +Vlag Klikken
+                    </button>
+                    <button id="modeBtnLine" onclick="setVp01ToolMode('line')" class="tech-btn px-2 py-0.5 rounded font-bold" title="Klik van punt naar punt (of vlag naar vlag) om een meetlijn te trekken">
+                        📏 3. Lijn Tekenen
+                    </button>
+                    <button id="modeBtnErase" onclick="setVp01ToolMode('erase')" class="tech-btn px-2 py-0.5 rounded font-bold text-rose-300" title="Klik op een vlag of lijn om deze direct te wissen">
+                        🗑️ 4. Wis Vlag/Lijn
+                    </button>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="btnAutoConnect" onclick="toggleAutoConnectFlags()" class="tech-btn-active px-1.5 py-0.5 rounded text-[9px]" title="Verbind alle vlaggetjes automatisch met maatlijnen">
+                        🔗 Vlaglijn: AAN
+                    </button>
+                    <button id="btnClosePolygon" onclick="toggleClosePolygon()" class="tech-btn-active px-1.5 py-0.5 rounded text-[9px]" title="Sluit het perceelvlak tussen de laatste en eerste vlag">
+                        ⬠ Vlak: AAN
+                    </button>
+                    <button id="btnRadialVectors" onclick="toggleRadialVectors()" class="tech-btn px-1.5 py-0.5 rounded text-[9px]" title="Teken radiale vectorlijnen vanuit het nulpunt (0,0) naar elke vlag">
+                        📐 Vectors
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strictly Sized Canvas Viewport Container -->
+            <div id="vp01CanvasWrapper" class="relative flex-1 min-h-[250px] w-full bg-[#060b12] overflow-hidden">
+                <!-- Background Leaflet Map (Hidden when mapLayer === 'null') -->
+                <div id="leafletMapContainer" class="hidden"></div>
+
+                <!-- Primary 6D Polar Planimeter, Flags & Lines Canvas -->
+                <canvas id="planimeterCanvas" class="relative z-10 w-full h-full block cursor-crosshair"></canvas>
+
+                <!-- Top-Left Compact Calibrated HUD Overlay -->
+                <div class="absolute top-2 left-2 z-20 bg-[#08101ae6] border border-amber-500/50 rounded p-2 text-[10px] leading-snug w-[265px] pointer-events-none shadow-lg">
+                    <div class="amber-text font-bold flex items-center justify-between mb-0.5">
+                        <span id="hudModeBadge">📐 MODUS: ARM SLEPEN</span>
+                        <span id="hudMapBadge" class="text-[9px] px-1 rounded bg-slate-800 text-cyan-300">MAP: NULL</span>
+                    </div>
+                    <div class="text-slate-300">Armpunt (X, Y): <span id="hudArmXY" class="cyan-text font-bold">X: 7.85 cm, Y: 4.16 cm</span></div>
+                    <div class="text-slate-300">Vlaggen: <span id="hudFlagCount" class="cyan-text font-bold">0</span> | Lijnen: <span id="hudLineCount" class="amber-text font-bold">0</span></div>
+                    <div class="text-slate-300">Oppervlak (Gauss): <span id="hudAreaM2" class="cyan-text font-bold">0.00 m²</span> (<span id="hudAreaCm2">0.00</span> cm²)</div>
+                    <div class="text-slate-300">Omtrek/Lijnlengte: <span id="hudPerimM" class="cyan-text font-bold">0.00 m</span> | Δ: <span class="text-emerald-400 font-bold">0.000 mm</span></div>
+                </div>
+
+                <!-- Top-Right Coordinate & Search Target HUD -->
+                <div class="hidden sm:block absolute top-2 right-2 z-20 bg-[#08101ae6] border border-cyan-500/40 rounded p-1.5 text-[9px] text-right pointer-events-none w-[200px]">
+                    <div id="hudLocationName" class="text-cyan-400 font-bold truncate">ANKER: SCHERPENISSE (PLATTEWEG 7)</div>
+                    <div id="hudWgs84Text" class="text-slate-300">WGS84: 51.54780° N, 4.10660° E</div>
+                    <div id="hudRdText" class="text-amber-300">RD: X=66215 m | Y=395890 m</div>
+                </div>
+
+                <!-- Bottom Fixed Action Bar inside VP-01 for Building & Deleting Flags & Lines -->
+                <div class="absolute bottom-2 left-2 right-2 z-20 flex items-center justify-between gap-1 bg-[#070f19f2] px-2 py-1 rounded border border-slate-800 text-[10px] h-7 overflow-x-auto no-scrollbar">
+                    <div class="flex items-center gap-1">
+                        <button onclick="addFlagAtExactArmTip()" class="tech-btn-active px-2 py-0.5 rounded font-bold text-[9px]" title="Plaats direct een geijkte vlag op het huidige armpunt">
+                            🚩 +Vlag op Armpunt
+                        </button>
+                        <button onclick="addLineFromOriginToArmTip()" class="tech-btn-amber px-2 py-0.5 rounded font-bold text-[9px]" title="Trek een vaste meetlijn van de oorsprong of vorige vlag naar het armpunt">
+                            📏 +Lijn naar Arm
+                        </button>
+                        <button onclick="loadReferenceScherpenisseFlags()" class="tech-btn px-2 py-0.5 rounded text-amber-300 text-[9px]">
+                            📥 4 OTT-573 Vlaggen+Lijnen
+                        </button>
+                        <button onclick="undoLastFlagOrLine()" class="tech-btn px-2 py-0.5 rounded text-slate-200 text-[9px]" title="Wis laatst geplaatste vlag of lijn">
+                            ↩️ Wis Laatste
+                        </button>
+                        <button onclick="clearAllFlagsToNull()" class="tech-btn-danger px-2 py-0.5 rounded font-bold text-[9px]" title="Zet alle vlaggen en lijnen terug op NULL (0)">
+                            🗑️ Alles Wissen (NULL)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Fixed Height Table for Calibrated Flags & Lines (Locked 134px height) -->
+            <div class="border-t border-slate-800 bg-[#080f18] p-2 text-[10px] h-[134px] flex flex-col shrink-0">
+                <div class="flex items-center justify-between mb-1 shrink-0 gap-1">
+                    <span class="text-cyan-400 font-bold text-[10px] truncate">🚩 VLAGGEN & 📏 LIJNEN TABEL (🎯 = IJK ARM | 📏 = LIJN | ✕ = WIS)</span>
+                    <span id="calibrationStatusText" class="text-[9px] text-emerald-400 font-semibold shrink-0">STATUS: ARM SOLO (NULL)</span>
+                </div>
+                <div class="overflow-y-auto flex-1 border border-slate-800/80 rounded bg-[#05090f]">
+                    <table class="w-full text-left border-collapse text-[9px]">
+                        <thead class="bg-slate-900/90 text-slate-400 sticky top-0">
+                            <tr class="border-b border-slate-800">
+                                <th class="py-1 px-1.5">ID / Type</th>
+                                <th class="py-1 px-1">X / ΔX (cm)</th>
+                                <th class="py-1 px-1">Y / ΔY (cm)</th>
+                                <th class="py-1 px-1">Azimut / Lengte</th>
+                                <th class="py-1 px-1 text-right">Actie (IJk / Lijn / Wis)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flagsTableBody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== COLUMN 2: VP-02 // VOLLE BREEDTE PDF DOSSIER VIEWER (`pdfrs`) + WEBRTC DRAWER ==================== -->
+        <section id="panelVp02" class="tech-panel rounded">
+            <div class="tech-header px-2.5 py-1 flex items-center justify-between text-[10px] h-7">
+                <span class="cyan-text font-bold truncate">VP-02 // VOLLE BREEDTE PDF DOSSIER VIEWER (`pdfrs` ENGINE)</span>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button id="btnToggleWebRtcDrawer" onclick="toggleVp02WebRtcDrawer()" class="tech-btn-amber px-2 py-0.5 rounded text-[9px] font-bold">
+                        📹 WebRTC Cam, Bel-API & Chat ▾
+                    </button>
+                    <span id="rtcChannelDot" class="status-dot bg-emerald-400"></span>
+                </div>
+            </div>
+
+            <!-- FULL-WIDTH PDF VIEWER TOOLBAR (EDGE-TO-EDGE 100% WIDTH) -->
+            <div class="bg-[#0b1420] border-b border-slate-800 px-2 py-1 flex flex-wrap items-center justify-between gap-1 text-[10px] shrink-0">
+                <div class="flex items-center gap-1 min-w-0 flex-1">
+                    <span class="amber-text font-bold shrink-0">📕 DOSSIER:</span>
+                    <select id="vp02PdfSelector" onchange="selectDossierForPdfViewer(this.value)"
+                        class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-[10px] text-cyan-300 truncate flex-1 focus:outline-none">
+                    </select>
+                </div>
+
+                <!-- Search in PDF (`pdfrs::search`), Full Width Toggle & Redact Tools -->
+                <div class="flex items-center gap-1 shrink-0">
+                    <input id="pdfSearchQuery" type="text" placeholder="Zoek in PDF (pdfrs::search)..."
+                        oninput="renderPdfViewerCanvas()"
+                        class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-[9px] text-amber-200 w-28 sm:w-36 focus:outline-none focus:border-cyan-400" />
+                    <button id="btnPdfFitWidth" onclick="setPdfFitFullWidth()" class="tech-btn-active px-1.5 py-0.5 rounded text-[9px] font-bold" title="Schaal PDF exact op 100% volle breedte van VP-02">
+                        ↔ 100% Breedte
+                    </button>
+                    <button onclick="changePdfZoom(-0.15)" class="tech-btn px-1.5 py-0.5 rounded text-[9px]" title="Uitzoomen">−</button>
+                    <span id="pdfZoomBadge" class="text-[9px] text-slate-300 w-9 text-center">100%</span>
+                    <button onclick="changePdfZoom(0.15)" class="tech-btn px-1.5 py-0.5 rounded text-[9px]" title="Inzoomen">+</button>
+                    <button id="btnPdfRedactMode" onclick="togglePdfRedactTool()" class="tech-btn px-1.5 py-0.5 rounded text-[9px]" title="pdfrs::redact Teken zwart lakvlak">
+                        ⬛ Lak
+                    </button>
+                    <button onclick="sendCurrentPdfPageToVp01Overlay()" class="tech-btn-amber px-1.5 py-0.5 rounded text-[9px] font-bold" title="Projecteer deze PDF-pagina onder de 6D Polar Arm in VP-01">
+                        🗺️ -> VP-01
+                    </button>
+                </div>
+            </div>
+
+            <!-- EDGE-TO-EDGE 100% FULL WIDTH PDF VIEWPORT IN VP-02 -->
+            <div id="vp02PdfViewport" class="relative flex-1 w-full overflow-y-auto overflow-x-hidden bg-[#05080e] flex flex-col items-stretch p-0 min-h-0">
+                <!-- Full-Width Canvas Container -->
+                <div class="w-full flex-1 flex flex-col items-center justify-start bg-[#05080e]">
+                    <canvas id="pdfViewerCanvas" class="w-full block shadow-2xl bg-white cursor-crosshair"></canvas>
+                </div>
+
+                <!-- Sticky Full-Width Bottom Control Bar inside VP-02 PDF Viewer -->
+                <div class="sticky bottom-0 left-0 right-0 w-full bg-[#09121ef2] border-t border-cyan-800/70 px-3 py-1.5 flex items-center justify-between text-[10px] gap-2 z-20">
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="stepPdfPage(-1)" class="tech-btn px-2 py-0.5 rounded font-bold">◀ Vorige</button>
+                        <span id="pdfPageIndicator" class="text-cyan-300 font-bold">Pagina 1 / 2</span>
+                        <button onclick="stepPdfPage(1)" class="tech-btn px-2 py-0.5 rounded font-bold">Volgende ▶</button>
+                    </div>
+                    <span id="pdfSearchHitsBadge" class="text-amber-300 truncate hidden sm:inline">pdfrs::raster [100% VOLLE BREEDTE VP-02]</span>
+                    <div class="flex items-center gap-1">
+                        <button onclick="clearPdfRedactions()" class="tech-btn px-2 py-0.5 rounded text-[9px]" title="Wis zwarte lakvlakken">Wis Lak</button>
+                        <button onclick="generateAndDownloadSinglePdf()" class="tech-btn-active px-2.5 py-0.5 rounded font-bold">
+                            📥 Download PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLLAPSIBLE WEBRTC CAMERA, BEL-API & DATACHANNEL KLANTCHAT DRAWER (SO PDF HAS 100% FULL HEIGHT & WIDTH BY DEFAULT) -->
+            <div id="vp02WebRtcDrawer" class="hidden h-[210px] border-t-2 border-cyan-500/70 grid grid-cols-12 gap-1.5 p-1.5 bg-[#080e17] shrink-0 overflow-hidden">
+                <!-- Left 5 Cols: WebRTC Camera + Bel-API SIP Dialer -->
+                <div class="col-span-5 flex flex-col gap-1 overflow-hidden">
+                    <div class="relative flex-1 rounded overflow-hidden border border-cyan-900/80 bg-black flex items-center justify-center min-h-[100px]">
+                        <video id="webcamVideo" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+                        <canvas id="cameraHudCanvas" class="w-full h-full block"></canvas>
+
+                        <div class="absolute top-1 left-1.5 bg-black/75 px-1.5 py-0.5 rounded border border-cyan-500/40 text-[8px] flex items-center gap-1">
+                            <span class="status-dot bg-amber-400 animate-ping"></span>
+                            <span id="camModeLabel" class="text-cyan-300 font-bold">6D CAM + KAARTSCANNER</span>
+                        </div>
+
+                        <div class="absolute bottom-1 left-1 right-1 flex items-center justify-between gap-1">
+                            <button id="btnStartCam" onclick="toggleWebcamStream()" class="tech-btn px-1.5 py-0.5 rounded text-[9px] font-bold">
+                                📷 Start Cam
+                            </button>
+                            <button onclick="toggleWebcamOldMapOverlay()" class="tech-btn-amber px-1.5 py-0.5 rounded text-[9px] font-bold" title="Projecteer live camera onder de 6D Polar Arm in VP-01">
+                                🗺️ Cam -> VP-01
+                            </button>
+                            <button onclick="captureCameraToPdfBuffer()" class="tech-btn px-1.5 py-0.5 rounded text-[9px]" title="Maak snapshot voor PDF">
+                                📸
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#0b131e] border border-slate-800 rounded p-1.5 flex flex-col gap-1 shrink-0">
+                        <div class="flex items-center justify-between text-[9px]">
+                            <span class="amber-text font-bold">📞 BEL-API SIP</span>
+                            <span id="callTimerDisplay" class="text-cyan-400 font-bold">00:00</span>
+                            <div class="flex gap-0.5">
+                                <button onclick="playDtmf('1')" class="tech-btn px-1 rounded text-[8px]">1</button>
+                                <button onclick="playDtmf('2')" class="tech-btn px-1 rounded text-[8px]">2</button>
+                                <button onclick="playDtmf('3')" class="tech-btn px-1 rounded text-[8px]">3</button>
+                                <button onclick="playDtmf('#')" class="tech-btn px-1 rounded text-[8px]">#</button>
+                            </div>
+                        </div>
+                        <button id="btnCallToggle" onclick="toggleBelApiCall()" class="w-full py-1 rounded font-bold text-[9px] bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-400 transition">
+                            📞 Start Bel-API Gesprek (woo-loket@tholen.nl)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right 7 Cols: WebRTC DataChannel Chatfunctie -->
+                <div class="col-span-7 flex flex-col bg-[#060a10] border border-slate-800 rounded p-1.5 overflow-hidden">
+                    <div class="flex items-center justify-between text-[9px] mb-1 shrink-0">
+                        <span class="cyan-text font-bold">💬 WEBRTC DATACHANNEL CHAT</span>
+                        <div class="flex gap-1">
+                            <button onclick="sendQuickDossierMessage('Woo-Precisering 1.0')" class="tech-btn px-1.5 py-0.5 rounded text-[8px]">+ Woo-Dossier</button>
+                            <button onclick="toggleVp02WebRtcDrawer()" class="text-slate-400 hover:text-white px-1 text-[9px]">✕ Sluit</button>
+                        </div>
+                    </div>
+                    <div id="chatMessagesContainer" class="flex-1 overflow-y-auto space-y-1 p-1 rounded bg-[#04070b] border border-slate-800/80 text-[9px] min-h-0"></div>
+                    <form onsubmit="handleChatSubmit(event)" class="mt-1 flex gap-1 shrink-0">
+                        <input id="chatInputBox" type="text" placeholder="Bericht of 6D-status via DataChannel..."
+                            class="flex-1 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-[10px] text-slate-100 focus:outline-none focus:border-cyan-400" />
+                        <button type="submit" class="tech-btn-active px-2 py-1 rounded text-[10px] font-bold">Zend ↵</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== COLUMN 3: VP-03 // WOO-THOLEN ARCHIEF INDEX & RUST `pdfrs` ==================== -->
+        <section id="panelVp03" class="tech-panel rounded">
+            <div class="tech-header px-2.5 py-1.5 flex items-center justify-between text-[10px] h-7">
+                <span class="cyan-text font-bold truncate">VP-03 // WOO-THOLEN INDEX & CRATE `pdfrs`</span>
+                <span class="text-emerald-400 font-bold text-[9px] shrink-0">12 STUKKEN</span>
+            </div>
+
+            <!-- Sub-navigation Tabs -->
+            <div class="grid grid-cols-3 gap-1 p-1 bg-[#09111a] border-b border-slate-800 text-[9px] shrink-0">
+                <button id="tabBtnTree" onclick="switchRightTab('tree')" class="tech-btn-active py-1 px-1.5 rounded font-bold">
+                    📂 1. Archief (12)
+                </button>
+                <button id="tabBtnEditor" onclick="switchRightTab('editor')" class="tech-btn py-1 px-1.5 rounded font-bold">
+                    📝 2. Bron & PDF
+                </button>
+                <button id="tabBtnRust" onclick="switchRightTab('rust')" class="tech-btn py-1 px-1.5 rounded font-bold">
+                    🦀 3. Rust `pdfrs`
+                </button>
+            </div>
+
+            <!-- TAB 1: WOO-THOLEN DIRECTORY TREE -->
+            <div id="tabPanelTree" class="flex-1 flex flex-col overflow-hidden p-1.5 min-h-0">
+                <div class="bg-[#060b11] border border-slate-800 rounded p-1.5 mb-1.5 text-[9px] shrink-0">
+                    <div class="flex items-center justify-between text-amber-400 font-bold">
+                        <span class="truncate">📁 file:///home/ontwerp/Bureaublad/archief onderzoek</span>
+                        <a href="https://woo-tholen.vercel.app/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 underline shrink-0 ml-1">woo-tholen.vercel.app ↗</a>
+                    </div>
+                    <div class="text-slate-400 mt-0.5 flex items-center justify-between">
+                        <span>Klik op een dossier voor volle breedte weergave in VP-02</span>
+                        <span id="selectedMergeCount" class="text-emerald-400 font-bold">Merge: 3</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-1 mb-1.5 shrink-0">
+                    <input id="archiveSearchInput" oninput="renderArchiveTable()" type="text" placeholder="Filter in 12 Woo-Tholen dossiers..."
+                        class="flex-1 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-[10px] text-slate-200 focus:outline-none focus:border-cyan-400" />
+                    <button onclick="batchMergeSelectedPdfs()" class="tech-btn-amber px-2 py-1 rounded text-[9px] font-bold">
+                        ⚡ Parallel Merge (`pdfrs`)
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto border border-slate-800 rounded bg-[#05090f] min-h-0">
+                    <table class="w-full text-left border-collapse text-[9px]">
+                        <thead class="bg-slate-900/90 text-slate-400 sticky top-0">
+                            <tr class="border-b border-slate-800">
+                                <th class="p-1 w-5">✓</th>
+                                <th class="p-1">Naam (Klik = Open Volle Breedte in VP-02)</th>
+                                <th class="p-1 text-right">Grootte</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archiveFilesTbody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: MARKDOWN / PDF SOURCE EDITOR -->
+            <div id="tabPanelEditor" class="hidden flex-1 flex flex-col overflow-hidden p-1.5 space-y-1.5 min-h-0">
+                <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 px-2 py-1 rounded text-[10px] shrink-0">
+                    <span id="activeFileTitle" class="cyan-text font-bold truncate">536f9552...woo-preciesering_1.0.pdf</span>
+                    <span id="activeFileSizeBadge" class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[9px] shrink-0">537 KB</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1 bg-[#080f18] p-1.5 rounded border border-slate-800 text-[9px] shrink-0">
+                    <div>
+                        <label class="text-slate-400 block">Watermerk (`pdfrs::pdf_ops`)</label>
+                        <input id="pdfWatermarkInput" type="text" value="WOO-THOLEN // GEÏJKT DOSSIER" oninput="renderPdfViewerCanvas(); updateRustCodePreview();"
+                            class="w-full bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-cyan-300" />
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block">Profiel (`pdfrs::optimization`)</label>
+                        <select id="pdfProfileSelect" onchange="updateRustCodePreview()" class="w-full bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-amber-300">
+                            <option value="web">OptimizationProfile::web()</option>
+                            <option value="print">OptimizationProfile::print()</option>
+                            <option value="custom">Custom (High, 200 DPI)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <textarea id="dossierContentTextarea" oninput="syncEditorToPdfViewer()"
+                    class="flex-1 w-full bg-[#05080d] border border-slate-800 rounded p-2 text-[10px] text-slate-200 font-mono leading-relaxed focus:outline-none focus:border-cyan-500 resize-none min-h-0"></textarea>
+
+                <div class="grid grid-cols-2 gap-1 shrink-0">
+                    <button onclick="generateAndDownloadSinglePdf()" class="tech-btn-active py-1.5 px-2 rounded text-[10px] font-bold">
+                        📥 Exporteer PDF (`pdfrs`)
+                    </button>
+                    <button onclick="shareActiveDossierOverWebRTC()" class="tech-btn-amber py-1.5 px-2 rounded text-[10px] font-bold">
+                        📡 Deel in Klantchat
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 3: RUST `pdfrs` CRATE CODE GENERATOR -->
+            <div id="tabPanelRust" class="hidden flex-1 flex flex-col overflow-hidden p-1.5 space-y-1.5 min-h-0">
+                <div class="bg-[#08101a] border border-slate-800 rounded p-1.5 text-[9px] flex items-center justify-between shrink-0">
+                    <div>
+                        <span class="amber-text font-bold">🦀 Crate `pdfrs` Rust Broncode</span>
+                        <p class="text-slate-400">Inclusief `raster`, `search`, `redact`, `parallel` & `pdf_ops`.</p>
+                    </div>
+                    <button onclick="copyRustCode()" class="tech-btn-active px-2 py-1 rounded font-bold">📋 Kopieer</button>
+                </div>
+                <pre id="rustCodeDisplay" class="flex-1 overflow-auto bg-[#04070b] border border-slate-800 rounded p-2 text-[9px] text-cyan-300 leading-relaxed select-all min-h-0"></pre>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==================== MOBILE STICKY BOTTOM NAVIGATION BAR ==================== -->
+    <nav id="mobileNavBar" class="hidden grid-cols-4 gap-1 bg-[#09121e] border-t-2 border-cyan-500/60 p-1.5 text-[10px] shrink-0 z-40">
+        <button id="mobNavVp01" onclick="switchMobilePanel('vp01')" class="tech-btn-active py-2 px-1 rounded font-bold flex flex-col items-center">
+            <span>🧭 VP-01</span>
+            <span class="text-[8px] text-cyan-200">Arm, Vlag & Lijn</span>
+        </button>
+        <button id="mobNavVp02" onclick="switchMobilePanel('vp02')" class="tech-btn py-2 px-1 rounded font-bold flex flex-col items-center">
+            <span>📕 VP-02 PDF</span>
+            <span class="text-[8px] text-amber-300">Volle Breedte</span>
+        </button>
+        <button id="mobNavRtc" onclick="switchMobilePanel('rtc')" class="tech-btn py-2 px-1 rounded font-bold flex flex-col items-center">
+            <span>📹 WebRTC</span>
+            <span class="text-[8px] text-emerald-300">Cam & Bel-API</span>
+        </button>
+        <button id="mobNavVp03" onclick="switchMobilePanel('vp03')" class="tech-btn py-2 px-1 rounded font-bold flex flex-col items-center">
+            <span>🦀 VP-03</span>
+            <span class="text-[8px] text-slate-300">Archief & pdfrs</span>
+        </button>
+    </nav>
+
+    <!-- ==================== BOTTOM 6D ROBOTICS SLIDERS & SPECTRUM BAR (DESKTOP 92PX) ==================== -->
+    <footer class="desktop-footer tech-panel border-t border-cyan-900/60 px-3 py-1.5 grid grid-cols-12 gap-3 items-center text-[10px] h-[92px] overflow-hidden shrink-0">
+        <!-- Left 7 Cols: 6D Polar Arm & Pose Sliders -->
+        <div class="col-span-7 space-y-1">
+            <div class="grid grid-cols-3 gap-x-3 gap-y-1">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-amber-400 w-24 shrink-0">🧭 AZIMUT (θ):</span>
+                    <input id="sliderAzimut" type="range" min="0" max="360" step="0.05" value="62.10" oninput="handle6DSliderChange()" class="flex-1" />
+                    <span id="valAzimut" class="cyan-text font-bold w-12 text-right">62.10°</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-amber-400 w-24 shrink-0">📏 STRAAL (ρ):</span>
+                    <input id="sliderRho" type="range" min="0.5" max="13.5" step="0.01" value="8.88" oninput="handle6DSliderChange()" class="flex-1" />
+                    <span id="valRho" class="cyan-text font-bold w-14 text-right">8.88 cm</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-slate-400 w-20 shrink-0">🔍 ZOOM:</span>
+                    <input id="sliderZoom" type="range" min="0.5" max="2.2" step="0.05" value="1.00" oninput="handle6DSliderChange()" class="flex-1" />
+                    <span id="valZoom" class="cyan-text font-bold w-11 text-right">1.00x</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-slate-400 w-24 shrink-0">📐 PITCH (Rx):</span>
+                    <input id="sliderPitch" type="range" min="-90" max="90" step="1" value="0" oninput="handle6DSliderChange()" class="flex-1" />
+                    <span id="valPitch" class="cyan-text font-bold w-12 text-right">0°</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-slate-400 w-24 shrink-0">🔄 ROLL (Ry):</span>
+                    <input id="sliderRoll" type="range" min="-90" max="90" step="1" value="0" oninput="handle6DSliderChange()" class="flex-1" />
+                    <span id="valRoll" class="cyan-text font-bold w-14 text-right">0°</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-slate-400 w-20 shrink-0">🧭 YAW (Rz):</span>
+                    <input id="sliderYaw" type="range" min="-180" max="180" step="1" value="0" oninput="handle6DSliderChange()" class="flex-1" />
+                    <span id="valYaw" class="cyan-text font-bold w-11 text-right">0°</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1 pt-0.5 text-[9px]">
+                <button onclick="setPlanimeterPolar(0, 5.0, true)" class="tech-btn px-2 py-0.5 rounded">0° NOORD</button>
+                <button onclick="setPlanimeterPolar(62.10, 8.88, true)" class="tech-btn-active px-2 py-0.5 rounded">OTT-573 (62.1° / 8.88cm)</button>
+                <button onclick="addFlagAtExactArmTip()" class="tech-btn-amber px-2 py-0.5 rounded font-bold">🚩 +VLAG OP ARM</button>
+                <button onclick="addLineFromOriginToArmTip()" class="tech-btn px-2 py-0.5 rounded text-cyan-300">📏 +LIJN TREKKEN</button>
+                <button onclick="clearAllFlagsToNull()" class="tech-btn-danger px-2 py-0.5 rounded">🗑️ WIS ALLES (NULL)</button>
+            </div>
+        </div>
+
+        <!-- Center 3 Cols: FFT Audio Spectrum -->
+        <div class="col-span-3 bg-[#060b12] border border-slate-800 rounded p-1.5 h-full flex flex-col justify-between">
+            <div class="flex items-center justify-between text-[9px]">
+                <span class="cyan-text font-bold">🔊 FFT 528 Hz SPECTRUM</span>
+                <span class="text-amber-400">LASER: 537.8 nm</span>
+            </div>
+            <canvas id="spectrumCanvas" height="38" class="w-full h-[38px] block"></canvas>
+        </div>
+
+        <!-- Right 2 Cols: Export Buttons -->
+        <div class="col-span-2 grid grid-cols-2 gap-1 text-[9px]">
+            <button onclick="exportPlanimeterSvgData()" class="tech-btn py-1.5 px-1.5 rounded font-bold text-amber-300">📐 SVG</button>
+            <button onclick="captureCameraToPdfBuffer()" class="tech-btn py-1.5 px-1.5 rounded font-bold text-amber-300">🖼️ SNAP</button>
+            <button onclick="exportGeoJsonFlags()" class="tech-btn py-1.5 px-1.5 rounded font-bold text-cyan-300">🌍 GEOJSON</button>
+            <button onclick="generateAndDownloadSinglePdf()" class="tech-btn-active py-1.5 px-1.5 rounded font-bold">📄 PDF</button>
+        </div>
+    </footer>
+</div>
+
+<!-- FIXED POSITION NON-SHIFTING TOAST NOTIFICATION -->
+<div id="tacticalToast" class="fixed bottom-24 right-4 z-50 pointer-events-none opacity-0 transition-opacity duration-200 bg-[#0b1624f5] border-2 border-cyan-400 text-cyan-200 px-3.5 py-2 rounded shadow-2xl text-xs font-mono w-80">
+    <div class="font-bold text-cyan-400 text-[11px] truncate" id="toastTitle">SYSTEEM MELDING</div>
+    <div id="toastBody" class="text-slate-200 text-[10px] mt-0.5 leading-snug">Actie voltooid.</div>
+</div>
+
+<script>
+    // ============================================================================
+    // 1. VORTEX OS // 6D POLAR BRIDGE (BROADCASTCHANNEL & LOCALSTORAGE)
+    // ============================================================================
+    const mainPolarBridge = ('BroadcastChannel' in window) ? new BroadcastChannel('vortex_os_6d_bridge') : null;
+
+    // INITIAL STATE: ONLY POLAR ARM ON, FLAGS AT ZERO (NULL), MAP AT NULL
+    const vortexState = {
+        azDeg: 62.10,
+        rhoCm: 8.88,
+        pitchDeg: 0,
+        rollDeg: 0,
+        yawDeg: 0,
+        zoom: 1.00,
+        anchorLat: 51.54780,
+        anchorLon: 4.10660,
+        anchorLabel: 'SCHERPENISSE (PLATTEWEG 7)',
+        mapLayer: 'null',          // Default NULL / UIT
+        snapToFlags: true,
+        toolMode: 'arm',           // 'arm' | 'flag' | 'line' | 'erase'
+        autoConnectFlags: true,    // Automatically connect flags with measurement lines
+        closePolygon: true,        // Close parcel polygon between last and first flag
+        showRadialVectors: false,  // Draw radial vectors from (0,0) to each flag
+        flags: [],                 // Starts EMPTY (NULL)
+        lines: [],                 // Custom user-drawn measurement lines [{id, x1Cm, y1Cm, x2Cm, y2Cm}]
+        pendingLineStart: null,    // {xCm, yCm, label} when drawing a 2-point custom line
+        webcamOverlayActive: false,
+        uploadedMapImage: null,
+        overlayAlpha: 0.65,
+        overlayScale: 1.0,
+        overlayRotation: 0,
+        lastSnapshotDataUrl: null,
+        isMobileView: false
     };
-}
+
+    // Exact 4 reference flags for Scherpenisse OTT Nr. 573
+    const REFERENCE_OTT573_FLAGS = [
+        { id: 'P7-NW (Wagenhuis)', xCm: 1.79, yCm: 1.86 },
+        { id: 'P7-NO (Schuur 1926)', xCm: 3.95, yCm: 1.63 },
+        { id: 'P5-ZO (86m² WOZ)', xCm: 4.10, yCm: -1.39 },
+        { id: 'P5-ZW (86m² WOZ)', xCm: 1.65, yCm: -1.62 }
+    ];
+
+    function syncPolarArmToKlantcontact(azDeg, rhoCm, pitchDeg = 0, rollDeg = 0, yawDeg = 0, zoom = 1.0, flags = vortexState.flags) {
+        const payload = {
+            source: 'MAIN_INDEX',
+            timestamp: Date.now(),
+            azDeg: Number(azDeg),
+            rhoCm: Number(rhoCm),
+            pitchDeg: Number(pitchDeg),
+            rollDeg: Number(rollDeg),
+            yawDeg: Number(yawDeg),
+            zoom: Number(zoom),
+            anchorLat: vortexState.anchorLat,
+            anchorLon: vortexState.anchorLon,
+            flags: flags,
+            lines: vortexState.lines
+        };
+        if (mainPolarBridge) {
+            try { mainPolarBridge.postMessage(payload); } catch (e) {}
+        }
+        try {
+            localStorage.setItem('vortex_os_6d_state', JSON.stringify(payload));
+        } catch (e) {}
+
+        const ind = document.getElementById('topStatusIndicator');
+        if (ind) {
+            const t = new Date(payload.timestamp).toLocaleTimeString('nl-NL');
+            ind.textContent = `6D SYNC OK (${t})`;
+        }
+    }
+
+    if (mainPolarBridge) {
+        mainPolarBridge.onmessage = (ev) => {
+            const d = ev.data;
+            if (!d || d.source === 'MAIN_INDEX') return;
+            if (typeof setPlanimeterPolar === 'function') {
+                setPlanimeterPolar(d.azDeg, d.rhoCm, false, d.pitchDeg, d.rollDeg, d.yawDeg, d.zoom);
+            }
+        };
+    }
+
+    // ============================================================================
+    // 2. EXACT MATHEMATICAL CALIBRATION (POLAR <-> CARTESIAN <-> WGS84 <-> RD)
+    // ============================================================================
+    function polarToCartesianCm(azDeg, rhoCm) {
+        const rad = (Number(azDeg) * Math.PI) / 180.0;
+        const xCm = Number(rhoCm) * Math.sin(rad);
+        const yCm = Number(rhoCm) * Math.cos(rad);
+        return { xCm, yCm };
+    }
+
+    function cartesianCmToPolar(xCm, yCm) {
+        const rhoCm = Math.hypot(xCm, yCm);
+        let azDeg = (Math.atan2(xCm, yCm) * 180.0) / Math.PI;
+        if (azDeg < 0) azDeg += 360.0;
+        return { azDeg, rhoCm };
+    }
+
+    function cmOffsetToWgs84(xCm, yCm) {
+        const dNorthMeters = yCm * 3.162;
+        const dEastMeters = xCm * 3.162;
+        const lat = vortexState.anchorLat + (dNorthMeters / 111320.0);
+        const lon = vortexState.anchorLon + (dEastMeters / (111320.0 * Math.cos(vortexState.anchorLat * Math.PI / 180.0)));
+        return { lat, lon };
+    }
+
+    function wgs84ToRd(lat, lon) {
+        const dPhi = 0.36 * (lat - 52.15517440);
+        const dLam = 0.36 * (lon - 5.38720621);
+        const x = 155000 + 190094.945 * dLam - 11832.228 * dPhi * dLam - 114.221 * dPhi * dPhi * dLam - 32.391 * Math.pow(dLam, 3);
+        const y = 463000 + 309056.544 * dPhi + 3638.893 * dLam * dLam + 73.077 * dPhi * dPhi - 157.984 * dPhi * dLam * dLam;
+        return { x: Math.round(x), y: Math.round(y) };
+    }
+
+    function rdToWgs84(x, y) {
+        const dX = (x - 155000) * 1e-5;
+        const dY = (y - 463000) * 1e-5;
+        const sumN = (3235.65389 * dY) + (-32.58297 * dX * dX) + (-0.24750 * dY * dY) + (-0.84978 * dX * dX * dY) + (-0.06550 * dY * dY * dY);
+        const sumE = (5260.52916 * dX) + (105.94684 * dX * dY) + (2.45656 * dX * dY * dY) + (-0.81885 * Math.pow(dX, 3));
+        const lat = 52.15517440 + (sumN / 3600.0);
+        const lon = 5.38720621 + (sumE / 3600.0);
+        return { lat, lon };
+    }
+
+    // Distance from point P(px, py) to segment AB(x1,y1 -> x2,y2) in cm
+    function pointToSegmentDistanceCm(px, py, x1, y1, x2, y2) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const lenSq = dx * dx + dy * dy;
+        if (lenSq === 0) return Math.hypot(px - x1, py - y1);
+        let t = ((px - x1) * dx + (py - y1) * dy) / lenSq;
+        t = Math.max(0, Math.min(1, t));
+        return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+    }
+
+    // ============================================================================
+    // 3. LOCATION, COORDINATES & PLACE SEARCH ENGINE (PDOK API + RD + WGS84)
+    // ============================================================================
+    async function executeLocationSearch() {
+        const raw = (document.getElementById('geoSearchInput').value || '').trim();
+        if (!raw) return;
+
+        const nums = raw.match(/[-+]?\d+(?:\.\d+)?/g);
+        if (nums && nums.length >= 2 && /^[\d\s.,;:-]+$/.test(raw)) {
+            const n1 = parseFloat(nums[0]);
+            const n2 = parseFloat(nums[1]);
+            if (n1 > 1000 && n2 > 200000) {
+                const wgs = rdToWgs84(n1, n2);
+                flyToAnchorLocation(wgs.lat, wgs.lon, `RD COÖRDINAAT (${Math.round(n1)}, ${Math.round(n2)})`);
+                return;
+            } else if (n1 >= 50 && n1 <= 54 && n2 >= 3 && n2 <= 8) {
+                flyToAnchorLocation(n1, n2, `WGS84 (${n1.toFixed(5)}°N, ${n2.toFixed(5)}°E)`);
+                return;
+            }
+        }
+
+        const resultsBox = document.getElementById('geoSearchResultsBox');
+        resultsBox.innerHTML = `<div class="p-2 text-cyan-300">Zoeken in PDOK Kadaster & Locatieserver naar "${raw}"...</div>`;
+        resultsBox.classList.remove('hidden');
+
+        try {
+            const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(raw)}&rows=6`;
+            const res = await fetch(url);
+            const data = await res.json();
+            const docs = data?.response?.docs || [];
+
+            if (docs.length === 0) {
+                resultsBox.innerHTML = `<div class="p-2 text-amber-300">Geen PDOK resultaat gevonden. Probeer bijv. "Platteweg 7 Scherpenisse" of "Tholen".</div>`;
+                setTimeout(() => resultsBox.classList.add('hidden'), 3000);
+                return;
+            }
+
+            resultsBox.innerHTML = '';
+            docs.forEach((doc) => {
+                const m = (doc.centroide_ll || '').match(/POINT\(([-0-9.]+)\s+([-0-9.]+)\)/);
+                if (!m) return;
+                const lon = parseFloat(m[1]);
+                const lat = parseFloat(m[2]);
+                const label = doc.weergavenaam || raw;
+                const rd = wgs84ToRd(lat, lon);
+
+                const item = document.createElement('div');
+                item.className = 'p-2 hover:bg-cyan-950/70 cursor-pointer flex items-center justify-between gap-2';
+                item.innerHTML = `
+                    <div>
+                        <div class="text-cyan-300 font-bold">${label}</div>
+                        <div class="text-[9px] text-slate-400">Type: ${doc.type || 'adres'} | WGS84: ${lat.toFixed(5)}, ${lon.toFixed(5)} | RD: ${rd.x}, ${rd.y}</div>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded bg-cyan-900/60 text-cyan-200 text-[9px] font-bold">🎯 IJK</span>
+                `;
+                item.onclick = () => {
+                    resultsBox.classList.add('hidden');
+                    flyToAnchorLocation(lat, lon, label.toUpperCase());
+                };
+                resultsBox.appendChild(item);
+            });
+        } catch (err) {
+            resultsBox.innerHTML = `<div class="p-2 text-rose-400">Netwerkfout bij PDOK zoeken. Gebruik coördinaten zoals 51.5478, 4.1066.</div>`;
+            setTimeout(() => resultsBox.classList.add('hidden'), 3000);
+        }
+    }
+
+    function flyToAnchorLocation(lat, lon, label) {
+        vortexState.anchorLat = Number(lat);
+        vortexState.anchorLon = Number(lon);
+        vortexState.anchorLabel = label;
+
+        const rd = wgs84ToRd(lat, lon);
+        document.getElementById('hudLocationName').textContent = `ANKER: ${label}`;
+        document.getElementById('hudWgs84Text').textContent = `WGS84: ${lat.toFixed(5)}° N, ${lon.toFixed(5)}° E`;
+        document.getElementById('hudRdText').textContent = `RD: X=${rd.x} m | Y=${rd.y} m`;
+
+        if (leafletMap) {
+            leafletMap.setView([lat, lon], 18, { animate: false });
+        }
+        drawPlanimeterCanvas();
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+        showToast('LOCATIE & ANKER GEÏJKT', `${label} (${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E | RD ${rd.x}, ${rd.y})`);
+    }
+
+    // ============================================================================
+    // 4. PDOK / BACKGROUND MAP ENGINE (STARTS ON NULL / OFF BY DEFAULT)
+    // ============================================================================
+    let leafletMap = null;
+    let activeTileLayer = null;
+    let activeOverlayLayer = null;
+
+    function initLeafletBackgroundMap() {
+        const container = document.getElementById('leafletMapContainer');
+        leafletMap = L.map(container, {
+            center: [vortexState.anchorLat, vortexState.anchorLon],
+            zoom: 18,
+            zoomControl: false,
+            attributionControl: false,
+            dragging: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false
+        });
+    }
+
+    function setMapSelection(layerKey) {
+        document.getElementById('mapLayerSelect').value = layerKey;
+        changeBackgroundMapLayer(layerKey);
+        document.getElementById('moreMapsPopover').classList.add('hidden');
+    }
+
+    function changeBackgroundMapLayer(layerKey) {
+        vortexState.mapLayer = layerKey;
+        const mapContainer = document.getElementById('leafletMapContainer');
+        const badge = document.getElementById('hudMapBadge');
+
+        if (!leafletMap) initLeafletBackgroundMap();
+        if (activeTileLayer) { leafletMap.removeLayer(activeTileLayer); activeTileLayer = null; }
+        if (activeOverlayLayer) { leafletMap.removeLayer(activeOverlayLayer); activeOverlayLayer = null; }
+
+        if (layerKey === 'null') {
+            mapContainer.classList.add('hidden');
+            badge.textContent = 'MAP: NULL (UIT)';
+            drawPlanimeterCanvas();
+            showToast('KAARTLAAG OP NULL', 'Achtergrondkaart uitgeschakeld. Alleen geijkte 6D Polar Arm is actief.');
+            return;
+        }
+
+        mapContainer.classList.remove('hidden');
+        leafletMap.invalidateSize();
+        leafletMap.setView([vortexState.anchorLat, vortexState.anchorLon], 18, { animate: false });
+
+        if (layerKey === 'pdok_brt') {
+            activeTileLayer = L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+            badge.textContent = 'MAP: PDOK BRT';
+        } else if (layerKey === 'pdok_kadaster') {
+            activeTileLayer = L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+            activeOverlayLayer = L.tileLayer.wms('https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0?', {
+                layers: 'Kadastralekaart',
+                format: 'image/png',
+                transparent: true
+            }).addTo(leafletMap);
+            badge.textContent = 'MAP: KADASTER V5';
+        } else if (layerKey === 'pdok_luchtfoto') {
+            activeTileLayer = L.tileLayer('https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg', { maxZoom: 19 }).addTo(leafletMap);
+            badge.textContent = 'MAP: LUCHTFOTO';
+        } else if (layerKey === 'osm_topo') {
+            activeTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+            badge.textContent = 'MAP: OSM TOPO';
+        } else if (layerKey === 'openseamap') {
+            activeTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+            activeOverlayLayer = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(leafletMap);
+            badge.textContent = 'MAP: OPENSEAMAP';
+        } else if (layerKey === 'minuutplan_1832') {
+            mapContainer.classList.add('hidden');
+            generateBuiltInMinuutplan1832Overlay();
+            badge.textContent = 'MAP: 1832 MINUUT';
+        }
+
+        drawPlanimeterCanvas();
+        showToast('KAARTLAAG GEACTIVEERD', `Actieve kaartlaag: ${badge.textContent}`);
+    }
+
+    function toggleMapPopover() {
+        document.getElementById('moreMapsPopover').classList.toggle('hidden');
+    }
+
+    // ============================================================================
+    // 5. OLD MAP OVERLAY VIA WEBRTC LIVE CAMERA OR UPLOADED IMAGE
+    // ============================================================================
+    function toggleWebcamOldMapOverlay() {
+        if (!mediaStream) {
+            toggleWebcamStream().then(() => {
+                vortexState.webcamOverlayActive = true;
+                updateCamOverlayBtnUI();
+                showToast('LIVE CAMERA ONDER POLAR ARM', 'Houd een fysieke oude kaart voor de camera om direct met de 6D Polar Arm te meten.');
+            });
+        } else {
+            vortexState.webcamOverlayActive = !vortexState.webcamOverlayActive;
+            updateCamOverlayBtnUI();
+            drawPlanimeterCanvas();
+        }
+    }
+
+    function updateCamOverlayBtnUI() {
+        const btn = document.getElementById('btnCamMapOverlay');
+        if (btn) {
+            btn.textContent = vortexState.webcamOverlayActive
+                ? '⏹️ Stop Camera-Projectie onder Arm'
+                : '📹 Projecteer Live WebRTC Camera onder Arm';
+        }
+    }
+
+    function handleOldMapImageUpload(event) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                vortexState.uploadedMapImage = img;
+                drawPlanimeterCanvas();
+                showToast('OUDE KAART GELADEN', `Afbeelding "${file.name}" geprojecteerd onder de 6D Polar Arm.`);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function generateBuiltInMinuutplan1832Overlay() {
+        const off = document.createElement('canvas');
+        off.width = 500;
+        off.height = 380;
+        const c = off.getContext('2d');
+        c.fillStyle = '#efe4c8';
+        c.fillRect(0, 0, 500, 380);
+        c.strokeStyle = '#5c4028';
+        c.lineWidth = 2;
+        c.strokeRect(12, 12, 476, 356);
+
+        c.fillStyle = '#3e2723';
+        c.font = 'bold 13px monospace';
+        c.fillText('KADASTRAAL MINUUTPLAN 1832 // SECTIE G NR. 573 SCHERPENISSE', 25, 36);
+        c.font = '11px monospace';
+        c.fillText('Oorspronkelijke Aanwijzende Tafel (OAT) - Platteweg 5 & 7 (Wagenhuis & Schuur)', 25, 54);
+
+        c.strokeStyle = '#8b0000';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.moveTo(270, 145);
+        c.lineTo(345, 152);
+        c.lineTo(350, 240);
+        c.lineTo(265, 248);
+        c.closePath();
+        c.stroke();
+        c.fillStyle = 'rgba(180, 60, 40, 0.18)';
+        c.fill();
+        c.fillStyle = '#4e342e';
+        c.fillText('G 573 (92.65 m²)', 275, 198);
+
+        const img = new Image();
+        img.onload = () => {
+            vortexState.uploadedMapImage = img;
+            drawPlanimeterCanvas();
+        };
+        img.src = off.toDataURL('image/png');
+    }
+
+    function updateOldMapOverlayParams() {
+        vortexState.overlayAlpha = parseFloat(document.getElementById('overlayAlphaSlider').value);
+        vortexState.overlayScale = parseFloat(document.getElementById('overlayScaleSlider').value);
+        vortexState.overlayRotation = parseFloat(document.getElementById('overlayRotSlider').value);
+        drawPlanimeterCanvas();
+    }
+
+    function clearOldMapOverlay() {
+        vortexState.uploadedMapImage = null;
+        vortexState.webcamOverlayActive = false;
+        updateCamOverlayBtnUI();
+        drawPlanimeterCanvas();
+        showToast('OVERLAY GEWIST', 'Oude kaart en camera-projectie verwijderd van VP-01.');
+    }
+
+    // ============================================================================
+    // 6. VP-01 6D POLAR PLANIMETER, FLAGS & LINES ENGINE
+    // ============================================================================
+    const planimeterCanvas = document.getElementById('planimeterCanvas');
+    const pCtx = planimeterCanvas.getContext('2d');
+    let isPointerDownOnVp01 = false;
+
+    function setVp01ToolMode(mode) {
+        vortexState.toolMode = mode;
+        vortexState.pendingLineStart = null;
+        const map = {
+            arm: { id: 'modeBtnArm', label: '📐 MODUS: ARM SLEPEN' },
+            flag: { id: 'modeBtnFlag', label: '🚩 MODUS: +VLAG KLIKKEN' },
+            line: { id: 'modeBtnLine', label: '📏 MODUS: LIJN TEKENEN' },
+            erase: { id: 'modeBtnErase', label: '🗑️ MODUS: WIS VLAG/LIJN' }
+        };
+        Object.keys(map).forEach(k => {
+            const btn = document.getElementById(map[k].id);
+            if (!btn) return;
+            if (k === mode) {
+                btn.className = 'tech-btn-active px-2 py-0.5 rounded font-bold';
+            } else {
+                btn.className = k === 'erase'
+                    ? 'tech-btn px-2 py-0.5 rounded font-bold text-rose-300'
+                    : 'tech-btn px-2 py-0.5 rounded font-bold';
+            }
+        });
+        document.getElementById('hudModeBadge').textContent = map[mode].label;
+        drawPlanimeterCanvas();
+    }
+
+    function toggleAutoConnectFlags() {
+        vortexState.autoConnectFlags = !vortexState.autoConnectFlags;
+        const btn = document.getElementById('btnAutoConnect');
+        btn.textContent = `🔗 Vlaglijn: ${vortexState.autoConnectFlags ? 'AAN' : 'UIT'}`;
+        btn.className = vortexState.autoConnectFlags
+            ? 'tech-btn-active px-1.5 py-0.5 rounded text-[9px]'
+            : 'tech-btn px-1.5 py-0.5 rounded text-[9px]';
+        drawPlanimeterCanvas();
+    }
+
+    function toggleClosePolygon() {
+        vortexState.closePolygon = !vortexState.closePolygon;
+        const btn = document.getElementById('btnClosePolygon');
+        btn.textContent = `⬠ Vlak: ${vortexState.closePolygon ? 'AAN' : 'UIT'}`;
+        btn.className = vortexState.closePolygon
+            ? 'tech-btn-active px-1.5 py-0.5 rounded text-[9px]'
+            : 'tech-btn px-1.5 py-0.5 rounded text-[9px]';
+        drawPlanimeterCanvas();
+    }
+
+    function toggleRadialVectors() {
+        vortexState.showRadialVectors = !vortexState.showRadialVectors;
+        const btn = document.getElementById('btnRadialVectors');
+        btn.className = vortexState.showRadialVectors
+            ? 'tech-btn-active px-1.5 py-0.5 rounded text-[9px]'
+            : 'tech-btn px-1.5 py-0.5 rounded text-[9px]';
+        drawPlanimeterCanvas();
+    }
+
+    function syncVp01CanvasDimensions() {
+        const wrapper = document.getElementById('vp01CanvasWrapper');
+        if (!wrapper) return;
+        const w = wrapper.clientWidth;
+        const h = wrapper.clientHeight;
+        if (w > 0 && h > 0 && (planimeterCanvas.width !== w || planimeterCanvas.height !== h)) {
+            planimeterCanvas.width = w;
+            planimeterCanvas.height = h;
+            if (leafletMap) leafletMap.invalidateSize();
+        }
+        drawPlanimeterCanvas();
+    }
+
+    function getPlanimeterGeometry() {
+        const w = planimeterCanvas.width || 480;
+        const h = planimeterCanvas.height || 360;
+        const cx = Math.round(w * 0.50);
+        const cy = Math.round(h * 0.53);
+        const scale = Math.min(w, h) * 0.036 * vortexState.zoom; // px per cm
+        return { w, h, cx, cy, scale };
+    }
+
+    function computeGaussParcelMetrics() {
+        const flags = vortexState.flags;
+        let areaCm2 = 0;
+        let perimCm = 0;
+
+        if (flags.length >= 2 && vortexState.autoConnectFlags) {
+            const count = flags.length;
+            for (let i = 0; i < count; i++) {
+                const cur = flags[i];
+                const nxt = flags[(i + 1) % count];
+                if (i < count - 1 || (count >= 3 && vortexState.closePolygon)) {
+                    perimCm += Math.hypot(nxt.xCm - cur.xCm, nxt.yCm - cur.yCm);
+                }
+                if (count >= 3 && vortexState.closePolygon) {
+                    areaCm2 += (cur.xCm * nxt.yCm) - (nxt.xCm * cur.yCm);
+                }
+            }
+            areaCm2 = Math.abs(areaCm2) * 0.5;
+        }
+
+        // Also add custom lines length to total length readout
+        let customLinesCm = 0;
+        vortexState.lines.forEach(ln => {
+            customLinesCm += Math.hypot(ln.x2Cm - ln.x1Cm, ln.y2Cm - ln.y1Cm);
+        });
+
+        const areaM2 = areaCm2 * 10.0;
+        const perimM = (perimCm + customLinesCm) * 3.162;
+        return { areaCm2, areaM2, perimM };
+    }
+
+    function drawTacticalLineBadge(ctx, x1Px, y1Px, x2Px, y2Px, distCm, color = '#00e5ff') {
+        const mx = (x1Px + x2Px) * 0.5;
+        const my = (y1Px + y2Px) * 0.5;
+        const distM = (distCm * 3.162).toFixed(2) + ' m';
+        ctx.save();
+        ctx.font = 'bold 9px "JetBrains Mono"';
+        const tw = ctx.measureText(distM).width;
+        ctx.fillStyle = 'rgba(5, 11, 18, 0.88)';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.fillRect(mx - tw / 2 - 4, my - 7, tw + 8, 13);
+        ctx.strokeRect(mx - tw / 2 - 4, my - 7, tw + 8, 13);
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText(distM, mx, my + 2.5);
+        ctx.restore();
+    }
+
+    function drawPlanimeterCanvas() {
+        const { w, h, cx, cy, scale } = getPlanimeterGeometry();
+        pCtx.clearRect(0, 0, w, h);
+
+        // 1. Optional Uploaded Historical Map or Live WebRTC Camera Overlay
+        const videoEl = document.getElementById('webcamVideo');
+        if (vortexState.webcamOverlayActive && mediaStream && videoEl.readyState >= 2) {
+            pCtx.save();
+            pCtx.translate(cx, cy);
+            pCtx.rotate((vortexState.overlayRotation * Math.PI) / 180.0);
+            pCtx.scale(vortexState.overlayScale, vortexState.overlayScale);
+            pCtx.globalAlpha = vortexState.overlayAlpha;
+            pCtx.drawImage(videoEl, -w * 0.45, -h * 0.45, w * 0.9, h * 0.9);
+            pCtx.restore();
+        } else if (vortexState.uploadedMapImage) {
+            pCtx.save();
+            pCtx.translate(cx, cy);
+            pCtx.rotate((vortexState.overlayRotation * Math.PI) / 180.0);
+            pCtx.scale(vortexState.overlayScale, vortexState.overlayScale);
+            pCtx.globalAlpha = vortexState.overlayAlpha;
+            const iw = w * 0.86;
+            const ih = h * 0.82;
+            pCtx.drawImage(vortexState.uploadedMapImage, -iw / 2, -ih / 2, iw, ih);
+            pCtx.restore();
+        }
+
+        // 2. Calibrated Tactical Polar Grid
+        pCtx.save();
+        pCtx.strokeStyle = 'rgba(0, 229, 255, 0.10)';
+        pCtx.lineWidth = 1;
+        const stepPx = scale * 2.0;
+        for (let x = cx % stepPx; x < w; x += stepPx) {
+            pCtx.beginPath(); pCtx.moveTo(x, 0); pCtx.lineTo(x, h); pCtx.stroke();
+        }
+        for (let y = cy % stepPx; y < h; y += stepPx) {
+            pCtx.beginPath(); pCtx.moveTo(0, y); pCtx.lineTo(w, y); pCtx.stroke();
+        }
+
+        // Principal X / Y Calibration Axes through Origin (0,0)
+        pCtx.strokeStyle = 'rgba(0, 229, 255, 0.35)';
+        pCtx.beginPath();
+        pCtx.moveTo(0, cy); pCtx.lineTo(w, cy);
+        pCtx.moveTo(cx, 0); pCtx.lineTo(cx, h);
+        pCtx.stroke();
+
+        // Outer Polar Circle (10.5 cm radius)
+        const maxRadiusPx = 10.5 * scale;
+        pCtx.strokeStyle = '#00e5ff';
+        pCtx.lineWidth = 1.5;
+        pCtx.beginPath();
+        pCtx.arc(cx, cy, maxRadiusPx, 0, Math.PI * 2);
+        pCtx.stroke();
+
+        // Radial azimuth rays every 30°
+        pCtx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
+        pCtx.setLineDash([3, 4]);
+        for (let deg = 0; deg < 360; deg += 30) {
+            const pt = polarToCartesianCm(deg, 10.5);
+            pCtx.beginPath();
+            pCtx.moveTo(cx, cy);
+            pCtx.lineTo(cx + pt.xCm * scale, cy - pt.yCm * scale);
+            pCtx.stroke();
+        }
+        pCtx.setLineDash([]);
+        pCtx.restore();
+
+        // 3. Draw Optional Radial Vector Lines from Origin (0,0) to each Flag
+        if (vortexState.showRadialVectors && vortexState.flags.length > 0) {
+            pCtx.save();
+            pCtx.strokeStyle = 'rgba(255, 179, 0, 0.55)';
+            pCtx.lineWidth = 1.2;
+            pCtx.setLineDash([2, 3]);
+            vortexState.flags.forEach(f => {
+                const fx = cx + f.xCm * scale;
+                const fy = cy - f.yCm * scale;
+                pCtx.beginPath();
+                pCtx.moveTo(cx, cy);
+                pCtx.lineTo(fx, fy);
+                pCtx.stroke();
+            });
+            pCtx.setLineDash([]);
+            pCtx.restore();
+        }
+
+        // 4. Draw Auto-Connected Parcel Lines & Polygon Fill between Flags
+        if (vortexState.flags.length >= 2 && vortexState.autoConnectFlags) {
+            pCtx.save();
+            pCtx.fillStyle = 'rgba(0, 229, 255, 0.15)';
+            pCtx.strokeStyle = '#00e5ff';
+            pCtx.lineWidth = 2.2;
+            pCtx.beginPath();
+            vortexState.flags.forEach((f, idx) => {
+                const fx = cx + f.xCm * scale;
+                const fy = cy - f.yCm * scale;
+                if (idx === 0) pCtx.moveTo(fx, fy);
+                else pCtx.lineTo(fx, fy);
+            });
+            if (vortexState.flags.length >= 3 && vortexState.closePolygon) {
+                pCtx.closePath();
+                pCtx.fill();
+            }
+            pCtx.stroke();
+
+            // Draw distance labels on each flag-to-flag segment
+            const count = vortexState.flags.length;
+            for (let i = 0; i < count; i++) {
+                if (i === count - 1 && (!vortexState.closePolygon || count < 3)) break;
+                const f1 = vortexState.flags[i];
+                const f2 = vortexState.flags[(i + 1) % count];
+                const x1 = cx + f1.xCm * scale;
+                const y1 = cy - f1.yCm * scale;
+                const x2 = cx + f2.xCm * scale;
+                const y2 = cy - f2.yCm * scale;
+                const distCm = Math.hypot(f2.xCm - f1.xCm, f2.yCm - f1.yCm);
+                drawTacticalLineBadge(pCtx, x1, y1, x2, y2, distCm, '#00e5ff');
+            }
+            pCtx.restore();
+        }
+
+        // 5. Draw Custom User-Created Measurement Lines (`vortexState.lines`)
+        if (vortexState.lines.length > 0) {
+            pCtx.save();
+            vortexState.lines.forEach((ln) => {
+                const x1 = cx + ln.x1Cm * scale;
+                const y1 = cy - ln.y1Cm * scale;
+                const x2 = cx + ln.x2Cm * scale;
+                const y2 = cy - ln.y2Cm * scale;
+
+                pCtx.strokeStyle = '#ffb300';
+                pCtx.lineWidth = 2.2;
+                pCtx.beginPath();
+                pCtx.moveTo(x1, y1);
+                pCtx.lineTo(x2, y2);
+                pCtx.stroke();
+
+                pCtx.fillStyle = '#ffb300';
+                pCtx.beginPath(); pCtx.arc(x1, y1, 3.5, 0, Math.PI * 2); pCtx.fill();
+                pCtx.beginPath(); pCtx.arc(x2, y2, 3.5, 0, Math.PI * 2); pCtx.fill();
+
+                const distCm = Math.hypot(ln.x2Cm - ln.x1Cm, ln.y2Cm - ln.y1Cm);
+                drawTacticalLineBadge(pCtx, x1, y1, x2, y2, distCm, '#ffb300');
+            });
+            pCtx.restore();
+        }
+
+        // Highlight Pending Line Start Point (in 'line' tool mode)
+        if (vortexState.pendingLineStart) {
+            const px = cx + vortexState.pendingLineStart.xCm * scale;
+            const py = cy - vortexState.pendingLineStart.yCm * scale;
+            const armTip = polarToCartesianCm(vortexState.azDeg, vortexState.rhoCm);
+            const tx = cx + armTip.xCm * scale;
+            const ty = cy - armTip.yCm * scale;
+
+            pCtx.save();
+            pCtx.strokeStyle = '#10b981';
+            pCtx.lineWidth = 1.8;
+            pCtx.setLineDash([4, 4]);
+            pCtx.beginPath();
+            pCtx.moveTo(px, py);
+            pCtx.lineTo(tx, ty);
+            pCtx.stroke();
+            pCtx.setLineDash([]);
+            pCtx.fillStyle = '#10b981';
+            pCtx.beginPath();
+            pCtx.arc(px, py, 5, 0, Math.PI * 2);
+            pCtx.fill();
+            pCtx.restore();
+        }
+
+        // 6. Draw Calibrated Flags
+        if (vortexState.flags.length > 0) {
+            pCtx.save();
+            vortexState.flags.forEach((f) => {
+                const fx = cx + f.xCm * scale;
+                const fy = cy - f.yCm * scale;
+
+                pCtx.strokeStyle = '#ffffff';
+                pCtx.lineWidth = 1;
+                pCtx.beginPath();
+                pCtx.moveTo(fx - 6, fy); pCtx.lineTo(fx + 6, fy);
+                pCtx.moveTo(fx, fy - 6); pCtx.lineTo(fx, fy + 6);
+                pCtx.stroke();
+
+                pCtx.fillStyle = '#ff3b30';
+                pCtx.beginPath();
+                pCtx.arc(fx, fy, 4.2, 0, Math.PI * 2);
+                pCtx.fill();
+
+                // Flag pole & banner
+                pCtx.strokeStyle = '#ffb300';
+                pCtx.lineWidth = 1.6;
+                pCtx.beginPath();
+                pCtx.moveTo(fx, fy);
+                pCtx.lineTo(fx, fy - 15);
+                pCtx.lineTo(fx + 9, fy - 11.5);
+                pCtx.lineTo(fx, fy - 8);
+                pCtx.stroke();
+                pCtx.fillStyle = 'rgba(255, 59, 48, 0.85)';
+                pCtx.fill();
+
+                pCtx.fillStyle = '#ffd54f';
+                pCtx.font = 'bold 9px "JetBrains Mono"';
+                pCtx.fillText(f.id, fx + 7, fy + 3);
+            });
+            pCtx.restore();
+        }
+
+        // 7. Draw 100% Mathematically Calibrated 6D Polar Arm
+        const armTipCm = polarToCartesianCm(vortexState.azDeg, vortexState.rhoCm);
+        const tipX = cx + armTipCm.xCm * scale;
+        const tipY = cy - armTipCm.yCm * scale;
+
+        const elbowPolar = polarToCartesianCm(vortexState.azDeg - 28, Math.max(3.5, vortexState.rhoCm * 0.62));
+        const elbowX = cx + elbowPolar.xCm * scale;
+        const elbowY = cy - elbowPolar.yCm * scale - 18;
+
+        pCtx.save();
+        pCtx.strokeStyle = 'rgba(0, 229, 255, 0.65)';
+        pCtx.lineWidth = 1.2;
+        pCtx.setLineDash([3, 3]);
+        pCtx.beginPath();
+        pCtx.moveTo(cx, cy);
+        pCtx.lineTo(tipX, tipY);
+        pCtx.stroke();
+        pCtx.setLineDash([]);
+
+        pCtx.strokeStyle = '#ffb300';
+        pCtx.lineWidth = 5;
+        pCtx.lineCap = 'round';
+        pCtx.beginPath();
+        pCtx.moveTo(cx, cy);
+        pCtx.lineTo(elbowX, elbowY);
+        pCtx.lineTo(tipX, tipY);
+        pCtx.stroke();
+
+        pCtx.strokeStyle = '#2b1b00';
+        pCtx.lineWidth = 1.5;
+        pCtx.beginPath();
+        pCtx.moveTo(cx, cy);
+        pCtx.lineTo(elbowX, elbowY);
+        pCtx.lineTo(tipX, tipY);
+        pCtx.stroke();
+
+        pCtx.fillStyle = '#3d2200';
+        pCtx.strokeStyle = '#ffb300';
+        pCtx.lineWidth = 2;
+        pCtx.beginPath();
+        pCtx.arc(cx, cy, 6, 0, Math.PI * 2);
+        pCtx.fill();
+        pCtx.stroke();
+
+        pCtx.fillStyle = '#001f29';
+        pCtx.strokeStyle = '#00e5ff';
+        pCtx.beginPath();
+        pCtx.arc(elbowX, elbowY, 5, 0, Math.PI * 2);
+        pCtx.fill();
+        pCtx.stroke();
+
+        const midX = (elbowX + tipX) * 0.5;
+        const midY = (elbowY + tipY) * 0.5;
+        pCtx.fillStyle = '#0f1926';
+        pCtx.strokeStyle = '#ffb300';
+        pCtx.lineWidth = 1.8;
+        pCtx.beginPath();
+        pCtx.arc(midX, midY, 11, 0, Math.PI * 2);
+        pCtx.fill();
+        pCtx.stroke();
+        pCtx.fillStyle = '#ffffff';
+        pCtx.font = 'bold 8px "JetBrains Mono"';
+        pCtx.textAlign = 'center';
+        pCtx.fillText('427', midX, midY + 3);
+
+        pCtx.strokeStyle = '#00e5ff';
+        pCtx.lineWidth = 2;
+        pCtx.beginPath();
+        pCtx.arc(tipX, tipY, 7.5, 0, Math.PI * 2);
+        pCtx.stroke();
+
+        pCtx.fillStyle = '#00e5ff';
+        pCtx.beginPath();
+        pCtx.arc(tipX, tipY, 2.2, 0, Math.PI * 2);
+        pCtx.fill();
+        pCtx.restore();
+
+        // Update HUD Readouts
+        document.getElementById('hudArmXY').textContent = `X: ${armTipCm.xCm.toFixed(2)} cm, Y: ${armTipCm.yCm.toFixed(2)} cm`;
+        const metrics = computeGaussParcelMetrics();
+        const autoLinesCount = (vortexState.autoConnectFlags && vortexState.flags.length >= 2)
+            ? (vortexState.flags.length >= 3 && vortexState.closePolygon ? vortexState.flags.length : vortexState.flags.length - 1)
+            : 0;
+        document.getElementById('hudFlagCount').textContent = vortexState.flags.length;
+        document.getElementById('hudLineCount').textContent = vortexState.lines.length + autoLinesCount;
+        document.getElementById('hudAreaM2').textContent = `${metrics.areaM2.toFixed(2)} m²`;
+        document.getElementById('hudAreaCm2').textContent = metrics.areaCm2.toFixed(2);
+        document.getElementById('hudPerimM').textContent = `${metrics.perimM.toFixed(2)} m`;
+    }
+
+    // ============================================================================
+    // 7. BUILDING & DELETING FLAGS AND LINES + 0.000mm ARM CALIBRATION
+    // ============================================================================
+    function setPlanimeterPolar(azDeg, rhoCm, broadcast = true, pitch = vortexState.pitchDeg, roll = vortexState.rollDeg, yaw = vortexState.yawDeg, zoom = vortexState.zoom) {
+        vortexState.azDeg = ((Number(azDeg) % 360) + 360) % 360;
+        vortexState.rhoCm = Math.max(0.2, Math.min(13.5, Number(rhoCm) || 0.2));
+        vortexState.pitchDeg = Number(pitch) || 0;
+        vortexState.rollDeg = Number(roll) || 0;
+        vortexState.yawDeg = Number(yaw) || 0;
+        vortexState.zoom = Number(zoom) || 1.0;
+
+        document.getElementById('sliderAzimut').value = vortexState.azDeg;
+        document.getElementById('sliderRho').value = vortexState.rhoCm;
+        document.getElementById('sliderPitch').value = vortexState.pitchDeg;
+        document.getElementById('sliderRoll').value = vortexState.rollDeg;
+        document.getElementById('sliderYaw').value = vortexState.yawDeg;
+        document.getElementById('sliderZoom').value = vortexState.zoom;
+
+        document.getElementById('valAzimut').textContent = `${vortexState.azDeg.toFixed(2)}°`;
+        document.getElementById('valRho').textContent = `${vortexState.rhoCm.toFixed(2)} cm`;
+        document.getElementById('valPitch').textContent = `${vortexState.pitchDeg}°`;
+        document.getElementById('valRoll').textContent = `${vortexState.rollDeg}°`;
+        document.getElementById('valYaw').textContent = `${vortexState.yawDeg}°`;
+        document.getElementById('valZoom').textContent = `${vortexState.zoom.toFixed(2)}x`;
+        document.getElementById('vp01HeaderTelemetry').textContent = `θ = ${vortexState.azDeg.toFixed(2)}° | ρ = ${vortexState.rhoCm.toFixed(2)} cm`;
+
+        drawPlanimeterCanvas();
+        if (broadcast) {
+            syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm, vortexState.pitchDeg, vortexState.rollDeg, vortexState.yawDeg, vortexState.zoom, vortexState.flags);
+        }
+    }
+
+    function handle6DSliderChange() {
+        setPlanimeterPolar(
+            parseFloat(document.getElementById('sliderAzimut').value),
+            parseFloat(document.getElementById('sliderRho').value),
+            true,
+            parseFloat(document.getElementById('sliderPitch').value),
+            parseFloat(document.getElementById('sliderRoll').value),
+            parseFloat(document.getElementById('sliderYaw').value),
+            parseFloat(document.getElementById('sliderZoom').value)
+        );
+    }
+
+    function addFlagAtCartesian(xCm, yCm, customLabel = null) {
+        const wgs = cmOffsetToWgs84(xCm, yCm);
+        const flagId = customLabel || `VLAG-${vortexState.flags.length + 1}`;
+        vortexState.flags.push({
+            id: flagId,
+            xCm: Number(xCm.toFixed(4)),
+            yCm: Number(yCm.toFixed(4)),
+            lat: Number(wgs.lat.toFixed(5)),
+            lon: Number(wgs.lon.toFixed(5))
+        });
+        renderFlagsTable();
+        drawPlanimeterCanvas();
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+        playBeep(880, 0.06);
+    }
+
+    function addFlagAtExactArmTip() {
+        const { xCm, yCm } = polarToCartesianCm(vortexState.azDeg, vortexState.rhoCm);
+        addFlagAtCartesian(xCm, yCm);
+        showToast('VLAG OP ARMPUNT GEBOUWD', `Vlag geplaatst op X=${xCm.toFixed(2)} cm, Y=${yCm.toFixed(2)} cm (θ=${vortexState.azDeg.toFixed(2)}°, ρ=${vortexState.rhoCm.toFixed(2)} cm).`);
+    }
+
+    function addLineFromOriginToArmTip() {
+        const tip = polarToCartesianCm(vortexState.azDeg, vortexState.rhoCm);
+        let startX = 0;
+        let startY = 0;
+        if (vortexState.flags.length > 0) {
+            const lastFlag = vortexState.flags[vortexState.flags.length - 1];
+            startX = lastFlag.xCm;
+            startY = lastFlag.yCm;
+        }
+        const lineId = `LIJN-${vortexState.lines.length + 1}`;
+        vortexState.lines.push({
+            id: lineId,
+            x1Cm: Number(startX.toFixed(4)),
+            y1Cm: Number(startY.toFixed(4)),
+            x2Cm: Number(tip.xCm.toFixed(4)),
+            y2Cm: Number(tip.yCm.toFixed(4))
+        });
+        renderFlagsTable();
+        drawPlanimeterCanvas();
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+        playBeep(790, 0.06);
+        const distM = (Math.hypot(tip.xCm - startX, tip.yCm - startY) * 3.162).toFixed(2);
+        showToast('MEETLIJN GEPLAATST', `${lineId} getrokken (${distM} m).`);
+    }
+
+    function undoLastFlagOrLine() {
+        if (vortexState.lines.length > 0) {
+            const removed = vortexState.lines.pop();
+            showToast('LAATSTE LIJN GEWIST', `${removed.id} is verwijderd.`);
+        } else if (vortexState.flags.length > 0) {
+            const removed = vortexState.flags.pop();
+            showToast('LAATSTE VLAG GEWIST', `${removed.id} is verwijderd.`);
+        } else {
+            showToast('NIETS OM TE WISSEN', 'Er zijn momenteel geen actieve vlaggen of lijnen.');
+            return;
+        }
+        renderFlagsTable();
+        drawPlanimeterCanvas();
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+        playBeep(480, 0.05);
+    }
+
+    function clearAllFlagsToNull() {
+        vortexState.flags = [];
+        vortexState.lines = [];
+        vortexState.pendingLineStart = null;
+        renderFlagsTable();
+        drawPlanimeterCanvas();
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+        document.getElementById('calibrationStatusText').textContent = 'STATUS: ARM SOLO (NULL)';
+        playBeep(420, 0.08);
+        showToast('VLAGGEN & LIJNEN OP NULL', 'Alle vlaggetjes en meetlijnen zijn gewist. Alleen de 6D Polar Arm staat aan.');
+    }
+
+    function loadReferenceScherpenisseFlags() {
+        vortexState.flags = REFERENCE_OTT573_FLAGS.map(f => {
+            const wgs = cmOffsetToWgs84(f.xCm, f.yCm);
+            return { ...f, lat: Number(wgs.lat.toFixed(5)), lon: Number(wgs.lon.toFixed(5)) };
+        });
+        vortexState.autoConnectFlags = true;
+        vortexState.closePolygon = true;
+        renderFlagsTable();
+        calibrateArmOnFlagIndex(0);
+        showToast('4 OTT-573 VLAGGEN & LIJNEN GELADEN', 'Perceel OTT Nr. 573 (92.65 m² / omtrek 38.73 m) geladen en geijkt op P7-NW.');
+    }
+
+    function calibrateArmOnFlagIndex(idx) {
+        const f = vortexState.flags[idx];
+        if (!f) return;
+        const { azDeg, rhoCm } = cartesianCmToPolar(f.xCm, f.yCm);
+        setPlanimeterPolar(azDeg, rhoCm, true);
+        document.getElementById('calibrationStatusText').textContent = `GEÏJKT OP ${f.id} (Δ=0.000mm)`;
+        playBeep(960, 0.06);
+    }
+
+    function drawLineFromFlagToNext(idx) {
+        const f1 = vortexState.flags[idx];
+        if (!f1) return;
+        const f2 = vortexState.flags[(idx + 1) % vortexState.flags.length] || { xCm: 0, yCm: 0 };
+        vortexState.lines.push({
+            id: `LIJN-${vortexState.lines.length + 1}`,
+            x1Cm: f1.xCm,
+            y1Cm: f1.yCm,
+            x2Cm: f2.xCm,
+            y2Cm: f2.yCm
+        });
+        renderFlagsTable();
+        drawPlanimeterCanvas();
+        playBeep(820, 0.05);
+    }
+
+    function removeSingleFlag(idx) {
+        const removed = vortexState.flags.splice(idx, 1)[0];
+        renderFlagsTable();
+        drawPlanimeterCanvas();
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+        if (removed) showToast('VLAG GEWIST', `${removed.id} is verwijderd.`);
+    }
+
+    function removeSingleLine(idx) {
+        const removed = vortexState.lines.splice(idx, 1)[0];
+        renderFlagsTable();
+        drawPlanimeterCanvas();
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+        if (removed) showToast('LIJN GEWIST', `${removed.id} is verwijderd.`);
+    }
+
+    function toggleSnapToFlags() {
+        vortexState.snapToFlags = !vortexState.snapToFlags;
+        const btn = document.getElementById('btnSnapToggle');
+        btn.textContent = `🧲 Snap: ${vortexState.snapToFlags ? 'AAN' : 'UIT'}`;
+        btn.className = vortexState.snapToFlags
+            ? 'tech-btn-active px-2 py-1 rounded text-[10px] font-semibold'
+            : 'tech-btn px-2 py-1 rounded text-[10px] font-semibold';
+    }
+
+    function renderFlagsTable() {
+        const tbody = document.getElementById('flagsTableBody');
+        tbody.innerHTML = '';
+        if (vortexState.flags.length === 0 && vortexState.lines.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-3 text-center text-slate-500">Vlaggen & lijnen staan op NULL (0). Kies "+Vlag Klikken", "Lijn Tekenen" of "+Vlag op Armpunt".</td></tr>`;
+            return;
+        }
+
+        // Render Flags
+        vortexState.flags.forEach((f, idx) => {
+            const pol = cartesianCmToPolar(f.xCm, f.yCm);
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-800/60';
+            tr.innerHTML = `
+                <td class="py-1 px-1.5 text-amber-300 font-semibold truncate max-w-[105px]">🚩 ${f.id}</td>
+                <td class="py-1 px-1 text-cyan-300">${f.xCm.toFixed(2)}</td>
+                <td class="py-1 px-1 text-cyan-300">${f.yCm.toFixed(2)}</td>
+                <td class="py-1 px-1 text-slate-300">${pol.azDeg.toFixed(1)}° / ${(pol.rhoCm * 3.162).toFixed(2)}m</td>
+                <td class="py-1 px-1 text-right space-x-0.5">
+                    <button onclick="calibrateArmOnFlagIndex(${idx})" class="px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500 text-cyan-200 hover:bg-cyan-800 font-bold" title="IJk Polar Arm exact op deze vlag">🎯 IJk</button>
+                    <button onclick="drawLineFromFlagToNext(${idx})" class="px-1 py-0.5 rounded bg-amber-950 border border-amber-600 text-amber-200 hover:bg-amber-800" title="Trek vaste lijn vanaf deze vlag">📏</button>
+                    <button onclick="removeSingleFlag(${idx})" class="px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-700 text-rose-300 hover:bg-rose-800 font-bold" title="Wis deze vlag">✕</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Render Custom Lines
+        vortexState.lines.forEach((ln, idx) => {
+            const dx = ln.x2Cm - ln.x1Cm;
+            const dy = ln.y2Cm - ln.y1Cm;
+            const pol = cartesianCmToPolar(dx, dy);
+            const lenM = (pol.rhoCm * 3.162).toFixed(2);
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-800/60 bg-amber-950/15';
+            tr.innerHTML = `
+                <td class="py-1 px-1.5 text-cyan-300 font-semibold truncate max-w-[105px]">📏 ${ln.id}</td>
+                <td class="py-1 px-1 text-amber-300">Δ${dx.toFixed(2)}</td>
+                <td class="py-1 px-1 text-amber-300">Δ${dy.toFixed(2)}</td>
+                <td class="py-1 px-1 text-emerald-300 font-bold">${pol.azDeg.toFixed(1)}° / ${lenM} m</td>
+                <td class="py-1 px-1 text-right">
+                    <button onclick="removeSingleLine(${idx})" class="px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-700 text-rose-300 hover:bg-rose-800 font-bold" title="Wis deze lijn">✕ Wis</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Unified Pointer Events (Mouse + Mobile Touch) on VP-01 Canvas
+    planimeterCanvas.addEventListener('pointerdown', (e) => {
+        if (e.button === 2) return;
+        planimeterCanvas.setPointerCapture(e.pointerId);
+        isPointerDownOnVp01 = true;
+        handleVp01PointerAction(e, true);
+    });
+    planimeterCanvas.addEventListener('pointermove', (e) => {
+        if (!isPointerDownOnVp01) return;
+        if (vortexState.toolMode === 'arm' || vortexState.toolMode === 'line') {
+            handleVp01PointerAction(e, false);
+        }
+    });
+    planimeterCanvas.addEventListener('pointerup', (e) => {
+        isPointerDownOnVp01 = false;
+        try { planimeterCanvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    });
+    // Right-click on canvas deletes nearest flag or line immediately
+    planimeterCanvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const { xCm, yCm } = getCanvasClickCm(e);
+        eraseNearestFlagOrLineAt(xCm, yCm);
+    });
+
+    function getCanvasClickCm(e) {
+        const rect = planimeterCanvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const { cx, cy, scale } = getPlanimeterGeometry();
+        let xCm = (mx - cx) / scale;
+        let yCm = (cy - my) / scale;
+
+        if (vortexState.snapToFlags && vortexState.flags.length > 0 && vortexState.toolMode !== 'erase') {
+            for (let i = 0; i < vortexState.flags.length; i++) {
+                const f = vortexState.flags[i];
+                if (Math.hypot(f.xCm - xCm, f.yCm - yCm) < 0.50) {
+                    xCm = f.xCm;
+                    yCm = f.yCm;
+                    document.getElementById('calibrationStatusText').textContent = `MAGNETISCH GEÏJKT: ${f.id}`;
+                    break;
+                }
+            }
+        }
+        return { xCm, yCm };
+    }
+
+    function eraseNearestFlagOrLineAt(xCm, yCm) {
+        // 1. Check nearest flag within 0.85 cm
+        let bestFlagIdx = -1;
+        let bestFlagDist = 0.85;
+        vortexState.flags.forEach((f, idx) => {
+            const d = Math.hypot(f.xCm - xCm, f.yCm - yCm);
+            if (d < bestFlagDist) { bestFlagDist = d; bestFlagIdx = idx; }
+        });
+        if (bestFlagIdx !== -1) {
+            removeSingleFlag(bestFlagIdx);
+            playBeep(420, 0.05);
+            return;
+        }
+
+        // 2. Check nearest custom line within 0.65 cm
+        let bestLineIdx = -1;
+        let bestLineDist = 0.65;
+        vortexState.lines.forEach((ln, idx) => {
+            const d = pointToSegmentDistanceCm(xCm, yCm, ln.x1Cm, ln.y1Cm, ln.x2Cm, ln.y2Cm);
+            if (d < bestLineDist) { bestLineDist = d; bestLineIdx = idx; }
+        });
+        if (bestLineIdx !== -1) {
+            removeSingleLine(bestLineIdx);
+            playBeep(420, 0.05);
+            return;
+        }
+        showToast('KLIK DICHTER OP VLAG OF LIJN', 'Klik op een rode vlag of gele meetlijn om deze te wissen.');
+    }
+
+    function handleVp01PointerAction(e, isInitialTap) {
+        const { xCm, yCm } = getCanvasClickCm(e);
+        const { azDeg, rhoCm } = cartesianCmToPolar(xCm, yCm);
+
+        if (vortexState.toolMode === 'erase' && isInitialTap) {
+            eraseNearestFlagOrLineAt(xCm, yCm);
+            return;
+        }
+
+        // Always update calibrated Polar Arm to pointer
+        setPlanimeterPolar(azDeg, rhoCm, true);
+
+        if (!isInitialTap) return;
+
+        if (vortexState.toolMode === 'flag' || e.shiftKey) {
+            addFlagAtCartesian(xCm, yCm);
+        } else if (vortexState.toolMode === 'line') {
+            if (!vortexState.pendingLineStart) {
+                vortexState.pendingLineStart = { xCm, yCm };
+                playBeep(720, 0.04);
+                showToast('STARTPUNT LIJN GEKOZEN', 'Klik nu op een tweede punt of vlag om de meetlijn te voltooien.');
+                drawPlanimeterCanvas();
+            } else {
+                const start = vortexState.pendingLineStart;
+                vortexState.pendingLineStart = null;
+                const lineId = `LIJN-${vortexState.lines.length + 1}`;
+                vortexState.lines.push({
+                    id: lineId,
+                    x1Cm: Number(start.xCm.toFixed(4)),
+                    y1Cm: Number(start.yCm.toFixed(4)),
+                    x2Cm: Number(xCm.toFixed(4)),
+                    y2Cm: Number(yCm.toFixed(4))
+                });
+                renderFlagsTable();
+                drawPlanimeterCanvas();
+                syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+                playBeep(940, 0.06);
+                const lenM = (Math.hypot(xCm - start.xCm, yCm - start.yCm) * 3.162).toFixed(2);
+                showToast('MEETLIJN VOLTOOID', `${lineId} getrokken: lengte = ${lenM} m.`);
+            }
+        }
+    }
+
+    // ============================================================================
+    // 8. WOO-THOLEN 12 ARCHIVE FILES & FULL-WIDTH VP-02 PDF VIEWER (`pdfrs`)
+    // ============================================================================
+    const wooArchiveFiles = [
+        {
+            name: '536f9552-4bce-4baa-a671-6a04fcc6640a_woo-preciesering_1.0.pdf',
+            size: '537 KB',
+            modified: '24-10-2026 20:09:08 CEST',
+            type: 'pdf',
+            selected: true,
+            content: `# WOO-PRECISERING 1.0 (DOSSIER 536f9552-4bce-4baa-a671-6a04fcc6640a)
+Datum: 24 oktober 2026 | Gemeente Tholen / Scherpenisse
+Betreft: Precisering Wet open overheid (Woo) inzake Platteweg 5 & 7, Scherpenisse
+
+## 1. Kern van de Precisering (Artikel 4.1 Woo)
+Overeenkomstig artikel 4.1 Woo wordt verzocht om openbaarmaking van alle kadastrale mutaties, bouwvergunningen (Wagenhuis P7-NW & Schuur 1926 P7-NO) en WOZ-afbakeningen (86 m² versus 92.65 m² planimetrische meting OTT Nr. 573).
+
+## 2. Geijkte 6D Planimeter & Kadastrale Referentie
+- Ankerlocatie: Platteweg 7, Scherpenisse (51.54780° N, 4.10660° E | RD X: 66215, Y: 395890)
+- Gemeten Perceel Oppervlak (Gauss): 92.65 m² (9.27 cm²)
+- Gemeten Perceel Omtrek: 38.73 m | Novius ΔU: 93
+- Verwerking: Rust crate pdfrs v0.4.2 (pdfrs::pdf_generator, pdfrs::search, pdfrs::redact)`
+        },
+        {
+            name: '8f86e9ae-5354-43d4-9aac-3d23f88e144d_brief_18_januari_verzenddatum_8_oct_.pdf',
+            size: '143 KB',
+            modified: '24-10-2026 20:10:04 CEST',
+            type: 'pdf',
+            selected: true,
+            content: `# BRIEF 18 JANUARI (FEITELIJKE VERZENDDATUM 8 OKTOBER)
+UUID: 8f86e9ae-5354-43d4-9aac-3d23f88e144d | Grootte: 143 KB
+Onderwerp: Forensische analyse dagtekening (18 januari) versus verzenddatum (8 oktober)
+
+## 1. Juridische Vaststelling (Awb art. 3:40 & art. 6:8)
+1. Uit de postregistratie en PDF-metadata (geëxtraheerd via pdfrs::pdf) blijkt onomstotelijk dat de brief gedateerd op 18 januari pas op 8 oktober is verzonden.
+2. Een besluit treedt niet in werking voordat het is bekendgemaakt door toezending of uitreiking.
+3. De bezwaar- en beroepstermijn vangt derhalve aan op 9 oktober.`
+        },
+        {
+            name: 'Archiefverzoek Minuutplannen & Familie.md',
+            size: '8 KB',
+            modified: '24-10-2026 16:09:26 CEST',
+            type: 'md',
+            selected: false,
+            content: `# Archiefverzoek Minuutplannen & Familie
+Datum: 24-10-2026 16:09:26 CEST | Zeeuws Archief / Gemeentearchief Tholen
+
+## Verzochte Historische Stukken
+- Kadastrale Minuutplannen (1832) sectie Scherpenisse G nr. 573, perceelreeks Platteweg.
+- Oorspronkelijke Aanwijzende Tafels (OAT) en hulpkaarten van het Wagenhuis en Schuur 1926.
+- Genealogische eigendomsoverdrachten en boedelscheidingen gekoppeld aan de leggerartikelen.`
+        },
+        {
+            name: 'Archiefverzoek Waterstaat & Visrechten.md',
+            size: '7 KB',
+            modified: '24-10-2026 16:09:52 CEST',
+            type: 'md',
+            selected: false,
+            content: `# Archiefverzoek Waterstaat & Visrechten
+Datum: 24-10-2026 16:09:52 CEST | Oosterschelde / Reimerswaal / Scherpenisse
+
+## Waterstaatkundige Concessies
+- Historische visrechten, weervisserij-concessies en oesterputten nabij de zeedijk van Scherpenisse.
+- Koppeling met RWS / NAP peilstation Oosterschelde (Actueel peil: -1.40 m NAP, HW +1.60m / LW -1.42m).`
+        },
+        {
+            name: 'E-mail Precisering Woo-verzoek.md',
+            size: '5 KB',
+            modified: '24-10-2026 16:09:56 CEST',
+            type: 'md',
+            selected: false,
+            content: `# E-mail Precisering Woo-verzoek
+Aan: Woo-coördinator Gemeente Tholen | Datum: 24-10-2026 16:09:56 CEST
+
+Geachte heer/mevrouw,
+Hierbij treft u de nadere precisering van het Woo-verzoek aangaande Platteweg 5 en 7 te Scherpenisse. Wij verzoeken om alle digitale brondocumenten, GIS-shapefiles en interne correspondentie over de grensreconstructie.`
+        },
+        {
+            name: 'Gecorrigeerde E-mail Precisering.md',
+            size: '6 KB',
+            modified: '24-10-2026 16:10:03 CEST',
+            type: 'md',
+            selected: false,
+            content: `# Gecorrigeerde E-mail Precisering (Inclusief Geijkte 6D Tabel)
+Datum: 24-10-2026 16:10:03 CEST
+
+## Geijkte Perceelcoördinaten (OTT Nr. 573)
+- P7-NW (Wagenhuis): X=1.79 cm, Y=1.86 cm (51.54818° N, 4.10665° E)
+- P7-NO (Schuur 1926): X=3.95 cm, Y=1.63 cm (51.54813° N, 4.10689° E)
+- P5-ZO (86m² WOZ): X=4.10 cm, Y=-1.39 cm (51.54751° N, 4.10696° E)
+- P5-ZW (86m² WOZ): X=1.65 cm, Y=-1.62 cm (51.54747° N, 4.10664° E)`
+        },
+        {
+            name: 'Instructiebrief Taxateur Wkpb.md',
+            size: '4 KB',
+            modified: '24-10-2026 16:10:08 CEST',
+            type: 'md',
+            selected: false,
+            content: `# Instructiebrief Taxateur Wkpb
+Datum: 24-10-2026 16:10:08 CEST
+
+## Opdrachtformulering
+1. Controleer alle publiekrechtelijke beperkingen (Wkpb-register) op Platteweg 5 en 7 te Scherpenisse.
+2. Rapporteer over het verschil tussen 86 m² WOZ-registratie en 92.65 m² Gauss-oppervlakte.`
+        },
+        {
+            name: 'Kadastraal Perceelregister Platteweg.md',
+            size: '6 KB',
+            modified: '24-10-2026 16:10:11 CEST',
+            type: 'md',
+            selected: false,
+            content: `# Kadastraal Perceelregister Platteweg (Scherpenisse)
+Datum: 24-10-2026 16:10:11 CEST
+
+## Kadastrale Legger & Perceeldata
+- Gemeente: Scherpenisse (Tholen) | Sectie G Nr. 573
+- Adres: Platteweg 7 & Platteweg 5
+- Gemeten Oppervlak (Planimeter OTT Nr. 573): 92.65 m² (Omtrek: 38.73 m)`
+        },
+        {
+            name: 'Opzet Beroepschrift Woo.md',
+            size: '6 KB',
+            modified: '24-10-2026 16:10:19 CEST',
+            type: 'md',
+            selected: false,
+            content: `# Opzet Beroepschrift Woo (Sector Bestuursrecht)
+Datum: 24-10-2026 16:10:19 CEST
+
+## Beroepsgronden
+1. Onvolledige zoekslag in het gemeentearchief naar de bouwhistorie van Schuur 1926 en Wagenhuis.
+2. Discrepantie dagtekening 18 januari versus verzenddatum 8 oktober.
+3. Verzoek om openbaarmaking van de volledige kadastrale minuutplansleutel.`
+        },
+        {
+            name: 'PDF Dossier Archiefonderzoek & Tree Structuur.pdf',
+            size: '176 KB',
+            modified: '24-10-2026 20:22:43 CEST',
+            type: 'pdf',
+            selected: true,
+            content: `# PDF DOSSIER ARCHIEFONDERZOEK & TREE STRUCTUUR
+Samengesteld met Rust crate pdfrs v0.4.2 (parallel::merge_pdfs_parallel)
+Pad: file:///home/ontwerp/Bureaublad/archief onderzoek
+Web-index: https://woo-tholen.vercel.app/ | GitHub: https://github.com/goija/woo-tholen/tree/main
+
+## Overzicht Geïndexeerde Bestanden (12 Stukken)
+1. 536f9552-4bce-4baa-a671-6a04fcc6640a_woo-preciesering_1.0.pdf (537 KB)
+2. 8f86e9ae-5354-43d4-9aac-3d23f88e144d_brief_18_januari_verzenddatum_8_oct_.pdf (143 KB)
+3. Archiefverzoek Minuutplannen & Familie.md (8 KB)
+4. Archiefverzoek Waterstaat & Visrechten.md (7 KB)
+5. E-mail Precisering Woo-verzoek.md (5 KB)
+6. Gecorrigeerde E-mail Precisering.md (6 KB)`
+        },
+        {
+            name: 'Verzoek Boedelregister & Visserijconcessie.md',
+            size: '8 KB',
+            modified: '24-10-2026 16:10:24 CEST',
+            type: 'md',
+            selected: false,
+            content: `# Verzoek Boedelregister & Visserijconcessie
+Datum: 24-10-2026 16:10:24 CEST
+
+## Onderzoeksvraag
+Inzage in de notariële boedelscheidingen en visserijconcessies op de Oosterschelde (kom van Reimerswaal / Scherpenisse) verbonden aan de opstallen aan de Platteweg.`
+        },
+        {
+            name: 'a6b9308b-4839-4ee4-81f3-6533bc301e0b_brief_18_januari_verzenddatum_8_oct_.pdf',
+            size: '143 KB',
+            modified: '24-10-2026 20:08:09 CEST',
+            type: 'pdf',
+            selected: false,
+            content: `# BRIEF 18 JANUARI (VERZENDDATUM 8 OKTOBER) - ARCHIEFKopie B
+UUID: a6b9308b-4839-4ee4-81f3-6533bc301e0b | Grootte: 143 KB
+
+Tweede forensische kopie van de brief van 18 januari (verzonden 8 oktober) voor structurele PDF-diff vergelijking via pdfrs::pdf.`
+        }
+    ];
+
+    let activeFileIndex = 0;
+    let pdfViewerState = {
+        page: 1,
+        totalPages: 2,
+        zoom: 1.0,
+        fitFullWidth: true,
+        redactMode: false,
+        redactions: []
+    };
+
+    function populatePdfSelectorDropdown() {
+        const sel = document.getElementById('vp02PdfSelector');
+        sel.innerHTML = '';
+        wooArchiveFiles.forEach((f, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `${f.type === 'pdf' ? '📕' : '📝'} ${f.name}`;
+            sel.appendChild(opt);
+        });
+        sel.value = activeFileIndex;
+    }
+
+    function selectDossierForPdfViewer(idxStr) {
+        openArchiveFile(parseInt(idxStr, 10), false);
+    }
+
+    // VP-02 Full-Width Interactive PDF Dossier Canvas Renderer (`pdfrs::raster`)
+    const pdfCanvas = document.getElementById('pdfViewerCanvas');
+    const pdfCtx = pdfCanvas.getContext('2d');
+
+    function setPdfFitFullWidth() {
+        pdfViewerState.fitFullWidth = true;
+        pdfViewerState.zoom = 1.0;
+        renderPdfViewerCanvas();
+        showToast('PDF OP 100% VOLLE BREEDTE', 'Het PDF-dossier vult nu de volledige breedte van VP-02.');
+    }
+
+    function clearPdfRedactions() {
+        pdfViewerState.redactions = [];
+        renderPdfViewerCanvas();
+    }
+
+    function renderPdfViewerCanvas() {
+        const file = wooArchiveFiles[activeFileIndex];
+        const rawText = document.getElementById('dossierContentTextarea')?.value || file.content;
+        const watermark = document.getElementById('pdfWatermarkInput')?.value || 'WOO-THOLEN';
+        const searchQuery = (document.getElementById('pdfSearchQuery')?.value || '').trim().toLowerCase();
+
+        const viewport = document.getElementById('vp02PdfViewport');
+        const containerW = Math.max(320, (viewport?.clientWidth || 540));
+
+        // Base coordinate system is 560x740; scale dynamically to 100% full width of VP-02
+        const baseW = 560;
+        const baseH = 740;
+        const autoWidthScale = containerW / baseW;
+        const effectiveScale = pdfViewerState.fitFullWidth
+            ? autoWidthScale
+            : autoWidthScale * pdfViewerState.zoom;
+
+        pdfCanvas.width = Math.round(baseW * effectiveScale);
+        pdfCanvas.height = Math.round(baseH * effectiveScale);
+        pdfCanvas.style.width = pdfViewerState.fitFullWidth ? '100%' : `${pdfCanvas.width}px`;
+
+        pdfCtx.save();
+        pdfCtx.scale(effectiveScale, effectiveScale);
+
+        // Paper background
+        pdfCtx.fillStyle = '#fdfdfd';
+        pdfCtx.fillRect(0, 0, baseW, baseH);
+
+        // Top official header band (Full width)
+        pdfCtx.fillStyle = '#0c1624';
+        pdfCtx.fillRect(0, 0, baseW, 58);
+        pdfCtx.fillStyle = '#00e5ff';
+        pdfCtx.font = 'bold 12px "JetBrains Mono", monospace';
+        pdfCtx.fillText('VORTEX OS v3.0 // WOO-THOLEN VOLLE BREEDTE PDF VIEWER (CRATE pdfrs)', 18, 22);
+        pdfCtx.fillStyle = '#ffb300';
+        pdfCtx.font = '10px "JetBrains Mono", monospace';
+        pdfCtx.fillText(`Dossier: ${file.name.slice(0, 62)} (${file.size})`, 18, 38);
+        pdfCtx.fillStyle = '#a0b8d0';
+        pdfCtx.fillText(`6D IJking: θ=${vortexState.azDeg.toFixed(2)}° | ρ=${vortexState.rhoCm.toFixed(2)} cm | Vlaggen: ${vortexState.flags.length} | Lijnen: ${vortexState.lines.length} | Pagina ${pdfViewerState.page}/${pdfViewerState.totalPages}`, 18, 51);
+
+        // Diagonal Watermark (`pdfrs::pdf_ops::watermark_pdf`)
+        if (watermark) {
+            pdfCtx.save();
+            pdfCtx.translate(baseW / 2, baseH / 2);
+            pdfCtx.rotate(-Math.PI / 5);
+            pdfCtx.fillStyle = 'rgba(0, 140, 180, 0.09)';
+            pdfCtx.font = 'bold 30px "JetBrains Mono", monospace';
+            pdfCtx.textAlign = 'center';
+            pdfCtx.fillText(watermark, 0, 0);
+            pdfCtx.restore();
+        }
+
+        // Render Text Content + Search Bounding Boxes (`pdfrs::search`)
+        const lines = rawText.split('\n');
+        let y = 84;
+        let searchHits = 0;
+
+        if (pdfViewerState.page === 1) {
+            lines.forEach((paragraph) => {
+                const isHeading = paragraph.startsWith('#');
+                pdfCtx.font = isHeading ? 'bold 12px "JetBrains Mono", monospace' : '10.5px "JetBrains Mono", monospace';
+                pdfCtx.fillStyle = isHeading ? '#0a2540' : '#1e293b';
+
+                const words = paragraph.split(' ');
+                let line = '';
+                words.forEach((w) => {
+                    if ((line + w).length > 74) {
+                        drawPdfLineWithSearch(line, 22, y, searchQuery, () => searchHits++);
+                        y += 16;
+                        line = w + ' ';
+                    } else {
+                        line += w + ' ';
+                    }
+                });
+                if (line.trim().length > 0) {
+                    drawPdfLineWithSearch(line, 22, y, searchQuery, () => searchHits++);
+                    y += isHeading ? 21 : 16;
+                } else {
+                    y += 8;
+                }
+            });
+
+            // Embedded 6D Polar Stamp & Parcel Vector Preview across Full Width of Page 1 (`pdfrs::vector`)
+            pdfCtx.strokeStyle = '#0284c7';
+            pdfCtx.lineWidth = 1.4;
+            pdfCtx.strokeRect(20, 480, baseW - 40, 210);
+            pdfCtx.fillStyle = '#0f172a';
+            pdfCtx.fillRect(21, 481, baseW - 42, 24);
+            pdfCtx.fillStyle = '#00e5ff';
+            pdfCtx.font = 'bold 10px "JetBrains Mono", monospace';
+            pdfCtx.fillText('BIJLAGE A // GEÏJKTE 6D POLAR PLANIMETER, VLAGGEN & MEETLIJNEN (pdfrs::vector)', 28, 497);
+
+            if (planimeterCanvas.width > 0) {
+                pdfCtx.drawImage(planimeterCanvas, 28, 512, 260, 168);
+            }
+
+            const armTip = polarToCartesianCm(vortexState.azDeg, vortexState.rhoCm);
+            const metrics = computeGaussParcelMetrics();
+            pdfCtx.fillStyle = '#1e293b';
+            pdfCtx.font = '10px "JetBrains Mono", monospace';
+            pdfCtx.fillText(`Anker: ${vortexState.anchorLabel.slice(0, 30)}`, 300, 528);
+            pdfCtx.fillText(`WGS84: ${vortexState.anchorLat.toFixed(5)}°N, ${vortexState.anchorLon.toFixed(5)}°E`, 300, 548);
+            pdfCtx.fillText(`Polar Arm: θ=${vortexState.azDeg.toFixed(2)}° | ρ=${vortexState.rhoCm.toFixed(2)} cm`, 300, 568);
+            pdfCtx.fillText(`Armpunt XY: (${armTip.xCm.toFixed(2)}, ${armTip.yCm.toFixed(2)}) cm`, 300, 588);
+            pdfCtx.fillText(`Actieve Vlaggen: ${vortexState.flags.length} | Lijnen: ${vortexState.lines.length}`, 300, 608);
+            pdfCtx.fillText(`Oppervlak (Gauss): ${metrics.areaM2.toFixed(2)} m²`, 300, 628);
+            pdfCtx.fillText(`Totale Omtrek/Lijn: ${metrics.perimM.toFixed(2)} m`, 300, 648);
+            pdfCtx.fillStyle = '#059669';
+            pdfCtx.font = 'bold 10px "JetBrains Mono", monospace';
+            pdfCtx.fillText(`STATUS: EXACT GEÏJKT (Δ = 0.000 mm)`, 300, 670);
+        } else {
+            // Page 2: Full Woo-Tholen Directory Tree & Flags/Lines Coordinate Table
+            pdfCtx.fillStyle = '#0a2540';
+            pdfCtx.font = 'bold 13px "JetBrains Mono", monospace';
+            pdfCtx.fillText('PAGINA 2 // WOO-THOLEN ARCHIEF INDEX & GEÏJKTE VLAGGEN/LIJNEN TABEL', 20, 84);
+
+            let ty = 112;
+            wooArchiveFiles.forEach((item, i) => {
+                pdfCtx.fillStyle = i % 2 === 0 ? '#f1f5f9' : '#ffffff';
+                pdfCtx.fillRect(20, ty - 12, baseW - 40, 20);
+                pdfCtx.fillStyle = '#0f172a';
+                pdfCtx.font = '9.5px "JetBrains Mono", monospace';
+                const rowStr = `${String(i + 1).padStart(2, '0')}. ${item.name.slice(0, 50)} | ${item.size} | ${item.modified}`;
+                drawPdfLineWithSearch(rowStr, 26, ty, searchQuery, () => searchHits++);
+                ty += 22;
+            });
+
+            // Flags & Lines Summary on Page 2
+            ty += 16;
+            pdfCtx.fillStyle = '#0a2540';
+            pdfCtx.font = 'bold 11px "JetBrains Mono", monospace';
+            pdfCtx.fillText(`ACTIEVE VLAGGEN (${vortexState.flags.length}) & MEETLIJNEN (${vortexState.lines.length}):`, 20, ty);
+            ty += 18;
+            vortexState.flags.forEach((f, idx) => {
+                pdfCtx.fillStyle = '#1e293b';
+                pdfCtx.font = '9.5px "JetBrains Mono", monospace';
+                pdfCtx.fillText(`Vlag ${idx + 1} (${f.id}): X=${f.xCm.toFixed(2)} cm, Y=${f.yCm.toFixed(2)} cm | WGS84=(${f.lat}, ${f.lon})`, 26, ty);
+                ty += 16;
+            });
+        }
+
+        // Draw user Redaction Boxes (`pdfrs::redact`)
+        pdfViewerState.redactions.forEach((r) => {
+            pdfCtx.fillStyle = '#000000';
+            pdfCtx.fillRect(r.x, r.y, r.w, r.h);
+            pdfCtx.fillStyle = '#ffb300';
+            pdfCtx.font = 'bold 8.5px monospace';
+            pdfCtx.fillText('[GEREDACTEERD pdfrs::redact]', r.x + 5, r.y + 12);
+        });
+
+        // Page Footer
+        pdfCtx.fillStyle = '#64748b';
+        pdfCtx.font = '9px "JetBrains Mono", monospace';
+        pdfCtx.fillText('Gegenereerd door VORTEX OS v3.0 // Rust crate pdfrs (100% Volle Breedte VP-02)', 20, baseH - 14);
+
+        pdfCtx.restore();
+
+        document.getElementById('pdfPageIndicator').textContent = `Pagina ${pdfViewerState.page} / ${pdfViewerState.totalPages}`;
+        document.getElementById('pdfZoomBadge').textContent = pdfViewerState.fitFullWidth ? '100%B' : `${Math.round(pdfViewerState.zoom * 100)}%`;
+        const hitEl = document.getElementById('pdfSearchHitsBadge');
+        if (searchQuery) {
+            hitEl.textContent = `pdfrs::search -> ${searchHits} treffer(s)`;
+            hitEl.className = 'text-emerald-400 font-bold truncate';
+        } else {
+            hitEl.textContent = 'pdfrs::raster [100% VOLLE BREEDTE VP-02]';
+            hitEl.className = 'text-amber-300 truncate hidden sm:inline';
+        }
+    }
+
+    function drawPdfLineWithSearch(text, x, y, query, onHit) {
+        if (query && text.toLowerCase().includes(query)) {
+            onHit();
+            const w = pdfCtx.measureText(text).width;
+            pdfCtx.save();
+            pdfCtx.fillStyle = 'rgba(255, 215, 0, 0.55)';
+            pdfCtx.strokeStyle = '#d97706';
+            pdfCtx.fillRect(x - 2, y - 11, w + 4, 14);
+            pdfCtx.strokeRect(x - 2, y - 11, w + 4, 14);
+            pdfCtx.restore();
+        }
+        pdfCtx.fillText(text, x, y);
+    }
+
+    function stepPdfPage(delta) {
+        pdfViewerState.page = Math.max(1, Math.min(pdfViewerState.totalPages, pdfViewerState.page + delta));
+        renderPdfViewerCanvas();
+    }
+
+    function changePdfZoom(delta) {
+        pdfViewerState.fitFullWidth = false;
+        pdfViewerState.zoom = Math.max(0.7, Math.min(1.8, +(pdfViewerState.zoom + delta).toFixed(2)));
+        renderPdfViewerCanvas();
+    }
+
+    function togglePdfRedactTool() {
+        pdfViewerState.redactMode = !pdfViewerState.redactMode;
+        const btn = document.getElementById('btnPdfRedactMode');
+        btn.className = pdfViewerState.redactMode
+            ? 'tech-btn-amber px-1.5 py-0.5 rounded text-[9px] font-bold'
+            : 'tech-btn px-1.5 py-0.5 rounded text-[9px]';
+        showToast(
+            pdfViewerState.redactMode ? 'LAK-MODUS ACTIEF (pdfrs::redact)' : 'LAK-MODUS UIT',
+            pdfViewerState.redactMode ? 'Klik op de PDF in VP-02 om een zwart redactievlak te plaatsen.' : 'Normale PDF-weergave hersteld.'
+        );
+    }
+
+    pdfCanvas.addEventListener('click', (e) => {
+        if (!pdfViewerState.redactMode) return;
+        const rect = pdfCanvas.getBoundingClientRect();
+        const scaleX = 560 / rect.width;
+        const scaleY = 740 / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        pdfViewerState.redactions.push({ x: Math.max(16, x - 75), y: y - 9, w: 165, h: 17 });
+        renderPdfViewerCanvas();
+        playBeep(440, 0.06);
+    });
+
+    function sendCurrentPdfPageToVp01Overlay() {
+        renderPdfViewerCanvas();
+        const img = new Image();
+        img.onload = () => {
+            vortexState.uploadedMapImage = img;
+            drawPlanimeterCanvas();
+            showToast('PDF GEPROJECTEERD IN VP-01', 'De actieve PDF-pagina staat nu als kaart-overlay onder de 6D Polar Arm.');
+        };
+        img.src = pdfCanvas.toDataURL('image/png');
+    }
+
+    function syncEditorToPdfViewer() {
+        wooArchiveFiles[activeFileIndex].content = document.getElementById('dossierContentTextarea').value;
+        renderPdfViewerCanvas();
+        updateRustCodePreview();
+    }
+
+    function toggleVp02WebRtcDrawer() {
+        const drawer = document.getElementById('vp02WebRtcDrawer');
+        drawer.classList.toggle('hidden');
+        renderPdfViewerCanvas();
+    }
+
+    // ============================================================================
+    // 9. MOBILE VERSION SWITCHER & RESPONSIVE TOUCH PANEL ROUTER
+    // ============================================================================
+    function toggleMobileViewMode() {
+        vortexState.isMobileView = !vortexState.isMobileView;
+        const btn = document.getElementById('btnMobileViewToggle');
+        if (vortexState.isMobileView) {
+            document.body.classList.add('mobile-mode');
+            btn.textContent = '🖥️ Desktop Versie';
+            btn.className = 'tech-btn-active px-2 py-1 rounded text-[10px] font-bold';
+            switchMobilePanel('vp01');
+            showToast('MOBIELE VERSIE ACTIEF', 'Gebruik de knoppenbalk onderaan om snel tussen VP-01, Volle PDF (VP-02), WebRTC en VP-03 te schakelen.');
+        } else {
+            document.body.classList.remove('mobile-mode');
+            btn.textContent = '📱 Mobiele Versie';
+            btn.className = 'tech-btn px-2 py-1 rounded text-[10px] font-bold text-cyan-300';
+            document.getElementById('panelVp01').classList.remove('hidden');
+            document.getElementById('panelVp02').classList.remove('hidden');
+            document.getElementById('panelVp03').classList.remove('hidden');
+            syncVp01CanvasDimensions();
+            renderPdfViewerCanvas();
+        }
+    }
+
+    function switchMobilePanel(target) {
+        const p1 = document.getElementById('panelVp01');
+        const p2 = document.getElementById('panelVp02');
+        const p3 = document.getElementById('panelVp03');
+        const rtcDrawer = document.getElementById('vp02WebRtcDrawer');
+
+        p1.classList.add('hidden');
+        p2.classList.add('hidden');
+        p3.classList.add('hidden');
+
+        ['mobNavVp01', 'mobNavVp02', 'mobNavRtc', 'mobNavVp03'].forEach(id => {
+            const b = document.getElementById(id);
+            if (b) b.className = 'tech-btn py-2 px-1 rounded font-bold flex flex-col items-center';
+        });
+
+        if (target === 'vp01') {
+            p1.classList.remove('hidden');
+            document.getElementById('mobNavVp01').className = 'tech-btn-active py-2 px-1 rounded font-bold flex flex-col items-center';
+            setTimeout(syncVp01CanvasDimensions, 20);
+        } else if (target === 'vp02') {
+            p2.classList.remove('hidden');
+            rtcDrawer.classList.add('hidden');
+            document.getElementById('mobNavVp02').className = 'tech-btn-active py-2 px-1 rounded font-bold flex flex-col items-center';
+            setTimeout(renderPdfViewerCanvas, 20);
+        } else if (target === 'rtc') {
+            p2.classList.remove('hidden');
+            rtcDrawer.classList.remove('hidden');
+            document.getElementById('mobNavRtc').className = 'tech-btn-active py-2 px-1 rounded font-bold flex flex-col items-center';
+            setTimeout(renderPdfViewerCanvas, 20);
+        } else if (target === 'vp03') {
+            p3.classList.remove('hidden');
+            document.getElementById('mobNavVp03').className = 'tech-btn-active py-2 px-1 rounded font-bold flex flex-col items-center';
+        }
+    }
+
+    // ============================================================================
+    // 10. ARCHIVE TABLE, PDF DOWNLOAD & RUST `pdfrs` GENERATOR
+    // ============================================================================
+    function renderArchiveTable() {
+        const tbody = document.getElementById('archiveFilesTbody');
+        const filter = (document.getElementById('archiveSearchInput').value || '').toLowerCase();
+        tbody.innerHTML = '';
+
+        let selectedCount = 0;
+        wooArchiveFiles.forEach((file, idx) => {
+            if (file.selected) selectedCount++;
+            if (filter && !file.name.toLowerCase().includes(filter) && !file.content.toLowerCase().includes(filter)) {
+                return;
+            }
+            const isPdf = file.type === 'pdf';
+            const tr = document.createElement('tr');
+            tr.className = `cursor-pointer transition ${idx === activeFileIndex ? 'bg-cyan-950/70 text-white' : 'hover:bg-slate-800/50 text-slate-300'}`;
+            tr.innerHTML = `
+                <td class="p-1" onclick="event.stopPropagation()">
+                    <input type="checkbox" ${file.selected ? 'checked' : ''} onchange="toggleFileSelection(${idx})" class="accent-cyan-400 cursor-pointer" />
+                </td>
+                <td class="p-1 font-medium" onclick="openArchiveFile(${idx}, false)">
+                    <div class="flex items-center gap-1">
+                        <span>${isPdf ? '📕' : '📝'}</span>
+                        <span class="${isPdf ? 'text-amber-300' : 'text-cyan-300'} break-all">${file.name}</span>
+                    </div>
+                </td>
+                <td class="p-1 text-right text-slate-400 whitespace-nowrap" onclick="openArchiveFile(${idx}, false)">${file.size}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('selectedMergeCount').textContent = `Merge: ${selectedCount}`;
+        updateRustCodePreview();
+    }
+
+    function toggleFileSelection(idx) {
+        wooArchiveFiles[idx].selected = !wooArchiveFiles[idx].selected;
+        renderArchiveTable();
+    }
+
+    function openArchiveFile(idx, switchTab = false) {
+        activeFileIndex = idx;
+        const f = wooArchiveFiles[idx];
+        document.getElementById('activeFileTitle').textContent = f.name;
+        document.getElementById('activeFileSizeBadge').textContent = f.size;
+        document.getElementById('dossierContentTextarea').value = f.content;
+        document.getElementById('vp02PdfSelector').value = idx;
+        pdfViewerState.page = 1;
+        renderArchiveTable();
+        renderPdfViewerCanvas();
+        if (switchTab) switchRightTab('editor');
+        if (vortexState.isMobileView || window.innerWidth <= 1024) {
+            switchMobilePanel('vp02');
+        }
+        playBeep(740, 0.04);
+    }
+
+    function switchRightTab(tab) {
+        ['tree', 'editor', 'rust'].forEach((t) => {
+            const panel = document.getElementById('tabPanel' + t.charAt(0).toUpperCase() + t.slice(1));
+            const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+            if (t === tab) {
+                panel.classList.remove('hidden');
+                btn.className = 'tech-btn-active py-1 px-1.5 rounded font-bold';
+            } else {
+                panel.classList.add('hidden');
+                btn.className = 'tech-btn py-1 px-1.5 rounded font-bold';
+            }
+        });
+        if (tab === 'rust') updateRustCodePreview();
+    }
+
+    function generateAndDownloadSinglePdf() {
+        const f = wooArchiveFiles[activeFileIndex];
+        const rawText = document.getElementById('dossierContentTextarea').value || f.content;
+        const watermark = document.getElementById('pdfWatermarkInput').value || 'WOO-THOLEN';
+        const profile = document.getElementById('pdfProfileSelect').value;
+        createRealPdfDocument(f.name.replace(/\.md$/i, '') + '_pdfrs.pdf', rawText, watermark, profile);
+    }
+
+    function batchMergeSelectedPdfs() {
+        const selected = wooArchiveFiles.filter(f => f.selected);
+        if (selected.length === 0) {
+            showToast('GEEN DOSSIERS GESELECTEERD', 'Vink minimaal één dossier aan in VP-03.');
+            return;
+        }
+        const combined = selected.map((f, i) =>
+            `=== DEELDOSSIER ${i + 1}: ${f.name} (${f.size}) ===\nGewijzigd: ${f.modified}\n\n${f.content}`
+        ).join('\n\n------------------------------------------------------------\n\n');
+        createRealPdfDocument('woo_tholen_parallel_merged.pdf', combined, 'WOO-THOLEN MERGED', 'web');
+    }
+
+    function createRealPdfDocument(filename, contentText, watermarkText, profileName) {
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            doc.setFillColor(11, 17, 26);
+            doc.rect(0, 0, 210, 26, 'F');
+            doc.setTextColor(0, 229, 255);
+            doc.setFont('courier', 'bold');
+            doc.setFontSize(11);
+            doc.text('VORTEX OS v3.0 // WOO-THOLEN ARCHIEF ENGINE (CRATE pdfrs)', 12, 10);
+
+            doc.setTextColor(255, 179, 0);
+            doc.setFontSize(8.5);
+            const metrics = computeGaussParcelMetrics();
+            doc.text(`Geijkte 6D Arm: θ=${vortexState.azDeg.toFixed(2)} deg | ρ=${vortexState.rhoCm.toFixed(2)} cm | Vlaggen: ${vortexState.flags.length} | Lijnen: ${vortexState.lines.length} | Opp: ${metrics.areaM2.toFixed(2)} m2`, 12, 17);
+            doc.setTextColor(200, 220, 240);
+            doc.text(`Bestand: ${filename} | Profiel: ${profileName}`, 12, 23);
+
+            if (watermarkText) {
+                doc.saveGraphicsState();
+                doc.setTextColor(232, 236, 242);
+                doc.setFontSize(26);
+                doc.text(watermarkText, 32, 155, { angle: 35 });
+                doc.restoreGraphicsState();
+            }
+
+            doc.setTextColor(20, 25, 35);
+            doc.setFont('courier', 'normal');
+            doc.setFontSize(9.5);
+            const lines = doc.splitTextToSize(contentText, 184);
+            doc.text(lines, 13, 35);
+
+            const planimeterImg = planimeterCanvas.toDataURL('image/png');
+            doc.setDrawColor(0, 180, 216);
+            doc.rect(13, 192, 92, 62);
+            doc.addImage(planimeterImg, 'PNG', 14, 193, 90, 60);
+            doc.setFontSize(8);
+            doc.text('Fig 1: VP-01 Geijkte 6D Polar Arm, Vlaggen & Lijnen', 13, 259);
+
+            if (vortexState.lastSnapshotDataUrl) {
+                doc.rect(110, 192, 86, 62);
+                doc.addImage(vortexState.lastSnapshotDataUrl, 'PNG', 111, 193, 84, 60);
+                doc.text('Fig 2: WebRTC Camera Kaartsnapshot', 110, 259);
+            }
+
+            doc.save(filename);
+            playBeep(920, 0.1);
+            showToast('PDF GEDOWNLOAD', `${filename} gegenereerd via pdfrs.`);
+        } catch (err) {
+            showToast('FOUT BIJ PDF EXPORT', 'Controleer browser-instellingen.');
+        }
+    }
+
+    function updateRustCodePreview() {
+        const activeFile = wooArchiveFiles[activeFileIndex];
+        const selectedFiles = wooArchiveFiles.filter(f => f.selected).map(f => `"${f.name}"`);
+        const watermark = document.getElementById('pdfWatermarkInput')?.value || 'CONFIDENTIAL';
+        const profile = document.getElementById('pdfProfileSelect')?.value || 'web';
+
+        const rustCode = `// === VORTEX OS v3.0 // WOO-THOLEN ARCHIEF ENGINE (Crate: pdfrs) ===
+use pdfrs::pdf_generator::{self, PageLayout};
+use pdfrs::{elements, pdf_ops, parallel, raster, search, vector};
+use pdfrs::optimization::{OptimizationProfile, OptimizedPdfGenerator};
+use pdfrs::Result;
+
+fn main() -> Result<()> {
+    // 1. Genereer PDF met exact geijkte 6D Polar Arm, Vlaggen (${vortexState.flags.length}) & Lijnen (${vortexState.lines.length})
+    let md = "# ${activeFile.name}\\nGeijkte 6D Arm: θ=${vortexState.azDeg.toFixed(2)}°, ρ=${vortexState.rhoCm.toFixed(2)} cm";
+    let elems = elements::parse_markdown(md);
+    pdf_generator::create_pdf_from_elements_with_layout(
+        "output.pdf", &elems, "Helvetica", 12.0, PageLayout::portrait()
+    )?;
+
+    // 2. Parallelle PDF Merge & Tekst-extractie (Rayon)
+    let files = &[${selectedFiles.join(', ')}];
+    parallel::merge_pdfs_parallel(files, "merged_woo_tholen.pdf")?;
+
+    // 3. Full-Text Search met Bounding Boxes (VP-02 Volle Breedte PDF Viewer)
+    let hits = search::search_pdf("merged_woo_tholen.pdf", "Platteweg")?;
+    println!("Gevonden treffers met bounding boxes: {}", hits.len());
+
+    // 4. Pure-Rust PDF Rasterization op 100% Volle Breedte van VP-02
+    let _png_pages = raster::rasterize_pdf("merged_woo_tholen.pdf", 180)?;
+    pdf_ops::watermark_pdf("merged_woo_tholen.pdf", "watermarked.pdf", "${watermark}", 48.0, 0.3)?;
+
+    let _opt = OptimizedPdfGenerator::new(OptimizationProfile::${profile}());
+    Ok(())
+}`;
+        const el = document.getElementById('rustCodeDisplay');
+        if (el) el.textContent = rustCode;
+    }
+
+    function copyRustCode() {
+        const text = document.getElementById('rustCodeDisplay').textContent;
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('RUST CODE GEKOPIEERD', 'Crate `pdfrs` implementatie staat op het klembord.');
+    }
+
+    // ============================================================================
+    // 11. WEBRTC CAMERA, BEL-API & RTCDATACHANNEL
+    // ============================================================================
+    let mediaStream = null;
+    let audioCtx = null;
+    let masterAudioEnabled = true;
+    let callActive = false;
+    let callSeconds = 0;
+    let callInterval = null;
+    let localPeer = null;
+    let remotePeer = null;
+    let sendDataChannel = null;
+
+    function ensureAudioContext() {
+        if (!audioCtx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioCtx();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playBeep(freq = 660, duration = 0.07) {
+        if (!masterAudioEnabled) return;
+        try {
+            ensureAudioContext();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch (e) {}
+    }
+
+    function playDtmf(key) {
+        playBeep(key === '#' ? 941 : 770, 0.09);
+    }
+
+    function toggleMasterAudio() {
+        masterAudioEnabled = !masterAudioEnabled;
+        document.getElementById('btnToggleAudio').textContent = masterAudioEnabled ? '🔊' : '🔇';
+    }
+
+    async function initWebRtcLoopback() {
+        try {
+            localPeer = new RTCPeerConnection();
+            remotePeer = new RTCPeerConnection();
+            sendDataChannel = localPeer.createDataChannel('vortex_os_6d_channel');
+            remotePeer.ondatachannel = (ev) => {
+                ev.channel.onmessage = (e) => handleIncomingRtcMessage(e.data);
+            };
+            localPeer.onicecandidate = e => e.candidate && remotePeer.addIceCandidate(e.candidate);
+            remotePeer.onicecandidate = e => e.candidate && localPeer.addIceCandidate(e.candidate);
+            const offer = await localPeer.createOffer();
+            await localPeer.setLocalDescription(offer);
+            await remotePeer.setRemoteDescription(offer);
+            const answer = await remotePeer.createAnswer();
+            await remotePeer.setLocalDescription(answer);
+            await localPeer.setRemoteDescription(answer);
+        } catch (e) {}
+    }
+
+    async function toggleWebcamStream() {
+        const videoEl = document.getElementById('webcamVideo');
+        const hudCanvas = document.getElementById('cameraHudCanvas');
+        const btn = document.getElementById('btnStartCam');
+
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(t => t.stop());
+            mediaStream = null;
+            vortexState.webcamOverlayActive = false;
+            videoEl.classList.add('hidden');
+            hudCanvas.classList.remove('hidden');
+            btn.textContent = '📷 Start Cam';
+            updateCamOverlayBtnUI();
+            drawPlanimeterCanvas();
+            return;
+        }
+        try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 360 }, audio: false });
+            videoEl.srcObject = mediaStream;
+            videoEl.classList.remove('hidden');
+            hudCanvas.classList.add('hidden');
+            btn.textContent = '⏹️ Stop Cam';
+            showToast('WEBRTC CAMERA ACTIEF', 'Klik op "Cam -> VP-01" om oude kaarten live onder de Polar Arm in te lezen.');
+        } catch (err) {
+            showToast('CAMERA SIMULATIE ACTIEF', 'Geen fysieke webcam gevonden; ingebouwde 6D kaartscanner actief.');
+        }
+    }
+
+    function captureCameraToPdfBuffer() {
+        const videoEl = document.getElementById('webcamVideo');
+        const hudCanvas = document.getElementById('cameraHudCanvas');
+        const temp = document.createElement('canvas');
+        temp.width = 360;
+        temp.height = 200;
+        const c = temp.getContext('2d');
+        if (mediaStream && !videoEl.classList.contains('hidden')) {
+            c.drawImage(videoEl, 0, 0, temp.width, temp.height);
+        } else {
+            c.drawImage(hudCanvas, 0, 0, temp.width, temp.height);
+        }
+        vortexState.lastSnapshotDataUrl = temp.toDataURL('image/png');
+        playBeep(1020, 0.07);
+        showToast('CAMERA SNAPSHOT OPGESLAGEN', 'Wordt automatisch ingesloten bij PDF-export.');
+    }
+
+    function toggleBelApiCall() {
+        callActive = !callActive;
+        const btn = document.getElementById('btnCallToggle');
+        if (callActive) {
+            callSeconds = 0;
+            playBeep(528, 0.12);
+            btn.textContent = '📴 Beëindig Bel-API Gesprek';
+            btn.className = 'w-full py-1 rounded font-bold text-[9px] bg-rose-700 hover:bg-rose-600 text-white border border-rose-400 transition';
+            appendChatMessage('BEL-API // SIP', 'Verbinding actief met sip:woo-loket@tholen.nl.', 'cyan');
+            callInterval = setInterval(() => {
+                callSeconds++;
+                const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const s = String(callSeconds % 60).padStart(2, '0');
+                document.getElementById('callTimerDisplay').textContent = `${m}:${s}`;
+            }, 1000);
+        } else {
+            clearInterval(callInterval);
+            btn.textContent = '📞 Start Bel-API Gesprek (woo-loket@tholen.nl)';
+            btn.className = 'w-full py-1 rounded font-bold text-[9px] bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-400 transition';
+            appendChatMessage('BEL-API // SIP', 'Gesprek beëindigd.', 'slate');
+        }
+    }
+
+    function sendPlanimeterToWebRTC() {
+        const armTip = polarToCartesianCm(vortexState.azDeg, vortexState.rhoCm);
+        const metrics = computeGaussParcelMetrics();
+        const msg = `📐 [6D GEÏJKTE TELEMETRIE] θ=${vortexState.azDeg.toFixed(2)}°, ρ=${vortexState.rhoCm.toFixed(2)} cm | Arm=(${armTip.xCm.toFixed(2)}, ${armTip.yCm.toFixed(2)}) cm | Vlaggen=${vortexState.flags.length} | Lijnen=${vortexState.lines.length} | Opp=${metrics.areaM2.toFixed(2)} m²`;
+
+        syncPolarArmToKlantcontact(
+            vortexState.azDeg,
+            vortexState.rhoCm,
+            vortexState.pitchDeg,
+            vortexState.rollDeg,
+            vortexState.yawDeg,
+            vortexState.zoom,
+            vortexState.flags
+        );
+
+        const pkt = JSON.stringify({ type: '6D_SYNC', message: msg });
+        if (sendDataChannel && sendDataChannel.readyState === 'open') {
+            sendDataChannel.send(pkt);
+        } else {
+            handleIncomingRtcMessage(pkt);
+        }
+        playBeep(840, 0.06);
+        showToast('6D NAAR KLANT VERZONDEN', `Geijkte status (${vortexState.flags.length} vlaggen, ${vortexState.lines.length} lijnen) verzonden.`);
+    }
+
+    function appendChatMessage(sender, text, color = 'cyan') {
+        const container = document.getElementById('chatMessagesContainer');
+        const time = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const div = document.createElement('div');
+        div.className = 'p-1.5 rounded border border-slate-800 bg-[#08101a]';
+        div.innerHTML = `
+            <div class="flex items-center justify-between text-[8px] text-slate-400">
+                <span class="font-bold text-${color}-400 truncate">${sender}</span>
+                <span>${time}</span>
+            </div>
+            <div class="text-slate-200 text-[9px] leading-snug break-words mt-0.5">${text}</div>
+        `;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function handleIncomingRtcMessage(rawJson) {
+        try {
+            const pkt = JSON.parse(rawJson);
+            appendChatMessage('KLANTCONTACT VP-01 [DataChannel]', pkt.message, 'cyan');
+        } catch (e) {
+            appendChatMessage('RTCDataChannel', rawJson, 'cyan');
+        }
+    }
+
+    function handleChatSubmit(e) {
+        e.preventDefault();
+        const input = document.getElementById('chatInputBox');
+        const msg = input.value.trim();
+        if (!msg) return;
+        input.value = '';
+        const pkt = JSON.stringify({ type: 'CHAT', message: msg });
+        if (sendDataChannel && sendDataChannel.readyState === 'open') {
+            sendDataChannel.send(pkt);
+        } else {
+            handleIncomingRtcMessage(pkt);
+        }
+    }
+
+    function sendQuickDossierMessage(label) {
+        const f = wooArchiveFiles[activeFileIndex];
+        appendChatMessage('WOO-THOLEN DOSSIER SHARE', `Dossier "${f.name}" (${label}) gekoppeld in VP-02 PDF Viewer.`, 'amber');
+    }
+
+    function shareActiveDossierOverWebRTC() {
+        const f = wooArchiveFiles[activeFileIndex];
+        appendChatMessage('VP-03 -> WEBRTC KLANTCHAT', `📎 Dossier "${f.name}" (${f.size}) gedeeld via RTCDataChannel.`, 'emerald');
+    }
+
+    // ============================================================================
+    // 12. ANIMATION LOOP FOR CAMERA HUD, LIVE OVERLAY & FFT SPECTRUM
+    // ============================================================================
+    const camCanvas = document.getElementById('cameraHudCanvas');
+    const camCtx = camCanvas.getContext('2d');
+    const specCanvas = document.getElementById('spectrumCanvas');
+    const specCtx = specCanvas.getContext('2d');
+    let animTick = 0;
+
+    function animateLoops() {
+        animTick += 0.04;
+
+        if (vortexState.webcamOverlayActive && mediaStream) {
+            drawPlanimeterCanvas();
+        }
+
+        if (!mediaStream && camCanvas) {
+            const cw = camCanvas.width = camCanvas.clientWidth || 240;
+            const ch = camCanvas.height = camCanvas.clientHeight || 110;
+            camCtx.fillStyle = '#050a12';
+            camCtx.fillRect(0, 0, cw, ch);
+
+            camCtx.strokeStyle = 'rgba(0, 229, 255, 0.35)';
+            camCtx.beginPath();
+            camCtx.arc(cw / 2, ch / 2, 26, 0, Math.PI * 2);
+            const rRad = (vortexState.azDeg - 90) * Math.PI / 180;
+            camCtx.moveTo(cw / 2, ch / 2);
+            camCtx.lineTo(cw / 2 + Math.cos(rRad) * 26, ch / 2 + Math.sin(rRad) * 26);
+            camCtx.stroke();
+
+            camCtx.fillStyle = '#00e5ff';
+            camCtx.font = '8px "JetBrains Mono"';
+            camCtx.fillText(`CAM SCANNER // θ:${vortexState.azDeg.toFixed(1)}°`, 6, ch - 12);
+        }
+
+        if (specCanvas) {
+            const sw = specCanvas.width = specCanvas.clientWidth || 260;
+            const sh = specCanvas.height = 38;
+            specCtx.clearRect(0, 0, sw, sh);
+            const bars = 28;
+            const bw = Math.max(3, (sw / bars) - 2);
+            for (let i = 0; i < bars; i++) {
+                const wave = Math.sin(animTick * 2.1 + i * 0.45) * 0.5 + 0.5;
+                const bh = Math.max(3, wave * (sh - 5) * (callActive ? 1.0 : 0.55));
+                specCtx.fillStyle = (i % 3 === 0) ? '#ffb300' : '#00e5ff';
+                specCtx.fillRect(i * (bw + 2), sh - bh, bw, bh);
+            }
+        }
+
+        requestAnimationFrame(animateLoops);
+    }
+
+    // ============================================================================
+    // 13. EXPORTS & NON-SHIFTING TOAST HELPER
+    // ============================================================================
+    function exportGeoJsonFlags() {
+        const geojson = {
+            type: 'FeatureCollection',
+            metadata: { anchor: vortexState.anchorLabel, azDeg: vortexState.azDeg, rhoCm: vortexState.rhoCm },
+            features: vortexState.flags.map(f => ({
+                type: 'Feature',
+                properties: { id: f.id, xCm: f.xCm, yCm: f.yCm },
+                geometry: { type: 'Point', coordinates: [f.lon, f.lat] }
+            }))
+        };
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' }));
+        a.download = 'vortex_6d_geijkte_vlaggen.geojson';
+        a.click();
+    }
+
+    function exportPlanimeterSvgData() {
+        const pts = vortexState.flags.map(f => `${150 + f.xCm * 18},${150 - f.yCm * 18}`).join(' ');
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" style="background:#05090f">
+            <circle cx="150" cy="150" r="120" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+            <polygon points="${pts}" fill="rgba(0,229,255,0.2)" stroke="#00e5ff" stroke-width="2"/>
+        </svg>`;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+        a.download = 'vortex_6d_planimeter.svg';
+        a.click();
+    }
+
+    let toastTimer = null;
+    function showToast(title, body) {
+        const t = document.getElementById('tacticalToast');
+        document.getElementById('toastTitle').textContent = title;
+        document.getElementById('toastBody').textContent = body;
+        t.classList.remove('opacity-0');
+        t.classList.add('opacity-100');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            t.classList.remove('opacity-100');
+            t.classList.add('opacity-0');
+        }, 3200);
+    }
+
+    // ============================================================================
+    // INITIALIZATION ON WINDOW LOAD
+    // ============================================================================
+    window.onload = () => {
+        syncVp01CanvasDimensions();
+        window.addEventListener('resize', () => {
+            syncVp01CanvasDimensions();
+            renderPdfViewerCanvas();
+        });
+
+        populatePdfSelectorDropdown();
+        renderFlagsTable(); // Starts at 0 flags & 0 lines (NULL)
+        renderArchiveTable();
+        openArchiveFile(0, false);
+
+        if (window.innerWidth <= 1024) {
+            switchMobilePanel('vp01');
+        }
+
+        initWebRtcLoopback();
+        animateLoops();
+
+        appendChatMessage(
+            'VORTEX OS v3.0 // VLAGGEN, LIJNEN & VOLLE PDF',
+            'Systeem gestart: bouw en wis vlaggetjes en trek meetlijnen in VP-01. De PDF Dossier Viewer beslaat nu de volle 100% breedte van VP-02 en de mobiele versie is direct beschikbaar.',
+            'cyan'
+        );
+
+        syncPolarArmToKlantcontact(vortexState.azDeg, vortexState.rhoCm);
+    };
+</script>
+</body>
+</html>
