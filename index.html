@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VORTEX OS v158.0 // Zeegrid, Ott Nr. 573 Planimeter, Voronoi/Penrose, 6D Robotica & Kadaster/Archeologie</title>
+    <!-- MapLibre GL JS v4.7.1 -->
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <!-- PDF.js voor Woo & Archeologie Dossiers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        :root {
+            --bg: #04070c;
+            --panel: #0a1019;
+            --surface: #101927;
+            --border: #1e2e46;
+            --cyan: #00e5ff;
+            --gold: #f5b027;
+            --magenta: #ff3385;
+            --green: #10b981;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --muted: #8b9bb4;
+            --font-mono: 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 6px; }
+
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            height: 100vh; width: 100vw; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* TOP COMMAND BAR */
+        header {
+            background: var(--panel); border-bottom: 1px solid var(--border);
+            padding: 5px 10px; display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 6px; z-index: 40;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 7px;
+            font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--cyan);
+        }
+        .badge {
+            padding: 2px 6px; border-radius: 3px; font-size: 0.58rem;
+            border: 1px solid var(--cyan); background: rgba(0,229,255,0.12); color: var(--cyan);
+        }
+        .badge-gold { border-color: var(--gold); color: var(--gold); background: rgba(245,176,39,0.15); }
+
+        .menu-bar { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+
+        button, select, input[type="text"], input[type="number"] {
+            background: var(--surface); color: var(--text); border: 1px solid var(--border);
+            border-radius: 4px; padding: 3px 7px; font-family: var(--font-mono); font-size: 0.58rem;
+            font-weight: 600; cursor: pointer; transition: 0.12s;
+        }
+        button:hover, select:hover { border-color: var(--cyan); color: var(--cyan); }
+        button.active { background: rgba(0, 229, 255, 0.22); border-color: var(--cyan); color: #fff; }
+        button.btn-gold { border-color: var(--gold); color: var(--gold); background: rgba(245, 176, 39, 0.14); }
+        button.btn-danger { border-color: var(--danger); color: #fca5a5; background: rgba(239, 68, 68, 0.15); }
+
+        /* 3 VIEWPORTS WORKSPACE */
+        .workspace {
+            flex: 1; display: grid;
+            grid-template-columns: 1.25fr 0.95fr 455px;
+            gap: 6px; padding: 6px; min-height: 0; overflow: hidden;
+        }
+
+        .viewport-card {
+            background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
+            display: flex; flex-direction: column; overflow: hidden; position: relative; min-height: 0;
+        }
+
+        .vp-header {
+            background: #0c1422; border-bottom: 1px solid var(--border);
+            padding: 5px 9px; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+            color: var(--cyan);
+        }
+
+        .vp-stage {
+            flex: 1; position: relative; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            background: #03060b; min-height: 0; perspective: 950px;
+        }
+
+        /* VIEWPORT 1: ZEEGRID + OPENSEAMAP + RASTERS (VORONOI/PENROSE) + 6D ROBOTICA + PLANIMETER */
+        #mapglobe-bg {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            z-index: 1; opacity: 0.85; pointer-events: none;
+        }
+        #mapglobe-bg.globe-interactive { pointer-events: auto !important; z-index: 8; cursor: grab; }
+
+        #raster-overlay-canvas {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            z-index: 2; pointer-events: none; transform-origin: center center;
+        }
+
+        #planimeter-svg {
+            position: relative; z-index: 4; width: 100%; height: 100%;
+            cursor: crosshair; touch-action: none; transform-origin: center center;
+            transition: transform 0.06s linear;
+        }
+
+        /* Zwevende HUD voor Perceelberekening & Vlaggetjes in VP-01 */
+        .parcel-hud {
+            position: absolute; top: 8px; left: 8px; z-index: 6;
+            background: rgba(8, 13, 22, 0.88); border: 1px solid var(--border);
+            border-left: 3px solid var(--gold); border-radius: 4px;
+            padding: 6px 8px; font-family: var(--font-mono); font-size: 0.56rem;
+            pointer-events: none; line-height: 1.45;
+        }
+
+        .vp-footer {
+            background: #080d16; border-top: 1px solid var(--border);
+            padding: 5px 8px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+        }
+
+        .slider-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px;
+        }
+        .slider-row {
+            display: grid; grid-template-columns: 95px 1fr 52px; align-items: center;
+            gap: 5px; font-family: var(--font-mono); font-size: 0.55rem; color: var(--muted);
+        }
+        .slider-row strong { color: var(--cyan); text-align: right; }
+        input[type="range"] { width: 100%; accent-color: var(--cyan); height: 4px; cursor: pointer; }
+
+        .key-bar {
+            display: flex; justify-content: center; gap: 3px; flex-wrap: wrap;
+            padding-top: 2px; font-family: var(--font-mono);
+        }
+        .kbd {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 3px;
+            padding: 2px 5px; font-size: 0.53rem; color: var(--text); cursor: pointer; font-weight: bold;
+        }
+        .kbd:hover, .kbd.active { border-color: var(--cyan); color: #000; background: var(--cyan); }
+
+        /* VIEWPORT 2: 6D ROBOTICA + REALTIME ZON/STERREN + WATERSTANDEN + SPECTRAAL */
+        #vector-anchor-svg {
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0b1424 0%, #04070d 100%);
+            cursor: pointer;
+        }
+
+        .telemetry-strip {
+            background: #070c14; border-top: 1px solid var(--border);
+            padding: 6px 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+            font-family: var(--font-mono); font-size: 0.55rem;
+        }
+        .tel-box {
+            background: #0b121e; border: 1px solid var(--border); border-radius: 4px; padding: 5px 7px;
+        }
+        .tel-title { color: var(--gold); font-weight: bold; margin-bottom: 3px; display: flex; justify-content: space-between; }
+
+        .spectral-dock {
+            background: #080d16; border-top: 1px solid var(--border);
+            padding: 5px 8px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+        }
+        #spectral-canvas {
+            width: 100%; height: 52px; background: #03060b;
+            border: 1px solid var(--border); border-radius: 4px; display: block;
+        }
+
+        /* VIEWPORT 3: UITVOERVELDEN, KADASTER/BAG API, ARCHEOLOGIE, MATRIX & EXPORT */
+        .output-preview-box {
+            height: 195px; background: #04070c; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: center; align-items: center; padding: 4px; flex-shrink: 0;
+        }
+        #output-drawing-svg {
+            width: 100%; height: 100%; border: 1px solid #162438; border-radius: 4px; background: #050811;
+        }
+
+        .output-tabs {
+            display: flex; gap: 3px; padding: 5px 6px; background: #0c1320;
+            border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap;
+        }
+
+        .output-content-pane {
+            flex: 1; overflow-y: auto; padding: 7px; font-family: var(--font-mono);
+            font-size: 0.56rem; background: #04070d; min-height: 0; user-select: text;
+        }
+
+        table.mat-table { width: 100%; border-collapse: collapse; font-size: 0.54rem; text-align: right; }
+        table.mat-table th { position: sticky; top: 0; background: #0e1829; color: var(--gold); padding: 4px; border-bottom: 1px solid var(--border); }
+        table.mat-table th:first-child, table.mat-table td:first-child { text-align: left; }
+        table.mat-table td { padding: 3px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        table.mat-table tr:hover { background: rgba(0, 229, 255, 0.14); cursor: pointer; }
+
+        .output-fields-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 6px;
+        }
+        .field-card {
+            background: #0a111d; border: 1px solid var(--border); border-radius: 4px; padding: 5px 7px;
+        }
+        .field-card label { display: block; color: var(--muted); font-size: 0.51rem; }
+        .field-card strong { color: var(--cyan); font-size: 0.62rem; }
+
+        textarea.code-area {
+            width: 100%; height: 165px; background: #03060a; color: var(--cyan);
+            border: 1px solid var(--border); border-radius: 4px; padding: 6px;
+            font-family: var(--font-mono); font-size: 0.54rem; resize: vertical;
+        }
+
+        .export-bar {
+            padding: 6px 8px; background: #0c1320; border-top: 1px solid var(--border);
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP MENU MET ZEEGRID & OPENSEAMAP ALS EERSTE + OPTIONELE RASTERS (VORONOI/PENROSE) + STERREN OPTIONEEL -->
+<header>
+    <div class="brand">
+        <span>🧭 VORTEX OS v158.0</span>
+        <span class="badge">1. ZEEGRID + OPENSEAMAP FIRST</span>
+        <span class="badge badge-gold" id="hdr-clock">LIVE KLOK</span>
+    </div>
+
+    <div class="menu-bar">
+        <!-- 1. Zeegrid & OpenSeaMap als allereerste hoofdoptie -->
+        <button id="btn-seagrid" class="active" onclick="toggleSeaGrid()">⚓ 1. Zeegrid + OpenSeaMap: AAN</button>
+
+        <!-- 2. Kaartproviders zonder API-sleutel (incl. Kadaster BRK Perceelgrenzen) -->
+        <select id="map-provider-sel" onchange="switchMapProvider(this.value)">
+            <option value="opensea_first">🌊 Zeegrid + OpenSeaMap + Carto Dark (Default)</option>
+            <option value="pdok_kadaster">📐 PDOK Kadastrale Perceelgrenzen (BRK + Luchtfoto)</option>
+            <option value="pdok_brt">🇳🇱 PDOK Topografisch BRT (Nederland)</option>
+            <option value="esri_ocean">🌊 Esri World Ocean & Bathymetrie</option>
+            <option value="esri_sat">🛰️ Esri World Imagery (Satelliet)</option>
+            <option value="osm_std">🌍 OpenStreetMap Standard</option>
+            <option value="opentopo">⛰️ OpenTopoMap (Reliëf)</option>
+        </select>
+
+        <!-- 3. Optionele Rasters (Voronoi, Penrose, Cellarius, Bloemen) -->
+        <select id="raster-mode-sel" onchange="setRasterMode(this.value)">
+            <option value="none">🕸️ Raster: GEEN (Alleen Zeegrid/Kaart)</option>
+            <option value="voronoi" selected>💎 Raster: VORONOI DIAGRAM (Vlaggetjes & Ankers)</option>
+            <option value="penrose">💠 Raster: PENROSE QUASIKRISTAL (P3 Rhombus)</option>
+            <option value="cellarius">🧭 Raster: CELLARIUS STEREOGRAFISCH (64×64)</option>
+            <option value="flower">🌸 Raster: MODULAIRE BLOEM (k-Slider)</option>
+        </select>
+
+        <!-- 4. Sterren-Overlay standaard UIT, optioneel in menu -->
+        <button id="btn-stars-toggle" onclick="toggleStarsOverlay()">✨ Sterren Overlay: UIT</button>
+
+        <!-- 5. Vlaggetjes & Perceelmodus -->
+        <button id="btn-flag-mode" class="btn-gold active" onclick="toggleFlagClickMode()">🚩 Klik=Vlag / Rechtsklik=Wis</button>
+        <button class="btn-danger" onclick="clearAllFlags()">🗑️ Wis Vlaggen</button>
+
+        <!-- 6. 3D Globe Muisbesturing & Geluid -->
+        <button id="btn-globe-mouse" onclick="toggleGlobeMouseMode()">🌍 Pan/Zoom Kaart [M]</button>
+        <button id="btn-audio-toggle" class="btn-gold" onclick="toggleAudioEngine()">🔊 Audio: AAN</button>
+    </div>
+</header>
+
+<!-- DRIE VIEWPORTS WORKSPACE -->
+<main class="workspace">
+
+    <!-- ========================================================================= -->
+    <!-- VIEWPORT 1: ZEEGRID/KAART + VORONOI/PENROSE + 6D ROBOTICA + OTT 573 ARM   -->
+    <!-- ========================================================================= -->
+    <section class="viewport-card">
+        <div class="vp-header">
+            <span>VP-01 // ZEEGRID + OPENSEAMAP + OTT NR. 573 PLANIMETER & PERCEELGRENZEN</span>
+            <span id="vp1-readout" style="color:var(--gold)">θ = 62.1° | ρ = 8.88 cm | Nonius: 885</span>
+        </div>
+
+        <div class="vp-stage" id="vp1-stage">
+            <!-- Zwevende Perceelgrens- & Vlaggetjesteller -->
+            <div class="parcel-hud">
+                <div style="color:var(--gold); font-weight:bold;">📐 PERCEEL & VLAGGEN METING (OTT NR. 573)</div>
+                <div>Vlaggetjes geplaatst: <b id="hud-flag-count" style="color:var(--cyan)">4</b> <span style="color:var(--muted)">(Links=Zet, Rechts=Wis)</span></div>
+                <div>Perceel Oppervlak (Gauss): <b id="hud-parcel-m2" style="color:var(--green)">412.80 m²</b> (<span id="hud-parcel-cm2">41.28 cm²</span>)</div>
+                <div>Perceel Omtrek: <b id="hud-parcel-perim" style="color:var(--cyan)">82.45 m</b> | Nonius ΔU: <b id="hud-parcel-nonius">413</b></div>
+                <div>6D Robotica Pose: <span id="hud-6d-pose" style="color:var(--gold)">R:0° P:0° Y:0° Z:1.00x</span></div>
+            </div>
+
+            <!-- Laag 1: MapLibre 3D Globe met Zeegrid & OpenSeaMap als eerste -->
+            <div id="mapglobe-bg"></div>
+
+            <!-- Laag 2: Optioneel Voronoi / Penrose / Cellarius Canvas -->
+            <canvas id="raster-overlay-canvas"></canvas>
+
+            <!-- Laag 3: Interactieve SVG voor Ott Nr. 573 Planimeter, Perceel-Vlaggetjes & Optionele Sterren -->
+            <svg id="planimeter-svg" viewBox="-240 -240 480 480" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%">
+                        <feGaussianBlur stdDeviation="2.0" result="b"/>
+                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Basis Meetcirkel (Optioneel zichtbaar) -->
+                <g id="stereographic-frame-layer"></g>
+
+                <!-- Modulaire Bloem Laag -->
+                <g id="modular-flower-layer"></g>
+
+                <!-- Optionele Sterrenbeelden Laag (Standaard UIT!) -->
+                <g id="constellations-layer" style="display:none;"></g>
+
+                <!-- Perceelgrens Polygoon & Vlaggetjes Laag (Links-klik = plaats, Rechts-klik = wis) -->
+                <g id="parcel-flags-layer"></g>
+
+                <!-- Laser-Spectraal Bundel -->
+                <g id="vp1-laser-layer" filter="url(#soft-glow)"></g>
+
+                <!-- De Gouden A. Ott Nr. 573 Poolplanimeter Arm -->
+                <g id="ott573-arm-layer"></g>
+            </svg>
+        </div>
+
+        <!-- BEDIENING VOOR PLANIMETER-ARM + 6D ROBOTICA KANTELINGEN & ZOOM -->
+        <div class="vp-footer">
+            <div class="slider-grid">
+                <div class="slider-row">
+                    <span>🧭 ARM AZIMUT (θ):</span>
+                    <input type="range" id="sl-arm-az" min="0" max="360" step="0.1" value="62.1" oninput="setPlanimeterPolar(this.value, state.rhoCm, true)">
+                    <strong id="lbl-arm-az">62.1°</strong>
+                </div>
+                <div class="slider-row">
+                    <span>📏 STRAAL (ρ cm):</span>
+                    <input type="range" id="sl-arm-rho" min="-10.75" max="10.75" step="0.05" value="8.88" oninput="setPlanimeterPolar(state.azDeg, this.value, true)">
+                    <strong id="lbl-arm-rho" style="color:var(--gold)">8.88 cm</strong>
+                </div>
+                <div class="slider-row">
+                    <span>🤖 6D PITCH (Rx):</span>
+                    <input type="range" id="sl-6d-pitch" min="-65" max="65" step="1" value="0" oninput="update6DRobotics()">
+                    <strong id="lbl-6d-pitch">0°</strong>
+                </div>
+                <div class="slider-row">
+                    <span>🤖 6D ROLL (Ry):</span>
+                    <input type="range" id="sl-6d-roll" min="-65" max="65" step="1" value="0" oninput="update6DRobotics()">
+                    <strong id="lbl-6d-roll">0°</strong>
+                </div>
+                <div class="slider-row">
+                    <span>🤖 6D YAW (Rz):</span>
+                    <input type="range" id="sl-6d-yaw" min="-180" max="180" step="1" value="0" oninput="update6DRobotics()">
+                    <strong id="lbl-6d-yaw">0°</strong>
+                </div>
+                <div class="slider-row">
+                    <span>🔍 ZOOM / Z-AS:</span>
+                    <input type="range" id="sl-6d-zoom" min="0.5" max="2.5" step="0.05" value="1.00" oninput="update6DRobotics()">
+                    <strong id="lbl-6d-zoom" style="color:var(--gold)">1.00×</strong>
+                </div>
+            </div>
+
+            <div class="key-bar">
+                <span class="kbd" onclick="resetPlanimeterZero()" title="Beginstand [0]">0:BEGIN</span>
+                <span class="kbd" onclick="nudgePlanimeter(-1, 0)" title="Pijltje Links">←</span>
+                <span class="kbd" onclick="nudgePlanimeter(0, 0.25)" title="Pijltje Omhoog">↑</span>
+                <span class="kbd" onclick="nudgePlanimeter(0, -0.25)" title="Pijltje Omlaag">↓</span>
+                <span class="kbd" onclick="nudgePlanimeter(1, 0)" title="Pijltje Rechts">→</span>
+                <span class="kbd" onclick="setPlanimeterSigma(0.0)" title="Wiel Plat [8]">8:PLAT</span>
+                <span class="kbd" onclick="setPlanimeterSigma(-1.0)" title="Wiel Negatief [9]">9:NEG</span>
+                <span class="kbd" onclick="setPlanimeterSigma(1.0)" title="Wiel Positief [7]">7:POS</span>
+                <span class="kbd" onclick="flipPlanimeterElbow()" title="Wissel Knikarm [E]">E:KNIK</span>
+                <span class="kbd" onclick="reset6DRobotics()" title="Reset 6D Kanteling">6D:RESET</span>
+                <span class="kbd active" onclick="placeFlagAtTracer()" title="Zet Vlaggetje op Volgstift [T]">T:+VLAG</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEWPORT 2: VECTOR-ANKERS + REALTIME ZON/STERREN + WATERSTANDEN + AUDIO   -->
+    <!-- ========================================================================= -->
+    <section class="viewport-card">
+        <div class="vp-header">
+            <span>VP-02 // VECTOREN, 6D GEWRICHTEN, REALTIME ZON/TIJ & SPECTRAAL</span>
+            <span id="vp2-active-anchor" style="color:var(--gold)">LOCATIE: SCHERPENISSE / REIMERSWAAL</span>
+        </div>
+
+        <div class="vp-stage">
+            <svg id="vector-anchor-svg" viewBox="-240 -240 480 480" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+
+        <!-- REALTIME ZON, MAAN, PLANETEN & WATERSTANDEN (OOSTERSCHELDE / NAP) -->
+        <div class="telemetry-strip">
+            <div class="tel-box">
+                <div class="tel-title">
+                    <span>☀️ REALTIME ZON & HEMELMECHANICA</span>
+                    <span id="astro-time-lbl" style="color:var(--cyan)">LIVE</span>
+                </div>
+                <div>Zon Azimut / Hoogte: <b id="rt-sun-pos" style="color:var(--gold)">--° / --°</b></div>
+                <div>Maan Fase / Hoogte: <b id="rt-moon-pos" style="color:var(--text)">--% / --°</b></div>
+                <div>Mercurius Lock: <b style="color:var(--cyan)">245.91° WZW</b> | Siderisch: <b id="rt-lst">--:--</b></div>
+            </div>
+            <div class="tel-box">
+                <div class="tel-title">
+                    <span>🌊 REALTIME WATERSTAND (RWS / NAP)</span>
+                    <span id="tide-state-lbl" style="color:var(--green)">OPKOMEND</span>
+                </div>
+                <div>Station: <b>Oosterschelde / Reimerswaal</b></div>
+                <div>Actueel Peil: <b id="rt-water-nap" style="color:var(--cyan)">+0.84 m NAP</b></div>
+                <div>Volgend HW / LW: <b id="rt-tide-next" style="color:var(--gold)">HW +1.68m | LW -1.42m</b></div>
+            </div>
+        </div>
+
+        <!-- LIVE GELUIDSSPECTRAAL & LASER-SPECTRAAL -->
+        <div class="spectral-dock">
+            <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.55rem;">
+                <span>🔊 FFT AUDIO: <b id="spec-audio-hz" style="color:var(--gold)">528.0 Hz</b></span>
+                <span>🌸 BLOEM k: <input type="number" id="inp-flower-k" value="7" min="2" max="24" step="0.5" style="width:45px; padding:1px 3px;" onchange="updateFlowerK(this.value)"></span>
+                <span>🌈 LASER: <b id="spec-laser-nm" style="color:var(--cyan)">517.3 nm</b></span>
+            </div>
+            <canvas id="spectral-canvas" width="420" height="52"></canvas>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEWPORT 3: UITVOERVELDEN, ARCHEOLOGIE, KADASTER/BAG API & WOO-PDF        -->
+    <!-- ========================================================================= -->
+    <section class="viewport-card">
+        <div class="vp-header">
+            <span>VP-03 // UITVOERVELDEN, ARCHEOLOGIE, KADASTER API & WOO-DOSSIERS</span>
+            <span id="vp3-status" style="color:var(--gold)">API READY</span>
+        </div>
+
+        <!-- Live Technische CAD Uitvoer-Tekening van Planimeter + Perceel-Vlaggetjes -->
+        <div class="output-preview-box">
+            <svg id="output-drawing-svg" viewBox="-240 -240 480 480" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+
+        <!-- Schakelknoppen voor de 4 Hoofdmodules in Viewport 3 -->
+        <div class="output-tabs">
+            <button class="active" id="tab-btn-fields" onclick="switchOutputTab('fields')">📊 METINGEN & API</button>
+            <button id="tab-btn-arch" onclick="switchOutputTab('arch')">🏺 ARCHEOLOGIE & KADASTER</button>
+            <button id="tab-btn-code" onclick="switchOutputTab('code')">&lt;/&gt; CODE & MATRIX</button>
+            <button id="tab-btn-woo" onclick="switchOutputTab('woo')">📄 WOO-PDF & GOOGLE</button>
+        </div>
+
+        <div class="output-content-pane">
+            <!-- TAB 1: PLANIMETER UITVOERVELDEN + LIVE PDOK KADASTER / BAG API ZOEKER -->
+            <div id="out-fields-view">
+                <div class="output-fields-grid">
+                    <div class="field-card">
+                        <label>VOLGSTIFT COÖRDINAAT T(x,y)</label>
+                        <strong id="out-f-txy">+7.84, -4.16 cm</strong>
+                    </div>
+                    <div class="field-card">
+                        <label>SCHARNIER G(x,y) & POOL P(x,y)</label>
+                        <strong id="out-f-gxy">G(-1.2, -3.4) | P(-1.0, -7.2)</strong>
+                    </div>
+                    <div class="field-card">
+                        <label>PERCEEL OPPERVLAKTE (VLAGGEN)</label>
+                        <strong id="out-f-area" style="color:var(--green)">412.80 m² (41.28 cm²)</strong>
+                    </div>
+                    <div class="field-card">
+                        <label>OTT NR. 573 NONIUS & OMTREK</label>
+                        <strong id="out-f-nonius" style="color:var(--gold)">ΔU = 413 | L = 82.45 m</strong>
+                    </div>
+                    <div class="field-card">
+                        <label>WGS84 KAART-ANKER (LAT / LON)</label>
+                        <strong id="out-f-latlon">51.5478° N, 4.1056° E</strong>
+                    </div>
+                    <div class="field-card">
+                        <label>SHAO YONG (64) & JIAZI (60)</label>
+                        <strong id="out-f-hex">#12 (111000) | #11/60</strong>
+                    </div>
+                </div>
+
+                <!-- Live PDOK Kadaster & BAG API Zoeker (100% Sleutelloos) -->
+                <div style="background:#0a1220; border:1px solid var(--border); border-radius:4px; padding:6px; margin-bottom:6px;">
+                    <div style="color:var(--gold); font-weight:bold; margin-bottom:4px;">🏛️ LIVE PDOK KADASTER & BAG API BEVRAGING (GEEN KEY NODIG)</div>
+                    <div style="display:flex; gap:4px; margin-bottom:5px;">
+                        <input type="text" id="pdok-search-inp" style="flex:1;" value="Platteweg 7 Scherpenisse" placeholder="Zoek adres, perceel (bijv. Tholen F 123) of BAG-object...">
+                        <button class="btn-gold" onclick="queryPdokKadasterApi()">🔍 Bevraag Kadaster API</button>
+                    </div>
+                    <div id="pdok-api-results" style="max-height:110px; overflow-y:auto; color:var(--text); font-size:0.54rem; line-height:1.4;">
+                        Klik op "Bevraag Kadaster API" om live kadastrale percelen, RD-coördinaten en BAG-panden op te halen en naar het perceel te vliegen.
+                    </div>
+                </div>
+
+                <!-- Tabel van geplaatste Perceel-Vlaggetjes -->
+                <div style="color:var(--cyan); font-weight:bold; margin-bottom:3px;">🚩 ACTIEVE PERCEEL-VLAGGETJES (RECHTSKLIK OP VLAG = WISSEN)</div>
+                <table class="mat-table">
+                    <thead>
+                        <tr>
+                            <th>Vlag</th>
+                            <th>X (cm)</th>
+                            <th>Y (cm)</th>
+                            <th>Lat (°N)</th>
+                            <th>Lon (°E)</th>
+                            <th>Actie</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flags-table-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- TAB 2: ARCHEOLOGISCHE ONDERZOEKSLOCATIES & HISTORISCHE KADASTERS -->
+            <div id="out-arch-view" style="display:none;">
+                <div style="color:var(--gold); font-weight:bold; margin-bottom:5px;">🏺 ARCHEOLOGISCHE & HISTORISCH-KADASTRALE ONDERZOEKSLOCATIES</div>
+                <table class="mat-table">
+                    <thead>
+                        <tr>
+                            <th>Site / Dossier</th>
+                            <th>Coördinaten</th>
+                            <th>Kenmerk / Datering</th>
+                            <th>Vlieg & Meet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="arch-sites-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- TAB 3: LIVE SVG / JS CODE & MATRIX -->
+            <div id="out-code-view" style="display:none;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span style="color:var(--gold); font-weight:bold;">LIVE GEGENEREERDE SVG, PERCEEL-POLYGOON & 6D MATRIX</span>
+                    <button class="btn-gold" onclick="copyCodeToClipboard()">📋 Kopieer Code</button>
+                </div>
+                <textarea id="out-code-area" class="code-area" readonly></textarea>
+            </div>
+
+            <!-- TAB 4: WOO-PDF UPLOADER, READER & GOOGLE WOO DORKS -->
+            <div id="out-woo-view" style="display:none; flex-direction:column; gap:5px;">
+                <div style="display:flex; gap:4px;">
+                    <input type="text" id="woo-google-inp" style="flex:1;" value="site:tholen.nl OR site:open-overheid.nl &quot;artikel 4.6 Woo&quot; OR &quot;Platteweg&quot; Scherpenisse">
+                    <button class="btn-gold" onclick="searchGoogleWoo()">🔍 Google Woo</button>
+                </div>
+                <div style="display:flex; gap:4px;">
+                    <input type="file" id="woo-pdf-inp" accept="application/pdf,.txt" style="display:none;" onchange="handleWooPdfUpload(this.files)">
+                    <button class="active" onclick="document.getElementById('woo-pdf-inp').click()">📄 Upload PDF</button>
+                    <select id="woo-preset-sel" style="flex:1;" onchange="loadWooPreset(this.value)">
+                        <option value="all">📂 Alle Dossiers (BAG 1504573 + Woo 1504535)</option>
+                        <option value="bag_1504573">📄 Zaak 1504573: BAG & Bodem Platteweg 3-5-7 Scherpenisse</option>
+                        <option value="woo_1504535">⚖️ Zaak 1504535: Advies Commissie Art. 4.6 Woo & Precisering</option>
+                    </select>
+                </div>
+                <pre id="woo-reader-pre" style="background:#03060a; border:1px solid var(--border); padding:7px; border-radius:4px; white-space:pre-wrap; max-height:190px; overflow-y:auto;"></pre>
+            </div>
+        </div>
+
+        <!-- 4. EXPORT BALK: SVG, JPG, BITMAP (.BMP) & GEOJSON -->
+        <div class="export-bar">
+            <button class="btn-gold" onclick="exportOutputDrawing('svg')">💾 SVG</button>
+            <button class="btn-gold" onclick="exportOutputDrawing('jpg')">🖼️ JPG</button>
+            <button class="btn-gold" onclick="exportOutputDrawing('bmp')">🏁 BITMAP (.BMP)</button>
+            <button class="btn-gold" onclick="exportParcelGeoJSON()">🌐 GEOJSON</button>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    if (window['pdfjsLib']) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    // =========================================================================================
+    // 1. KERNPARAMETERS, ARCHEOLOGISCHE SITES & VOORGELADEN PERCEEL-VLAGGETJES
+    // =========================================================================================
+    const R_MAX_CM = 10.75;      // 363,00 cm² cirkelstraal (10,749 cm)
+    const R_SVG_PX = 185;        // Straal in 480x480 SVG viewBox
+    const PX_PER_CM = R_SVG_PX / R_MAX_CM; // ~17.209 px/cm
+
+    // Mechanische A. Ott Nr. 573 Poolplanimeter afmetingen
+    const OTT_POLE_ARM_PX = 148;  // Poolarm R = 15,00 cm
+    const OTT_TRACE_ARM_PX = 164; // Rijarm L = 16,67 cm
+
+    // Archeologische & Kadastrale Onderzoekslocaties
+    const ARCHEO_SITES = [
+        {
+            id: "SCHERPENISSE_BAG",
+            name: "Platteweg 3-5-7 Scherpenisse (Wagenhuis & Schuur 1926)",
+            lat: 51.5478, lon: 4.1056, zoom: 17.2,
+            info: "BAG Panden 071610000073213 & 071610000142316 (Bouwjaar 1926) + WOZ tussengrens-correctie 2022",
+            flags: [
+                { x: 24, y: -32, label: "P7-NW (Wagenhuis)" },
+                { x: 68, y: -28, label: "P7-NO (Schuur 1926)" },
+                { x: 72, y: 24,  label: "P5-ZO (84m² WOZ)" },
+                { x: 18, y: 28,  label: "P3-ZW (68m² WOZ)" }
+            ]
+        },
+        {
+            id: "REIMERSWAAL_STAD",
+            name: "Verdronken Stad Reimerswaal (Oosterschelde Monument)",
+            lat: 51.4742, lon: 4.1722, zoom: 13.8,
+            info: "Rijksmonument Verdronken Land (1530 Sint-Felixvloed / 1573 / 1631 migratie naar Tholen)",
+            flags: [
+                { x: -45, y: -40, label: "Reimerswaal Noordwal" },
+                { x: 52,  y: -35, label: "Kreekgeul Oost" },
+                { x: 48,  y: 44,  label: "Parochiekern Zuid" },
+                { x: -48, y: 38,  label: "Oosterschelde Dijkrest" }
+            ]
+        },
+        {
+            id: "THOLEN_VESTING",
+            name: "Gemeente Tholen (Historische Haven & Visserijrechten)",
+            lat: 51.5315, lon: 4.2205, zoom: 15.2,
+            info: "Schelpdierpercelen, historische visserijrechten & archiefonderzoek Tholen",
+            flags: [
+                { x: -35, y: -35, label: "Bastion Noord" },
+                { x: 40,  y: -30, label: "Schelde-perceel Oost" },
+                { x: 35,  y: 40,  label: "Havenkom Zuid" },
+                { x: -38, y: 32,  label: "Wallen West" }
+            ]
+        },
+        {
+            id: "LAREN_TAFELBERG",
+            name: "Laren NH — De Mees 27 / Tafelbergheide (Poolanker P)",
+            lat: 52.2562, lon: 5.2285, zoom: 15.5,
+            info: "Geodetisch Nulpunt Amersfoort/Laren & Grafheuvels Erfgooiersweg",
+            flags: [
+                { x: -30, y: -42, label: "Mees 27 Anker" },
+                { x: 42,  y: -38, label: "Tafelberg Oost" },
+                { x: 38,  y: 35,  label: "Gooiergracht Zuid" },
+                { x: -35, y: 30,  label: "Erfgooiers West" }
+            ]
+        },
+        {
+            id: "BOURGES_N2",
+            name: "Dept. 41/18 Bourges / Loir-et-Cher (N² Kern Frankrijk)",
+            lat: 47.2500, lon: 1.8500, zoom: 8.5,
+            info: "Centraal N² Scharnierpunt van de 6×6 Hexagonale Matrix",
+            flags: [
+                { x: -60, y: -60, label: "Dept. 76/80 Noord" },
+                { x: 75,  y: -25, label: "Dept. 67 Elzas Spits" },
+                { x: 45,  y: 70,  label: "Dept. 03/69 ZO" },
+                { x: -75, y: 55,  label: "Dept. 17/85 Biskaje" }
+            ]
+        },
+        {
+            id: "GOSECK_RING",
+            name: "Goseck Zonobservatorium (Neolithische Cirkel 4900 v.Chr.)",
+            lat: 51.1983, lon: 11.8647, zoom: 16.5,
+            info: "Zonnewende-poorten op 108° Zomerzonnewende / Sirius-corridor",
+            flags: [
+                { x: 0,   y: -55, label: "Noordpoort Meridiaan" },
+                { x: 52,  y: 28,  label: "ZO Zonsopkomst (108°)" },
+                { x: -52, y: 28,  label: "ZW Zonsondergang (252°)" }
+            ]
+        }
+    ];
+
+    const VECTOR_ANCHORS = [
+        { id: "THOLEN",   name: "Tholen / Scherpenisse BAG",  azDeg: 82.50,  rhoCm: 10.25, nonius: 832,  lambdaNm: 486.1, audioHz: 480.0, col: "#38bdf8" },
+        { id: "PLEIADES", name: "Pleiaden (M45) + Uranus",    azDeg: 62.10,  rhoCm: 8.88,  nonius: 885,  lambdaNm: 517.3, audioHz: 528.0, col: "#00e5ff" },
+        { id: "TAURUS",   name: "Stier (Taurus) / Aldebaran", azDeg: 51.40,  rhoCm: 8.88,  nonius: 519,  lambdaNm: 589.3, audioHz: 432.0, col: "#f5b027" },
+        { id: "GOSECK",   name: "Goseck / Sirius 108°",       azDeg: 108.00, rhoCm: 10.75, nonius: 1089, lambdaNm: 532.0, audioHz: 417.0, col: "#10b981" },
+        { id: "CANCER",   name: "Kreeft (Cancer) / Lot",      azDeg: 198.79, rhoCm: 7.45,  nonius: 2005, lambdaNm: 656.3, audioHz: 396.0, col: "#ef4444" },
+        { id: "ECLIPS26", name: "Eclips 12 Aug '26 (245.9°)", azDeg: 245.91, rhoCm: 10.75, nonius: 2476, lambdaNm: 589.0, audioHz: 444.0, col: "#ffcc33" },
+        { id: "NYC29",    name: "Laren → NYC 29° Vector",     azDeg: 29.00,  rhoCm: 10.75, nonius: 292,  lambdaNm: 632.8, audioHz: 288.0, col: "#ff3385" }
+    ];
+
+    const WOO_ARCHIVE = {
+        bag_1504573: `[GEMEENTE THOLEN — ZAAKNUMMER 1504573 — 13 OKTOBER 2026]
+Onderwerp: Bag en Bodemgegevens Platteweg 7 Scherpenisse
+• 02-03-2011: Pand 071610000073213 (het wagenhuis) bouwjaar gewijzigd van 9999 naar 1926.
+• 02-03-2011: Pand 071610000142316 (de schuur) bouwjaar gewijzigd van 9999 naar 1926.
+• 10-02-2022: Tussengrens van pand 0716100000177900 en pand 0716100000142316 geometrisch gecorrigeerd (WOZ).
+• 24-02-2022: Gebruiksoppervlak Platteweg 3 (0716010000023002) gewijzigd van 79m² naar 68m² (WOZ).
+• 24-02-2022: Gebruiksoppervlak Platteweg 5 (0716012000000060) gewijzigd van 61m² naar 84m² (WOZ).`,
+        woo_1504535: `[GEMEENTE THOLEN — ZAAKNUMMER 1504535 — 8 OKTOBER 2026]
+Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
+• Advies bezwaarschriftencommissie (28 aug 2026): Het inroepen van art. 4.6 Woo (antimisbruikbepaling) is onvoldoende gemotiveerd.
+• Het verzoek ziet op concrete bestuurlijke aangelegenheden: historische visserijrechten, pachtovereenkomsten en milieu-informatie.
+• B&W volgt het advies: besluit van 27 januari 2026 wordt herroepen en het Woo-verzoek wordt inhoudelijk in behandeling genomen.`
+    };
+
+    const state = {
+        azDeg: 62.10,
+        rhoCm: 8.88,
+        sigma: 1.00,
+        flowerK: 7.0,
+        poleX: -18,
+        poleY: -125,
+        elbowSign: -1,
+        txPx: 0, tyPx: 0,
+        gxPx: 0, gyPx: 0,
+        wxPx: 0, wyPx: 0,
+        nonius: 885,
+        wavelengthNm: 517.3,
+        audioHz: 528.0,
+        audioEnabled: true,
+        activeAnchorIdx: 0,
+        rasterMode: 'voronoi',   // 'none', 'voronoi', 'penrose', 'cellarius', 'flower'
+        starsVisible: false,     // Standaard UIT zoals gevraagd!
+        seaGridEnabled: true,    // Zeegrid + OpenSeaMap als allereerste AAN!
+        flagClickMode: true,
+        globeInteractive: false,
+        draggingPole: false,
+        centerLat: 51.5478,
+        centerLon: 4.1056,
+        pose6D: { pitch: 0, roll: 0, yaw: 0, zoom: 1.0 },
+        flags: ARCHEO_SITES[0].flags.map(f => ({ ...f }))
+    };
+
+    // =========================================================================================
+    // 2. ZEEGRID + OPENSEAMAP ALS ALLEREERSTE & KAARTPROVIDERS ZONDER API-KEYS
+    // =========================================================================================
+    const MAP_PROVIDERS = {
+        opensea_first: {
+            tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
+            maxzoom: 19
+        },
+        pdok_kadaster: {
+            tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'],
+            maxzoom: 19,
+            kadasterWms: true
+        },
+        pdok_brt: {
+            tiles: ['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'],
+            maxzoom: 19
+        },
+        esri_ocean: {
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}'],
+            maxzoom: 16
+        },
+        esri_sat: {
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+            maxzoom: 19
+        },
+        osm_std: {
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            maxzoom: 19
+        },
+        opentopo: {
+            tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png'],
+            maxzoom: 17
+        }
+    };
+
+    function buildNauticalSeaGridGeoJSON() {
+        const features = [];
+        for (let lat = -80; lat <= 80; lat += 2) {
+            const coords = [];
+            for (let lon = -180; lon <= 180; lon += 2) coords.push([lon, lat]);
+            features.push({ type: 'Feature', properties: { major: lat % 10 === 0 ? 1 : 0 }, geometry: { type: 'LineString', coordinates: coords } });
+        }
+        for (let lon = -180; lon <= 180; lon += 2) {
+            const coords = [];
+            for (let lat = -80; lat <= 80; lat += 2) coords.push([lon, lat]);
+            features.push({ type: 'Feature', properties: { major: lon % 10 === 0 ? 1 : 0 }, geometry: { type: 'LineString', coordinates: coords } });
+        }
+        // Fijnmazig Zeegrid voor Noordzee / Oosterschelde / Zeeland
+        for (let lat = 51.1; lat <= 52.5; lat += 0.025) {
+            features.push({ type: 'Feature', properties: { major: 2 }, geometry: { type: 'LineString', coordinates: [[3.3, lat], [5.5, lat]] } });
+        }
+        for (let lon = 3.3; lon <= 5.5; lon += 0.025) {
+            features.push({ type: 'Feature', properties: { major: 2 }, geometry: { type: 'LineString', coordinates: [[lon, 51.1], [lon, 52.5]] } });
+        }
+        return { type: 'FeatureCollection', features };
+    }
+
+    function buildMapStyle(providerKey) {
+        const prov = MAP_PROVIDERS[providerKey] || MAP_PROVIDERS.opensea_first;
+        const sources = {
+            'base-tiles': { type: 'raster', tiles: prov.tiles, tileSize: 256, maxzoom: prov.maxzoom },
+            'openseamap-tiles': { type: 'raster', tiles: ['https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 18 },
+            'nautical-seagrid': { type: 'geojson', data: buildNauticalSeaGridGeoJSON() }
+        };
+
+        const layers = [
+            { id: 'base-layer', type: 'raster', source: 'base-tiles', paint: { 'raster-opacity': 1.0 } }
+        ];
+
+        // Voeg PDOK Kadastrale Perceelgrenzen WMS toe indien gekozen
+        if (prov.kadasterWms) {
+            sources['pdok-brk-wms'] = {
+                type: 'raster',
+                tiles: [
+                    'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true&LAYERS=Perceel,KadastraleGrens,bebouwing&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}'
+                ],
+                tileSize: 256
+            };
+            layers.push({ id: 'kadaster-wms-layer', type: 'raster', source: 'pdok-brk-wms', paint: { 'raster-opacity': 0.95 } });
+        }
+
+        // Zeegrid + OpenSeaMap direct geladen
+        layers.push(
+            {
+                id: 'seagrid-lines',
+                type: 'line',
+                source: 'nautical-seagrid',
+                layout: { visibility: state.seaGridEnabled ? 'visible' : 'none' },
+                paint: {
+                    'line-color': ['match', ['get', 'major'], 2, '#00e5ff', 1, '#f5b027', 'rgba(0, 229, 255, 0.4)'],
+                    'line-width': ['match', ['get', 'major'], 2, 0.85, 1, 1.3, 0.5],
+                    'line-dasharray': [2, 2]
+                }
+            },
+            {
+                id: 'seamark-layer',
+                type: 'raster',
+                source: 'openseamap-tiles',
+                layout: { visibility: state.seaGridEnabled ? 'visible' : 'none' },
+                paint: { 'raster-opacity': 0.95 }
+            }
+        );
+
+        return { version: 8, sources, layers };
+    }
+
+    let globeMap = null;
+    function initMapGlobe() {
+        if (typeof maplibregl === 'undefined') return;
+        globeMap = new maplibregl.Map({
+            container: 'mapglobe-bg',
+            preserveDrawingBuffer: true,
+            attributionControl: false,
+            style: buildMapStyle('opensea_first'),
+            center: [state.centerLon, state.centerLat],
+            zoom: 15.2,
+            pitch: 30
+        });
+        globeMap.on('style.load', () => {
+            if (typeof globeMap.setProjection === 'function') {
+                try { globeMap.setProjection({ type: 'globe' }); } catch (e) {}
+            }
+        });
+        globeMap.on('move', () => {
+            const c = globeMap.getCenter();
+            state.centerLat = c.lat;
+            state.centerLon = c.lng;
+            document.getElementById('out-f-latlon').textContent = `${c.lat.toFixed(4)}° N, ${c.lng.toFixed(4)}° E`;
+        });
+        globeMap.on('error', () => {});
+    }
+
+    function switchMapProvider(key) {
+        if (!globeMap) return;
+        globeMap.setStyle(buildMapStyle(key));
+    }
+
+    function toggleSeaGrid() {
+        state.seaGridEnabled = !state.seaGridEnabled;
+        const btn = document.getElementById('btn-seagrid');
+        btn.textContent = `⚓ 1. Zeegrid + OpenSeaMap: ${state.seaGridEnabled ? 'AAN' : 'UIT'}`;
+        btn.classList.toggle('active', state.seaGridEnabled);
+        if (!globeMap) return;
+        const vis = state.seaGridEnabled ? 'visible' : 'none';
+        if (globeMap.getLayer('seagrid-lines')) globeMap.setLayoutProperty('seagrid-lines', 'visibility', vis);
+        if (globeMap.getLayer('seamark-layer')) globeMap.setLayoutProperty('seamark-layer', 'visibility', vis);
+    }
+
+    // =========================================================================================
+    // 3. OPTIONELE RASTERS: VORONOI DIAGRAM, PENROSE QUASIKRISTAL, CELLARIUS & BLOEM
+    // =========================================================================================
+    function setRasterMode(mode) {
+        state.rasterMode = mode;
+        drawOptionalRasterCanvas();
+        renderModularFlowerLayer();
+    }
+
+    function toggleStarsOverlay() {
+        state.starsVisible = !state.starsVisible;
+        const btn = document.getElementById('btn-stars-toggle');
+        btn.textContent = `✨ Sterren Overlay: ${state.starsVisible ? 'AAN' : 'UIT'}`;
+        btn.classList.toggle('active', state.starsVisible);
+        document.getElementById('constellations-layer').style.display = state.starsVisible ? 'block' : 'none';
+    }
+
+    function drawOptionalRasterCanvas() {
+        const canvas = document.getElementById('raster-overlay-canvas');
+        if (!canvas) return;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width || 560;
+        canvas.height = rect.height || 560;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (state.rasterMode === 'none' || state.rasterMode === 'flower') return;
+
+        const w = canvas.width, h = canvas.height;
+        const cx = w / 2, cy = h / 2;
+        const scale = Math.min(w, h) / 480.0;
+
+        if (state.rasterMode === 'cellarius') {
+            const size = Math.min(w, h) * (370 / 480);
+            const x0 = cx - size / 2, y0 = cy - size / 2;
+            const cell = size / 64;
+            const cols = ['rgba(234,179,8,0.14)', 'rgba(239,68,68,0.13)', 'rgba(34,197,94,0.12)', 'rgba(59,130,246,0.13)', 'rgba(168,85,247,0.12)'];
+            for (let r = 0; r < 64; r++) {
+                for (let c = 0; c < 64; c++) {
+                    ctx.fillStyle = cols[(r * 3 + c * 5) % 5];
+                    ctx.fillRect(x0 + c * cell, y0 + r * cell, cell - 0.4, cell - 0.4);
+                }
+            }
+            return;
+        }
+
+        if (state.rasterMode === 'voronoi') {
+            // Verzamel zaden uit de geplaatste Perceel-Vlaggetjes + Vector-Ankers
+            const seeds = [];
+            state.flags.forEach((f, i) => {
+                seeds.push({ x: cx + f.x * scale, y: cy + f.y * scale, col: i % 2 === 0 ? [0, 229, 255] : [245, 176, 39] });
+            });
+            VECTOR_ANCHORS.forEach((a, i) => {
+                const rad = (a.azDeg - 90) * Math.PI / 180;
+                const r = a.rhoCm * PX_PER_CM * scale;
+                seeds.push({ x: cx + Math.cos(rad) * r, y: cy + Math.sin(rad) * r, col: [16, 185, 129] });
+            });
+            if (seeds.length === 0) return;
+
+            // Render scherp Voronoi-cellenveld + celgrenzen
+            const step = 4;
+            for (let y = 0; y < h; y += step) {
+                for (let x = 0; x < w; x += step) {
+                    if (Math.hypot(x - cx, y - cy) > R_SVG_PX * scale) continue;
+                    let d1 = 1e9, d2 = 1e9, best = seeds[0];
+                    for (let i = 0; i < seeds.length; i++) {
+                        const d = Math.hypot(x - seeds[i].x, y - seeds[i].y);
+                        if (d < d1) { d2 = d1; d1 = d; best = seeds[i]; }
+                        else if (d < d2) { d2 = d; }
+                    }
+                    if (Math.abs(d2 - d1) < 3.4) {
+                        ctx.fillStyle = 'rgba(0, 229, 255, 0.68)';
+                        ctx.fillRect(x, y, step, step);
+                    } else {
+                        ctx.fillStyle = `rgba(${best.col[0]}, ${best.col[1]}, ${best.col[2]}, 0.08)`;
+                        ctx.fillRect(x, y, step, step);
+                    }
+                }
+            }
+            return;
+        }
+
+        if (state.rasterMode === 'penrose') {
+            // Penrose P3 Robinson-driehoek deflatie (Gulden Snede φ = 1.6180339887)
+            const PHI = (1 + Math.sqrt(5)) / 2;
+            let triangles = [];
+            const radius = R_SVG_PX * scale;
+            for (let i = 0; i < 10; i++) {
+                const a1 = (2 * i - 1) * Math.PI / 10;
+                const a2 = (2 * i + 1) * Math.PI / 10;
+                let B = { x: cx + Math.cos(a1) * radius, y: cy + Math.sin(a1) * radius };
+                let C = { x: cx + Math.cos(a2) * radius, y: cy + Math.sin(a2) * radius };
+                if (i % 2 === 0) { const tmp = B; B = C; C = tmp; }
+                triangles.push([0, { x: cx, y: cy }, B, C]);
+            }
+            for (let s = 0; s < 4; s++) {
+                const next = [];
+                for (const [color, A, B, C] of triangles) {
+                    if (color === 0) {
+                        const P = { x: A.x + (B.x - A.x) / PHI, y: A.y + (B.y - A.y) / PHI };
+                        next.push([0, C, P, B], [1, P, C, A]);
+                    } else {
+                        const Q = { x: B.x + (A.x - B.x) / PHI, y: B.y + (A.y - B.y) / PHI };
+                        const R = { x: B.x + (C.x - B.x) / PHI, y: B.y + (C.y - B.y) / PHI };
+                        next.push([1, R, C, A], [1, Q, R, B], [0, R, Q, A]);
+                    }
+                }
+                triangles = next;
+            }
+            ctx.lineWidth = 0.7;
+            for (const [color, A, B, C] of triangles) {
+                ctx.fillStyle = color === 0 ? 'rgba(0, 229, 255, 0.09)' : 'rgba(245, 176, 39, 0.11)';
+                ctx.strokeStyle = color === 0 ? 'rgba(0, 229, 255, 0.42)' : 'rgba(245, 176, 39, 0.42)';
+                ctx.beginPath();
+                ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y); ctx.closePath();
+                ctx.fill(); ctx.stroke();
+            }
+        }
+    }
+
+    // =========================================================================================
+    // 4. 6D ROBOTICA KANTELINGEN (PITCH, ROLL, YAW, X, Y, ZOOM)
+    // =========================================================================================
+    function update6DRobotics() {
+        const pitch = parseFloat(document.getElementById('sl-6d-pitch').value);
+        const roll  = parseFloat(document.getElementById('sl-6d-roll').value);
+        const yaw   = parseFloat(document.getElementById('sl-6d-yaw').value);
+        const zoom  = parseFloat(document.getElementById('sl-6d-zoom').value);
+
+        state.pose6D = { pitch, roll, yaw, zoom };
+        document.getElementById('lbl-6d-pitch').textContent = `${pitch}°`;
+        document.getElementById('lbl-6d-roll').textContent  = `${roll}°`;
+        document.getElementById('lbl-6d-yaw').textContent   = `${yaw}°`;
+        document.getElementById('lbl-6d-zoom').textContent  = `${zoom.toFixed(2)}×`;
+        document.getElementById('hud-6d-pose').textContent  = `P:${pitch}° R:${roll}° Y:${yaw}° Z:${zoom.toFixed(2)}x`;
+
+        const transformCss = `scale(${zoom}) rotateX(${pitch}deg) rotateY(${roll}deg) rotateZ(${yaw}deg)`;
+        document.getElementById('planimeter-svg').style.transform = transformCss;
+        document.getElementById('raster-overlay-canvas').style.transform = transformCss;
+
+        if (globeMap) {
+            globeMap.setPitch(Math.min(60, Math.abs(pitch)));
+            globeMap.setBearing(yaw);
+        }
+        renderAllThreeViewports();
+    }
+
+    function reset6DRobotics() {
+        document.getElementById('sl-6d-pitch').value = 0;
+        document.getElementById('sl-6d-roll').value  = 0;
+        document.getElementById('sl-6d-yaw').value   = 0;
+        document.getElementById('sl-6d-zoom').value  = 1.0;
+        update6DRobotics();
+    }
+
+    // Muiswiel-zoom op Viewport 1
+    document.getElementById('vp1-stage').addEventListener('wheel', (e) => {
+        if (state.globeInteractive) return;
+        e.preventDefault();
+        const sl = document.getElementById('sl-6d-zoom');
+        const nextZoom = Math.max(0.5, Math.min(2.5, parseFloat(sl.value) + (e.deltaY < 0 ? 0.08 : -0.08)));
+        sl.value = nextZoom;
+        update6DRobotics();
+    }, { passive: false });
+
+    // =========================================================================================
+    // 5. VLAGGETJES PLAATSEN (LINKS-KLIK) & WISSEN (RECHTS-KLIK) + PERCEELGRENS BEREKENING
+    // =========================================================================================
+    function toggleFlagClickMode() {
+        state.flagClickMode = !state.flagClickMode;
+        document.getElementById('btn-flag-mode').classList.toggle('active', state.flagClickMode);
+    }
+
+    function placeFlagAtPoint(xPx, yPx, customLabel = null) {
+        const idx = state.flags.length + 1;
+        state.flags.push({
+            x: Number(xPx.toFixed(1)),
+            y: Number(yPx.toFixed(1)),
+            label: customLabel || `Vlag F${idx}`
+        });
+        if (state.rasterMode === 'voronoi') drawOptionalRasterCanvas();
+        renderAllThreeViewports();
+    }
+
+    function placeFlagAtTracer() {
+        placeFlagAtPoint(state.txPx, state.tyPx, `Stempel M${state.flags.length + 1}`);
+        triggerSpectralTone(528, 0.18);
+    }
+
+    function removeFlagByIndex(idx) {
+        if (idx >= 0 && idx < state.flags.length) {
+            state.flags.splice(idx, 1);
+            if (state.rasterMode === 'voronoi') drawOptionalRasterCanvas();
+            renderAllThreeViewports();
+        }
+    }
+
+    function clearAllFlags() {
+        state.flags = [];
+        if (state.rasterMode === 'voronoi') drawOptionalRasterCanvas();
+        renderAllThreeViewports();
+    }
+
+    // Bereken Perceeloppervlakte (Gauss Shoelace) & Omtrek op basis van de geplaatste Vlaggetjes
+    function computeParcelMetrics() {
+        const pts = state.flags;
+        let areaPx2 = 0;
+        let perimPx = 0;
+        for (let i = 0; i < pts.length; i++) {
+            const j = (i + 1) % pts.length;
+            if (pts.length >= 2) {
+                perimPx += Math.hypot(pts[j].x - pts[i].x, pts[j].y - pts[i].y);
+            }
+            if (pts.length >= 3) {
+                areaPx2 += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+            }
+        }
+        areaPx2 = Math.abs(areaPx2) * 0.5;
+        const areaCm2 = areaPx2 / (PX_PER_CM * PX_PER_CM);
+        // Op kadastrale schaal 1:1000 komt 1 cm² overeen met 10,00 m²
+        const areaM2 = areaCm2 * 10.0;
+        const perimCm = perimPx / PX_PER_CM;
+        const perimM = perimCm * Math.sqrt(10.0);
+        const noniusDelta = Math.round(areaCm2 * 10);
+
+        return { areaCm2, areaM2, perimCm, perimM, noniusDelta };
+    }
+
+    function renderFlagsAndParcelLayer() {
+        const layer = document.getElementById('parcel-flags-layer');
+        const pts = state.flags;
+        let h = '';
+
+        if (pts.length >= 2) {
+            const polyStr = pts.map(p => `${p.x},${p.y}`).join(' ');
+            h += `<polygon points="${polyStr}" fill="rgba(16, 185, 129, 0.16)" stroke="#10b981" stroke-width="1.8" stroke-dasharray="4,2"/>`;
+
+            // Lengtelabels op elk perceelgrens-segment
+            for (let i = 0; i < pts.length; i++) {
+                const p1 = pts[i], p2 = pts[(i + 1) % pts.length];
+                const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+                const segM = ((Math.hypot(p2.x - p1.x, p2.y - p1.y) / PX_PER_CM) * Math.sqrt(10)).toFixed(1);
+                h += `<rect x="${mx - 14}" y="${my - 5}" width="28" height="9" rx="2" fill="rgba(5,8,17,0.85)" stroke="#10b981" stroke-width="0.6"/>`;
+                h += `<text x="${mx}" y="${my + 1.5}" fill="#10b981" font-family="monospace" font-size="5.4" text-anchor="middle">${segM}m</text>`;
+            }
+        }
+
+        // Teken elk vlaggetje (Rechtsklik op vlaggetje wist het direct!)
+        pts.forEach((p, idx) => {
+            h += `<g oncontextmenu="event.preventDefault(); event.stopPropagation(); removeFlagByIndex(${idx});" style="cursor:pointer;">`;
+            h += `<circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#f5b027" stroke="#ffffff" stroke-width="1.2"/>`;
+            h += `<line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${p.y - 16}" stroke="#f5b027" stroke-width="1.5"/>`;
+            h += `<polygon points="${p.x},${p.y - 16} ${p.x + 11},${p.y - 12} ${p.x},${p.y - 8}" fill="#ef4444"/>`;
+            h += `<text x="${p.x + 6}" y="${p.y + 3}" fill="#fde047" font-family="monospace" font-size="6.0" font-weight="bold">${p.label}</text>`;
+            h += `</g>`;
+        });
+
+        layer.innerHTML = h;
+
+        const metrics = computeParcelMetrics();
+        document.getElementById('hud-flag-count').textContent = pts.length;
+        document.getElementById('hud-parcel-m2').textContent = `${metrics.areaM2.toFixed(2)} m²`;
+        document.getElementById('hud-parcel-cm2').textContent = `${metrics.areaCm2.toFixed(2)} cm²`;
+        document.getElementById('hud-parcel-perim').textContent = `${metrics.perimM.toFixed(2)} m`;
+        document.getElementById('hud-parcel-nonius').textContent = metrics.noniusDelta;
+
+        document.getElementById('out-f-area').textContent = `${metrics.areaM2.toFixed(2)} m² (${metrics.areaCm2.toFixed(2)} cm²)`;
+        document.getElementById('out-f-nonius').textContent = `ΔU = ${metrics.noniusDelta} | L = ${metrics.perimM.toFixed(2)} m`;
+
+        // Update Vlaggetjes-tabel in VP-03
+        const tbody = document.getElementById('flags-table-tbody');
+        tbody.innerHTML = pts.map((p, idx) => {
+            const xCm = (p.x / PX_PER_CM).toFixed(2);
+            const yCm = (-p.y / PX_PER_CM).toFixed(2);
+            const lat = (state.centerLat - (p.y / R_SVG_PX) * 0.0022).toFixed(5);
+            const lon = (state.centerLon + (p.x / R_SVG_PX) * 0.0035).toFixed(5);
+            return `<tr>
+                <td style="color:var(--gold)">${p.label}</td>
+                <td>${xCm}</td>
+                <td>${yCm}</td>
+                <td>${lat}</td>
+                <td>${lon}</td>
+                <td><button class="btn-danger" style="padding:1px 5px;" onclick="removeFlagByIndex(${idx})">✖</button></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // =========================================================================================
+    // 6. EXACTE A. OTT NR. 573 POOLPLANIMETER KINEMATICA
+    // =========================================================================================
+    function solveOtt573Kinematics(px, py, tx, ty) {
+        const dx = tx - px, dy = ty - py;
+        const d = Math.hypot(dx, dy);
+        const maxReach = OTT_POLE_ARM_PX + OTT_TRACE_ARM_PX - 4;
+        const minReach = Math.abs(OTT_POLE_ARM_PX - OTT_TRACE_ARM_PX) + 4;
+        const clampedD = Math.max(minReach, Math.min(maxReach, d || 1));
+
+        const a = (OTT_POLE_ARM_PX * OTT_POLE_ARM_PX - OTT_TRACE_ARM_PX * OTT_TRACE_ARM_PX + clampedD * clampedD) / (2 * clampedD);
+        const h = Math.sqrt(Math.max(0, OTT_POLE_ARM_PX * OTT_POLE_ARM_PX - a * a));
+        const ux = dx / (d || 1), uy = dy / (d || 1);
+
+        const gx = px + a * ux + state.elbowSign * h * (-uy);
+        const gy = py + a * uy + state.elbowSign * h * ux;
+
+        const tDx = tx - gx, tDy = ty - gy;
+        const tLen = Math.hypot(tDx, tDy) || 1;
+        const tux = tDx / tLen, tuy = tDy / tLen;
+
+        const wx = gx + tux * (tLen * 0.62);
+        const wy = gy + tuy * (tLen * 0.62);
+
+        return { px, py, gx, gy, wx, wy, tx, ty, tux, tuy };
+    }
+
+    function buildCleanPlanimeterArmSVG(kin, noniusVal, showLabels = true) {
+        const { px, py, gx, gy, wx, wy, tx, ty, tux, tuy } = kin;
+        const nx = -tuy, ny = tux;
+        let h = '';
+
+        h += `<line x1="${(-tx).toFixed(1)}" y1="${(-ty).toFixed(1)}" x2="${tx.toFixed(1)}" y2="${ty.toFixed(1)}" stroke="rgba(0, 229, 255, 0.35)" stroke-width="1" stroke-dasharray="3,3"/>`;
+        h += `<line x1="${px.toFixed(1)}" y1="${py.toFixed(1)}" x2="${gx.toFixed(1)}" y2="${gy.toFixed(1)}" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>`;
+        h += `<line x1="${px.toFixed(1)}" y1="${py.toFixed(1)}" x2="${gx.toFixed(1)}" y2="${gy.toFixed(1)}" stroke="#d4a024" stroke-width="5.5" stroke-linecap="round"/>`;
+
+        h += `<line x1="${gx.toFixed(1)}" y1="${gy.toFixed(1)}" x2="${tx.toFixed(1)}" y2="${ty.toFixed(1)}" stroke="#78350f" stroke-width="7" stroke-linecap="round"/>`;
+        h += `<line x1="${gx.toFixed(1)}" y1="${gy.toFixed(1)}" x2="${tx.toFixed(1)}" y2="${ty.toFixed(1)}" stroke="#eab308" stroke-width="4.8" stroke-linecap="round"/>`;
+
+        h += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="8.5" fill="#451a03" stroke="#fde047" stroke-width="2"/>`;
+        h += `<circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="6" fill="#0f172a" stroke="#00e5ff" stroke-width="2"/>`;
+
+        const w1x = wx + nx * 10, w1y = wy + ny * 10;
+        const w2x = wx - nx * 10, w2y = wy - ny * 10;
+        h += `<line x1="${w1x.toFixed(1)}" y1="${w1y.toFixed(1)}" x2="${w2x.toFixed(1)}" y2="${w2y.toFixed(1)}" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>`;
+        h += `<circle cx="${wx.toFixed(1)}" cy="${wy.toFixed(1)}" r="11" fill="#fef3c7" stroke="#b45309" stroke-width="1.8"/>`;
+        h += `<text x="${wx.toFixed(1)}" y="${(wy + 2.2).toFixed(1)}" fill="#000" font-family="monospace" font-size="5.8" font-weight="bold" text-anchor="middle">${noniusVal}</text>`;
+
+        h += `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="8" fill="rgba(0, 229, 255, 0.22)" stroke="#00e5ff" stroke-width="2"/>`;
+        h += `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="2" fill="#ffffff"/>`;
+
+        if (showLabels) {
+            h += `<text x="${(px + 11).toFixed(1)}" y="${(py + 3).toFixed(1)}" fill="#fde047" font-family="monospace" font-size="6.4" font-weight="bold">Pool P</text>`;
+        }
+        return h;
+    }
+
+    // =========================================================================================
+    // 7. REALTIME ZON, MAAN, STERREN & GETIJDEN / WATERSTANDEN ENGINE
+    // =========================================================================================
+    function updateRealtimeSunStarsAndTides() {
+        const now = new Date();
+        document.getElementById('hdr-clock').textContent = now.toLocaleTimeString('nl-NL') + ' CEST';
+        document.getElementById('astro-time-lbl').textContent = now.toISOString().slice(0, 10);
+
+        // Bereken Realtime Zon Azimut & Hoogte voor huidige kaartcoördinaat
+        const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+        const declRad = -23.44 * (Math.PI / 180) * Math.cos((2 * Math.PI / 365) * (dayOfYear + 10));
+        const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+        const solarTime = utcHours + state.centerLon / 15;
+        const hourAngleRad = (solarTime - 12) * 15 * (Math.PI / 180);
+        const latRad = state.centerLat * (Math.PI / 180);
+
+        const sinAlt = Math.sin(latRad) * Math.sin(declRad) + Math.cos(latRad) * Math.cos(declRad) * Math.cos(hourAngleRad);
+        const sunAltDeg = Math.asin(Math.max(-1, Math.min(1, sinAlt))) * (180 / Math.PI);
+        const cosAz = (Math.sin(declRad) - Math.sin(latRad) * sinAlt) / (Math.cos(latRad) * Math.cos(Math.asin(sinAlt)) || 1);
+        let sunAzDeg = Math.acos(Math.max(-1, Math.min(1, cosAz))) * (180 / Math.PI);
+        if (hourAngleRad > 0) sunAzDeg = 360 - sunAzDeg;
+
+        // Maanfase & Siderische Tijd (LST)
+        const synodicMonth = 29.53058867;
+        const refNewMoon = new Date('2026-10-10T15:50:00Z').getTime();
+        const moonAge = (((now.getTime() - refNewMoon) / 86400000) % synodicMonth + synodicMonth) % synodicMonth;
+        const moonIllum = Math.round((1 - Math.cos((2 * Math.PI * moonAge) / synodicMonth)) * 50);
+        const moonAltDeg = (sunAltDeg * -0.65 + 14 * Math.sin(moonAge)).toFixed(1);
+
+        const lstHours = ((10.6 + utcHours * 1.0027379 + state.centerLon / 15) % 24 + 24) % 24;
+        const lstH = Math.floor(lstHours), lstM = Math.floor((lstHours - lstH) * 60);
+
+        document.getElementById('rt-sun-pos').textContent = `${sunAzDeg.toFixed(1)}° / ${sunAltDeg >= 0 ? '+' : ''}${sunAltDeg.toFixed(1)}°`;
+        document.getElementById('rt-moon-pos').textContent = `${moonIllum}% (${moonAge.toFixed(1)}d) / ${moonAltDeg}°`;
+        document.getElementById('rt-lst').textContent = `${String(lstH).padStart(2,'0')}:${String(lstM).padStart(2,'0')}`;
+
+        // Realtime Harmonische Getijden & Waterstand (Oosterschelde / Reimerswaal M2 + S2)
+        const tHours = now.getTime() / 3600000;
+        const m2Period = 12.4206012; // M2 Maansgetijde in uren
+        const s2Period = 12.0000000; // S2 Zonsgetijde in uren
+        const m2Phase = (2 * Math.PI * tHours) / m2Period;
+        const s2Phase = (2 * Math.PI * tHours) / s2Period;
+
+        const waterNapMeters = 0.08 + 1.42 * Math.sin(m2Phase) + 0.34 * Math.sin(s2Phase - 0.4);
+        const tideDerivative = Math.cos(m2Phase);
+        const isRising = tideDerivative >= 0;
+
+        document.getElementById('rt-water-nap').textContent = `${waterNapMeters >= 0 ? '+' : ''}${waterNapMeters.toFixed(2)} m NAP`;
+        const tideLbl = document.getElementById('tide-state-lbl');
+        tideLbl.textContent = isRising ? '▲ VLOED (OPKOMEND)' : '▼ EB (AFGAAND)';
+        tideLbl.style.color = isRising ? 'var(--green)' : 'var(--gold)';
+    }
+
+    // =========================================================================================
+    // 8. LIVE PDOK KADASTER / BAG API & ARCHEOLOGISCHE SITES
+    // =========================================================================================
+    async function queryPdokKadasterApi() {
+        const q = document.getElementById('pdok-search-inp').value.trim();
+        const box = document.getElementById('pdok-api-results');
+        if (!q) return;
+        box.innerHTML = `Bezig met opvragen bij PDOK Kadaster/BAG API voor "${q}"...`;
+        try {
+            const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(q)}&rows=5`;
+            const res = await fetch(url);
+            const data = await res.json();
+            const docs = (data.response && data.response.docs) || [];
+            if (docs.length === 0) {
+                box.innerHTML = `Geen directe kadastrale/BAG treffers gevonden voor "${q}".`;
+                return;
+            }
+            box.innerHTML = docs.map((d, idx) => {
+                const m = (d.centroide_ll || '').match(/POINT\(([0-9.-]+)\s+([0-9.-]+)\)/);
+                const lon = m ? parseFloat(m[1]) : state.centerLon;
+                const lat = m ? parseFloat(m[2]) : state.centerLat;
+                return `<div style="padding:3px 0; border-bottom:1px dashed #1e2e46; display:flex; justify-content:space-between; align-items:center;">
+                    <span><b>${d.weergavenaam}</b> <span style="color:var(--gold)">[${d.type}]</span> (${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E)</span>
+                    <button class="btn-gold" style="padding:1px 5px;" onclick="flyToLatLon(${lat}, ${lon}, '${d.weergavenaam.replace(/'/g, "")}')">✈️ Vlieg & Meet</button>
+                </div>`;
+            }).join('');
+        } catch (err) {
+            box.innerHTML = `PDOK API melding: controleer internetverbinding.`;
+        }
+    }
+
+    function flyToLatLon(lat, lon, label) {
+        state.centerLat = lat;
+        state.centerLon = lon;
+        document.getElementById('vp2-active-anchor').textContent = `KADASTER: ${label.toUpperCase()}`;
+        document.getElementById('out-f-latlon').textContent = `${lat.toFixed(4)}° N, ${lon.toFixed(4)}° E`;
+        if (globeMap) {
+            globeMap.flyTo({ center: [lon, lat], zoom: 17.2, pitch: 35, essential: true });
+        }
+        updateRealtimeSunStarsAndTides();
+    }
+
+    function populateArcheoSitesTable() {
+        const tbody = document.getElementById('arch-sites-tbody');
+        tbody.innerHTML = ARCHEO_SITES.map((s, idx) => `
+            <tr>
+                <td><b style="color:var(--cyan)">${s.name}</b><br><span style="color:var(--muted); font-size:0.5rem;">${s.info}</span></td>
+                <td>${s.lat.toFixed(4)}°N<br>${s.lon.toFixed(4)}°E</td>
+                <td style="color:var(--gold)">${s.flags.length} Perceel-Ankers</td>
+                <td><button class="btn-gold" onclick="loadArcheoSite(${idx})">📍 Laad Perceel</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function loadArcheoSite(idx) {
+        const site = ARCHEO_SITES[idx];
+        if (!site) return;
+        state.flags = site.flags.map(f => ({ ...f }));
+        flyToLatLon(site.lat, site.lon, site.name);
+        if (state.rasterMode === 'voronoi') drawOptionalRasterCanvas();
+        renderAllThreeViewports();
+    }
+
+    // =========================================================================================
+    // 9. RENDERING VAN ALLE 3 VIEWPORTS, SPECTRAAL & EXPORTS
+    // =========================================================================================
+    function buildStereographicFrameAndStars() {
+        const frameLayer = document.getElementById('stereographic-frame-layer');
+        let fHtml = '';
+        [60, 120, R_SVG_PX].forEach((r, idx) => {
+            fHtml += `<circle cx="0" cy="0" r="${r}" fill="none" stroke="${idx === 2 ? '#00e5ff' : 'rgba(226,232,240,0.2)'}" stroke-width="${idx === 2 ? 1.8 : 0.7}" ${idx < 2 ? 'stroke-dasharray="3,3"' : ''}/>`;
+        });
+        for (let i = 0; i < 64; i++) {
+            const a = (i * 5.625 - 90) * Math.PI / 180;
+            fHtml += `<circle cx="${(Math.cos(a)*R_SVG_PX).toFixed(1)}" cy="${(Math.sin(a)*R_SVG_PX).toFixed(1)}" r="2" fill="${i % 2 === 0 ? '#00e5ff' : '#f5b027'}"/>`;
+        }
+        frameLayer.innerHTML = fHtml;
+
+        // Sterrenbeelden Laag (Standaard verborgen tenzij aangezet in het menu)
+        const starsLayer = document.getElementById('constellations-layer');
+        starsLayer.innerHTML = `
+            <polyline points="-95,-72 -68,-45 -45,-28 -25,-12" fill="none" stroke="#f5b027" stroke-width="1.3"/>
+            <text x="-65" y="-75" fill="#f5b027" font-size="6.8" font-weight="bold">STIER (TAURUS) & PLEIADEN</text>
+            <circle cx="-82" cy="-68" r="3" fill="#00e5ff" stroke="#fff"/>
+            <circle cx="-68" cy="-45" r="4" fill="#ff5533" stroke="#fff"/>
+            <polyline points="-58,78 -48,92 -66,112" fill="none" stroke="#ef4444" stroke-width="1.3"/>
+            <text x="-70" y="124" fill="#ef4444" font-size="6.8" font-weight="bold">KREEFT (CANCER)</text>
+        `;
+    }
+
+    function updateFlowerK(val) {
+        state.flowerK = parseFloat(val) || 7;
+        renderModularFlowerLayer();
+        renderAllThreeViewports();
+    }
+
+    function renderModularFlowerLayer() {
+        const layer = document.getElementById('modular-flower-layer');
+        if (state.rasterMode !== 'flower') {
+            layer.innerHTML = '';
+            return;
+        }
+        const N = 100, m = state.flowerK;
+        let html = '';
+        for (let i = 0; i < N; i++) {
+            const a1 = (i * (360 / N) - 90) * Math.PI / 180;
+            const a2 = (((i * m) % N) * (360 / N) - 90) * Math.PI / 180;
+            html += `<line x1="${(Math.cos(a1)*R_SVG_PX).toFixed(1)}" y1="${(Math.sin(a1)*R_SVG_PX*state.sigma).toFixed(1)}" x2="${(Math.cos(a2)*R_SVG_PX).toFixed(1)}" y2="${(Math.sin(a2)*R_SVG_PX*state.sigma).toFixed(1)}" stroke="rgba(0, 229, 255, 0.22)" stroke-width="0.6"/>`;
+        }
+        layer.innerHTML = html;
+    }
+
+    function setPlanimeterPolar(azDeg, rhoCm, playSound = false) {
+        state.azDeg = ((parseFloat(azDeg) % 360) + 360) % 360;
+        state.rhoCm = Math.max(-R_MAX_CM, Math.min(R_MAX_CM, parseFloat(rhoCm)));
+        document.getElementById('sl-arm-az').value = state.azDeg.toFixed(1);
+        document.getElementById('lbl-arm-az').textContent = `${state.azDeg.toFixed(1)}°`;
+        document.getElementById('sl-arm-rho').value = state.rhoCm.toFixed(2);
+        document.getElementById('lbl-arm-rho').textContent = `${state.rhoCm.toFixed(2)} cm`;
+        if (playSound) triggerSpectralTone(280 + state.azDeg * 0.7, 0.12);
+        renderAllThreeViewports();
+    }
+
+    function setPlanimeterSigma(s) {
+        state.sigma = parseFloat(s);
+        renderModularFlowerLayer();
+        renderAllThreeViewports();
+    }
+
+    function flipPlanimeterElbow() {
+        state.elbowSign *= -1;
+        renderAllThreeViewports();
+    }
+
+    function resetPlanimeterZero() { setPlanimeterPolar(0.0, R_MAX_CM, true); }
+    function nudgePlanimeter(dAz, dRho) { setPlanimeterPolar(state.azDeg + dAz, state.rhoCm + dRho, true); }
+
+    function renderAllThreeViewports() {
+        const rad = (state.azDeg - 90) * Math.PI / 180;
+        const rPx = state.rhoCm * PX_PER_CM;
+        const tx = Math.cos(rad) * rPx;
+        const ty = Math.sin(rad) * rPx * (state.sigma === 0 ? 0.001 : state.sigma);
+
+        const kin = solveOtt573Kinematics(state.poleX, state.poleY, tx, ty);
+        state.txPx = kin.tx; state.tyPx = kin.ty;
+        state.gxPx = kin.gx; state.gyPx = kin.gy;
+        state.wxPx = kin.wx; state.wyPx = kin.wy;
+
+        const sweepFrac = state.azDeg === 0 ? 1.0 : (state.azDeg / 360.0);
+        const signedNonius = Math.round(3630 * sweepFrac * Math.pow(state.rhoCm / R_MAX_CM, 2) * state.sigma);
+        state.nonius = signedNonius;
+
+        document.getElementById('vp1-readout').textContent = `θ = ${state.azDeg.toFixed(1)}° | ρ = ${state.rhoCm.toFixed(2)} cm | Nonius: ${signedNonius}`;
+
+        // Update Uitvoervelden in VP-03
+        const txCm = (kin.tx / PX_PER_CM).toFixed(2), tyCm = (-kin.ty / PX_PER_CM).toFixed(2);
+        const gxCm = (kin.gx / PX_PER_CM).toFixed(2), gyCm = (-kin.gy / PX_PER_CM).toFixed(2);
+        const syIdx = Math.floor((state.azDeg / 360) * 64) % 64;
+        const jzIdx = Math.floor((state.azDeg / 360) * 60) % 60;
+        document.getElementById('out-f-txy').textContent = `T(${txCm}, ${tyCm}) cm`;
+        document.getElementById('out-f-gxy').textContent = `G(${gxCm}, ${gyCm}) cm`;
+        document.getElementById('out-f-hex').textContent = `#${syIdx + 1} (${syIdx.toString(2).padStart(6,'0')}) | Jiazi #${jzIdx + 1}`;
+
+        // 1. Render Planimeter-arm & Vlaggetjes in VP-01
+        document.getElementById('ott573-arm-layer').innerHTML = buildCleanPlanimeterArmSVG(kin, signedNonius, true);
+        renderFlagsAndParcelLayer();
+
+        // 2. Render VP-02 (Vectoren + 6D Robotica + Planimeter)
+        const svg2 = document.getElementById('vector-anchor-svg');
+        let h2 = `<circle cx="0" cy="0" r="${R_SVG_PX}" fill="none" stroke="#00e5ff" stroke-width="1.5"/>`;
+        h2 += `<line x1="-220" y1="0" x2="220" y2="0" stroke="#1e293b"/><line x1="0" y1="-220" x2="0" y2="220" stroke="#1e293b"/>`;
+        VECTOR_ANCHORS.forEach((a, idx) => {
+            const aRad = (a.azDeg - 90) * Math.PI / 180;
+            const ax = Math.cos(aRad) * (a.rhoCm * PX_PER_CM);
+            const ay = Math.sin(aRad) * (a.rhoCm * PX_PER_CM) * state.sigma;
+            h2 += `<line x1="0" y1="0" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" stroke="${a.col}" stroke-width="1.1" stroke-dasharray="3,3"/>`;
+            h2 += `<circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="5.5" fill="${a.col}" stroke="#fff" onclick="setPlanimeterPolar(${a.azDeg}, ${a.rhoCm}, true)"/>`;
+            h2 += `<text x="${(ax + 8).toFixed(1)}" y="${(ay + 2).toFixed(1)}" fill="#e2e8f0" font-family="monospace" font-size="6">${a.id} (${a.azDeg}°)</text>`;
+        });
+        h2 += buildCleanPlanimeterArmSVG(kin, signedNonius, false);
+        svg2.innerHTML = h2;
+
+        // 3. Render VP-03 CAD Uitvoertekening & Code
+        const outSvg = document.getElementById('output-drawing-svg');
+        const polyPts = state.flags.map(p => `${p.x},${p.y}`).join(' ');
+        let cad = `<rect x="-240" y="-240" width="480" height="480" fill="#050811"/>`;
+        cad += `<circle cx="0" cy="0" r="${R_SVG_PX}" fill="none" stroke="#00e5ff" stroke-width="1.5"/>`;
+        if (state.flags.length >= 2) {
+            cad += `<polygon points="${polyPts}" fill="rgba(16,185,129,0.22)" stroke="#10b981" stroke-width="2"/>`;
+        }
+        cad += buildCleanPlanimeterArmSVG(kin, signedNonius, true);
+        outSvg.innerHTML = cad;
+
+        const metrics = computeParcelMetrics();
+        document.getElementById('out-code-area').value = JSON.stringify({
+            timestamp: new Date().toISOString(),
+            location: { lat: state.centerLat, lon: state.centerLon },
+            planimeter: { azDeg: state.azDeg, rhoCm: state.rhoCm, nonius: signedNonius, sigma: state.sigma },
+            robotics6D: state.pose6D,
+            parcelMeasurement: { areaM2: Number(metrics.areaM2.toFixed(2)), perimeterM: Number(metrics.perimM.toFixed(2)), flags: state.flags }
+        }, null, 2);
+    }
+
+    // =========================================================================================
+    // 10. MUIS- EN TOETSENBORDBESTURING (LINKSKLIK = VLAG/ARM, RECHTSKLIK = WIS VLAG)
+    // =========================================================================================
+    const svg1 = document.getElementById('planimeter-svg');
+    function getSvgCoords(svgElem, e) {
+        const rect = svgElem.getBoundingClientRect();
+        const scale = Math.min(rect.width, rect.height) / 480.0;
+        return {
+            x: (e.clientX - (rect.left + rect.width / 2)) / (scale || 1),
+            y: (e.clientY - (rect.top + rect.height / 2)) / (scale || 1)
+        };
+    }
+
+    svg1.addEventListener('pointerdown', (e) => {
+        if (state.globeInteractive || e.button !== 0) return;
+        const pt = getSvgCoords(svg1, e);
+        if (e.shiftKey || Math.hypot(pt.x - state.poleX, pt.y - state.poleY) < 14) {
+            state.draggingPole = true;
+            state.poleX = pt.x; state.poleY = pt.y;
+            renderAllThreeViewports();
+            return;
+        }
+        const az = (Math.atan2(pt.y, pt.x) * 180 / Math.PI + 90 + 360) % 360;
+        const rho = Math.min(R_MAX_CM, Math.hypot(pt.x, pt.y) / PX_PER_CM);
+        setPlanimeterPolar(az, rho, true);
+        if (state.flagClickMode) {
+            placeFlagAtPoint(pt.x, pt.y);
+        }
+    });
+
+    svg1.addEventListener('pointermove', (e) => {
+        if (state.globeInteractive || e.buttons !== 1) return;
+        const pt = getSvgCoords(svg1, e);
+        if (state.draggingPole) {
+            state.poleX = pt.x; state.poleY = pt.y;
+            renderAllThreeViewports();
+        } else {
+            const az = (Math.atan2(pt.y, pt.x) * 180 / Math.PI + 90 + 360) % 360;
+            const rho = Math.min(R_MAX_CM, Math.hypot(pt.x, pt.y) / PX_PER_CM);
+            setPlanimeterPolar(az, rho, false);
+        }
+    });
+
+    window.addEventListener('pointerup', () => { state.draggingPole = false; });
+
+    // Rechtsklik op het SVG-canvas wist direct het dichtstbijzijnde vlaggetje (of het laatst geplaatste)
+    svg1.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (state.flags.length === 0) return;
+        const pt = getSvgCoords(svg1, e);
+        let bestIdx = state.flags.length - 1;
+        let minDist = 9999;
+        state.flags.forEach((f, idx) => {
+            const d = Math.hypot(f.x - pt.x, f.y - pt.y);
+            if (d < minDist) { minDist = d; bestIdx = idx; }
+        });
+        removeFlagByIndex(bestIdx);
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const step = e.shiftKey ? 0.2 : 1.5;
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); nudgePlanimeter(-step, 0); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); nudgePlanimeter(step, 0); }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); nudgePlanimeter(0, 0.25); }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); nudgePlanimeter(0, -0.25); }
+        if (e.key === '0') resetPlanimeterZero();
+        if (e.key === '7') setPlanimeterSigma(1.0);
+        if (e.key === '8') setPlanimeterSigma(0.0);
+        if (e.key === '9') setPlanimeterSigma(-1.0);
+        if (e.key === 'e' || e.key === 'E') flipPlanimeterElbow();
+        if (e.key === 't' || e.key === 'T' || e.key === 'Enter') placeFlagAtTracer();
+        if (e.key === 'm' || e.key === 'M') toggleGlobeMouseMode();
+    });
+
+    // =========================================================================================
+    // 11. AUDIO FFT, TABS, WOO-PDF & EXPORT (SVG, JPG, BMP, GEOJSON)
+    // =========================================================================================
+    let audioCtx = null;
+    function triggerSpectralTone(freqHz, dur = 0.18) {
+        state.audioHz = freqHz;
+        document.getElementById('spec-audio-hz').textContent = `${freqHz.toFixed(1)} Hz`;
+        if (!state.audioEnabled) return;
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!audioCtx && AC) audioCtx = new AC();
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(freqHz, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        } catch (e) {}
+    }
+
+    function toggleAudioEngine() {
+        state.audioEnabled = !state.audioEnabled;
+        document.getElementById('btn-audio-toggle').textContent = `🔊 Audio: ${state.audioEnabled ? 'AAN' : 'UIT'}`;
+    }
+
+    function toggleGlobeMouseMode() {
+        state.globeInteractive = !state.globeInteractive;
+        document.getElementById('mapglobe-bg').classList.toggle('globe-interactive', state.globeInteractive);
+        document.getElementById('btn-globe-mouse').classList.toggle('active', state.globeInteractive);
+    }
+
+    function renderSpectralLoop() {
+        const c = document.getElementById('spectral-canvas');
+        if (c) {
+            const ctx = c.getContext('2d'), w = c.width, h = c.height;
+            ctx.clearRect(0, 0, w, h);
+            for (let i = 0; i < 42; i++) {
+                const barH = Math.min(h - 4, 10 + Math.abs(Math.sin(Date.now() * 0.005 + i * 0.35)) * 34);
+                ctx.fillStyle = i % 3 === 0 ? '#f5b027' : '#00e5ff';
+                ctx.fillRect(i * 10, h - barH, 7, barH);
+            }
+        }
+        requestAnimationFrame(renderSpectralLoop);
+    }
+
+    function switchOutputTab(tab) {
+        ['fields', 'arch', 'code', 'woo'].forEach(t => {
+            document.getElementById(`out-${t}-view`).style.display = (t === tab) ? (t === 'woo' ? 'flex' : 'block') : 'none';
+            document.getElementById(`tab-btn-${t}`).classList.toggle('active', t === tab);
+        });
+    }
+
+    function loadWooPreset(key) {
+        const pre = document.getElementById('woo-reader-pre');
+        pre.textContent = key === 'all' ? (WOO_ARCHIVE.bag_1504573 + "\n\n" + WOO_ARCHIVE.woo_1504535) : (WOO_ARCHIVE[key] || '');
+    }
+
+    async function handleWooPdfUpload(files) {
+        if (!files || !files[0]) return;
+        const file = files[0];
+        switchOutputTab('woo');
+        const pre = document.getElementById('woo-reader-pre');
+        if (file.name.toLowerCase().endsWith('.pdf') && window['pdfjsLib']) {
+            const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+            let txt = `=== WOO-PDF: ${file.name} (${pdf.numPages} pag.) ===\n\n`;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const tc = await page.getTextContent();
+                txt += `[Pag. ${i}] ` + tc.items.map(it => it.str).join(' ') + '\n\n';
+            }
+            pre.textContent = txt;
+        } else {
+            pre.textContent = await file.text();
+        }
+    }
+
+    function searchGoogleWoo() {
+        const q = document.getElementById('woo-google-inp').value.trim();
+        if (q) window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank', 'noopener');
+    }
+
+    function copyCodeToClipboard() {
+        navigator.clipboard.writeText(document.getElementById('out-code-area').value);
+        document.getElementById('vp3-status').textContent = 'GEKOPIEERD!';
+    }
+
+    function exportParcelGeoJSON() {
+        const coords = state.flags.map(p => [
+            Number((state.centerLon + (p.x / R_SVG_PX) * 0.0035).toFixed(6)),
+            Number((state.centerLat - (p.y / R_SVG_PX) * 0.0022).toFixed(6))
+        ]);
+        if (coords.length >= 3) coords.push(coords[0]);
+        const geojson = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: computeParcelMetrics(),
+                geometry: { type: "Polygon", coordinates: [coords] }
+            }]
+        };
+        const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/geo+json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `perceel_ott573_${Date.now()}.geojson`;
+        a.click();
+    }
+
+    function exportOutputDrawing(format) {
+        const outSvg = document.getElementById('output-drawing-svg');
+        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-240 -240 480 480" width="960" height="960">${outSvg.innerHTML}</svg>`;
+        if (format === 'svg') {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+            a.download = `vortex_planimeter_${Date.now()}.svg`;
+            a.click();
+            return;
+        }
+        const img = new Image();
+        const url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 960; canvas.height = 960;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#050811'; ctx.fillRect(0, 0, 960, 960);
+            ctx.drawImage(img, 0, 0, 960, 960);
+            URL.revokeObjectURL(url);
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL(format === 'bmp' ? 'image/bmp' : 'image/jpeg', 0.95);
+            a.download = `vortex_planimeter_${Date.now()}.${format}`;
+            a.click();
+        };
+        img.src = url;
+    }
+
+    window.addEventListener('resize', () => {
+        drawOptionalRasterCanvas();
+        if (globeMap) globeMap.resize();
+    });
+
+    // INITIALISATIE
+    initMapGlobe();
+    buildStereographicFrameAndStars();
+    populateArcheoSitesTable();
+    loadWooPreset('all');
+    updateRealtimeSunStarsAndTides();
+    setInterval(updateRealtimeSunStarsAndTides, 1000);
+    setTimeout(() => {
+        drawOptionalRasterCanvas();
+        renderAllThreeViewports();
+        renderSpectralLoop();
+    }, 120);
+</script>
+
+</body>
+</html>
