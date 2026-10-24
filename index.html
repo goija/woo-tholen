@@ -25,6 +25,27 @@
             --font-mono: 'Fira Code', 'JetBrains Mono', Consolas, monospace;
         }
 
+        /* DAG / HELDER MODUS (THEMA) */
+        body.day-mode {
+            --bg: #f1f5f9;
+            --panel: #ffffff;
+            --surface: #e2e8f0;
+            --border: #cbd5e1;
+            --cyan: #0284c7;
+            --gold: #d97706;
+            --text: #0f172a;
+            --muted: #475569;
+        }
+        body.day-mode header { background: #ffffff !important; }
+        body.day-mode .viewport-card { background: #ffffff !important; }
+        body.day-mode .vp-header { background: #f8fafc !important; color: #0284c7 !important; }
+        body.day-mode .vp-footer { background: #f8fafc !important; }
+        body.day-mode .tel-box { background: #f1f5f9 !important; }
+        body.day-mode .spectral-dock { background: #f8fafc !important; }
+        body.day-mode .output-content-pane { background: #f8fafc !important; }
+        body.day-mode textarea.code-area { background: #f8fafc !important; color: #0284c7 !important; }
+        body.day-mode .parcel-hud { background: rgba(255, 255, 255, 0.92) !important; color: #0f172a !important; }
+
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 6px; }
@@ -34,6 +55,7 @@
             font-family: 'Inter', system-ui, sans-serif;
             height: 100vh; width: 100vw; overflow: hidden;
             display: flex; flex-direction: column;
+            transition: background 0.2s, color 0.2s;
         }
 
         /* TOP COMMAND BAR */
@@ -60,7 +82,7 @@
             font-weight: 600; cursor: pointer; transition: 0.12s;
         }
         button:hover, select:hover { border-color: var(--cyan); color: var(--cyan); }
-        button.active { background: rgba(0, 229, 255, 0.22); border-color: var(--cyan); color: #fff; }
+        button.active { background: rgba(0, 229, 255, 0.22); border-color: var(--cyan); color: var(--text); }
         button.btn-gold { border-color: var(--gold); color: var(--gold); background: rgba(245, 176, 39, 0.14); }
         button.btn-danger { border-color: var(--danger); color: #fca5a5; background: rgba(239, 68, 68, 0.15); }
 
@@ -88,6 +110,7 @@
             display: flex; justify-content: center; align-items: center;
             background: #03060b; min-height: 0; perspective: 950px;
         }
+        body.day-mode .vp-stage { background: #e2e8f0; }
 
         /* VIEWPORT 1: ZEEGRID + OPENSEAMAP + RASTERS (VORONOI/PENROSE) + 6D ROBOTICA + PLANIMETER */
         #mapglobe-bg {
@@ -147,15 +170,20 @@
             background: radial-gradient(circle at center, #0b1424 0%, #04070d 100%);
             cursor: pointer;
         }
+        body.day-mode #vector-anchor-svg {
+            background: radial-gradient(circle at center, #cbd5e1 0%, #94a3b8 100%);
+        }
 
         .telemetry-strip {
             background: #070c14; border-top: 1px solid var(--border);
             padding: 6px 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
             font-family: var(--font-mono); font-size: 0.55rem;
         }
+        body.day-mode .telemetry-strip { background: #f8fafc; }
         .tel-box {
             background: #0b121e; border: 1px solid var(--border); border-radius: 4px; padding: 5px 7px;
         }
+        body.day-mode .tel-box { background: #ffffff; }
         .tel-title { color: var(--gold); font-weight: bold; margin-bottom: 3px; display: flex; justify-content: space-between; }
 
         .spectral-dock {
@@ -166,20 +194,24 @@
             width: 100%; height: 52px; background: #03060b;
             border: 1px solid var(--border); border-radius: 4px; display: block;
         }
+        body.day-mode #spectral-canvas { background: #ffffff; }
 
         /* VIEWPORT 3: UITVOERVELDEN, KADASTER/BAG API, ARCHEOLOGIE, MATRIX & EXPORT */
         .output-preview-box {
             height: 195px; background: #04070c; border-bottom: 1px solid var(--border);
             display: flex; justify-content: center; align-items: center; padding: 4px; flex-shrink: 0;
         }
+        body.day-mode .output-preview-box { background: #e2e8f0; }
         #output-drawing-svg {
             width: 100%; height: 100%; border: 1px solid #162438; border-radius: 4px; background: #050811;
         }
+        body.day-mode #output-drawing-svg { background: #ffffff; border-color: #cbd5e1; }
 
         .output-tabs {
             display: flex; gap: 3px; padding: 5px 6px; background: #0c1320;
             border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap;
         }
+        body.day-mode .output-tabs { background: #f8fafc; }
 
         .output-content-pane {
             flex: 1; overflow-y: auto; padding: 7px; font-family: var(--font-mono);
@@ -188,8 +220,10 @@
 
         table.mat-table { width: 100%; border-collapse: collapse; font-size: 0.54rem; text-align: right; }
         table.mat-table th { position: sticky; top: 0; background: #0e1829; color: var(--gold); padding: 4px; border-bottom: 1px solid var(--border); }
+        body.day-mode table.mat-table th { background: #e2e8f0; color: var(--gold); }
         table.mat-table th:first-child, table.mat-table td:first-child { text-align: left; }
         table.mat-table td { padding: 3px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        body.day-mode table.mat-table td { border-bottom-color: rgba(0,0,0,0.08); }
         table.mat-table tr:hover { background: rgba(0, 229, 255, 0.14); cursor: pointer; }
 
         .output-fields-grid {
@@ -198,6 +232,7 @@
         .field-card {
             background: #0a111d; border: 1px solid var(--border); border-radius: 4px; padding: 5px 7px;
         }
+        body.day-mode .field-card { background: #ffffff; }
         .field-card label { display: block; color: var(--muted); font-size: 0.51rem; }
         .field-card strong { color: var(--cyan); font-size: 0.62rem; }
 
@@ -211,11 +246,12 @@
             padding: 6px 8px; background: #0c1320; border-top: 1px solid var(--border);
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; flex-shrink: 0;
         }
+        body.day-mode .export-bar { background: #f8fafc; }
     </style>
 </head>
 <body>
 
-<!-- TOP MENU MET ZEEGRID & OPENSEAMAP ALS EERSTE + OPTIONELE RASTERS (VORONOI/PENROSE) + STERREN OPTIONEEL -->
+<!-- TOP MENU MET ZEEGRID & OPENSEAMAP ALS EERSTE + DAG/NACHT THEMA SCHAKELAAR -->
 <header>
     <div class="brand">
         <span>🧭 VORTEX OS v158.0</span>
@@ -227,7 +263,7 @@
         <!-- 1. Zeegrid & OpenSeaMap als allereerste hoofdoptie -->
         <button id="btn-seagrid" class="active" onclick="toggleSeaGrid()">⚓ 1. Zeegrid + OpenSeaMap: AAN</button>
 
-        <!-- 2. Kaartproviders: PDOK BRT als EERSTE in de selectielijst gezet -->
+        <!-- 2. Kaartproviders: PDOK BRT als EERSTE in de selectielijst -->
         <select id="map-provider-sel" onchange="switchMapProvider(this.value)">
             <option value="pdok_brt" selected>🇳🇱 PDOK Topografisch BRT (Nederland)</option>
             <option value="opensea_first">🌊 Zeegrid + OpenSeaMap + Carto Dark (Default)</option>
@@ -254,7 +290,10 @@
         <button id="btn-flag-mode" class="btn-gold active" onclick="toggleFlagClickMode()">🚩 Klik=Vlag / Rechtsklik=Wis</button>
         <button class="btn-danger" onclick="clearAllFlags()">🗑️ Wis Vlaggen</button>
 
-        <!-- 6. 3D Globe Muisbesturing & Geluid -->
+        <!-- 6. Donker / Helder Dag & Nacht Thema Schakelaar -->
+        <button id="btn-theme-toggle" class="btn-gold" onclick="toggleDayNightTheme()">🌙 Thema: Donker / Nacht</button>
+
+        <!-- 7. 3D Globe Muisbesturing & Geluid -->
         <button id="btn-globe-mouse" onclick="toggleGlobeMouseMode()">🌍 Pan/Zoom Kaart [M]</button>
         <button id="btn-audio-toggle" class="btn-gold" onclick="toggleAudioEngine()">🔊 Audio: AAN</button>
     </div>
@@ -551,94 +590,6 @@
 </main>
 
 <script>
-    // =========================================================================================
-    // 0. MAPLIBRE & PLANIMETER FUNCTIES (EXACT GEPLAATST ALS EERST IN DE CODE)
-    // =========================================================================================
-    function initMapLibre() {
-      try {
-        map = new maplibregl.Map({
-          container: 'maplibre-canvas',
-          style: {
-            version: 8,
-            sources: {
-              'pdok-brt': {
-                type: 'raster',
-                tiles: ['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'],
-                tileSize: 256,
-                attribution: '&copy; Kadaster / PDOK BRT Standaard'
-              }
-            },
-            layers: [{
-              id: 'pdok-brt-layer',
-              type: 'raster',
-              source: 'pdok-brt',
-              paint: {
-                'raster-opacity': 1.0
-              }
-            }]
-          },
-          center: [state.anchorLng, state.anchorLat],
-          zoom: 13
-        });
-
-        const el = document.createElement('div');
-        el.style.width = '14px';
-        el.style.height = '14px';
-        el.style.borderRadius = '50%';
-        el.style.border = '2px solid #00e5ff';
-        el.style.background = 'rgba(251, 191, 36, 0.75)';
-        el.style.boxShadow = '0 0 10px #00e5ff';
-
-        mapCursorMarker = new maplibregl.Marker({ element: el })
-          .setLngLat([state.anchorLng, state.anchorLat])
-          .addTo(map);
-
-        map.on('move', () => {
-          const c = map.getCenter();
-          state.anchorLng = c.lng;
-          state.anchorLat = c.lat;
-          document.getElementById('vp-map-coord').textContent = `${c.lat.toFixed(4)}°N, ${c.lng.toFixed(4)}°E`;
-        });
-      } catch (err) {}
-    }
-
-    function jumpToPreset(val) {
-      const [lng, lat, z] = val.split(',').map(Number);
-      state.anchorLng = lng;
-      state.anchorLat = lat;
-      if (map) map.flyTo({ center: [lng, lat], zoom: z, essential: true });
-    }
-
-    function updatePlanimeter(tx, ty) {
-      state.tx = tx;
-      state.ty = ty;
-
-      const px = 0, py = -300;
-      const R = 300, L = 430;
-      const dx = tx - px, dy = ty - py;
-      let d = Math.hypot(dx, dy);
-      if (d > R + L - 2) d = R + L - 2;
-      if (d < Math.abs(R - L) + 2) d = Math.abs(R - L) + 2;
-
-      const a = (R * R - L * L + d * d) / (2 * d);
-      const h = Math.sqrt(Math.max(0, R * R - a * a));
-      const mx = px + a * (dx / d);
-      const my = py + a * (dy / d);
-      const gx = mx - h * (dy / d);
-      const gy = my + h * (dx / d);
-
-      const deg = (Math.atan2(ty, tx) * 180 / Math.PI + 90 + 360) % 360;
-      const nonius = Math.round((deg / 360) * 3630);
-      const area = (nonius * 0.1).toFixed(1);
-      const syIdx = Math.floor(deg / 5.625) % 64;
-
-      state.theta = deg;
-      state.nonius = nonius;
-      state.syIdx = syIdx;
-
-      recalcLarmorHeterodyne();
-    }
-
     if (window['pdfjsLib']) {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
@@ -791,7 +742,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     };
 
     // =========================================================================================
-    // 2. MAP_PROVIDERS GEINTEGREERD MET KADASTER, PDOK, CARTO & ESRI ENDPOINTS
+    // 2. MAP_PROVIDERS MET PDOK BRT ALS STANDAARD EERSTE PROVIDER
     // =========================================================================================
     const MAP_PROVIDERS = {
         pdok_brt: {
@@ -939,7 +890,27 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }
 
     // =========================================================================================
-    // 3. OPTIONELE RASTERS: VORONOI DIAGRAM, PENROSE QUASIKRISTAL, CELLARIUS & BLOEM
+    // 3. DAG / NACHT / HELDER / DONKER THEMA SCHAKELAAR
+    // =========================================================================================
+    let isDayMode = false;
+    function toggleDayNightTheme() {
+        isDayMode = !isDayMode;
+        document.body.classList.toggle('day-mode', isDayMode);
+        const btn = document.getElementById('btn-theme-toggle');
+        btn.textContent = isDayMode ? '☀️ Thema: Dag / Helder' : '🌙 Thema: Donker / Nacht';
+        
+        // Wissel optioneel ook automatisch tussen donkere kaart (carto) en standaard topokaart indien gewenst
+        if (globeMap) {
+            if (isDayMode) {
+                switchMapProvider('osm_std');
+            } else {
+                switchMapProvider('pdok_brt');
+            }
+        }
+    }
+
+    // =========================================================================================
+    // 4. OPTIONELE RASTERS: VORONOI DIAGRAM, PENROSE QUASIKRISTAL, CELLARIUS & BLOEM
     // =========================================================================================
     function setRasterMode(mode) {
         state.rasterMode = mode;
@@ -985,7 +956,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         }
 
         if (state.rasterMode === 'voronoi') {
-            // Verzamel zaden uit de geplaatste Perceel-Vlaggetjes + Vector-Ankers
             const seeds = [];
             state.flags.forEach((f, i) => {
                 seeds.push({ x: cx + f.x * scale, y: cy + f.y * scale, col: i % 2 === 0 ? [0, 229, 255] : [245, 176, 39] });
@@ -997,7 +967,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
             });
             if (seeds.length === 0) return;
 
-            // Render scherp Voronoi-cellenveld + celgrenzen
             const step = 4;
             for (let y = 0; y < h; y += step) {
                 for (let x = 0; x < w; x += step) {
@@ -1021,7 +990,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         }
 
         if (state.rasterMode === 'penrose') {
-            // Penrose P3 Robinson-driehoek deflatie (Gulden Snede φ = 1.6180339887)
             const PHI = (1 + Math.sqrt(5)) / 2;
             let triangles = [];
             const radius = R_SVG_PX * scale;
@@ -1059,7 +1027,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }
 
     // =========================================================================================
-    // 4. 6D ROBOTICA KANTELINGEN (PITCH, ROLL, YAW, X, Y, ZOOM)
+    // 5. 6D ROBOTICA KANTELINGEN
     // =========================================================================================
     function update6DRobotics() {
         const pitch = parseFloat(document.getElementById('sl-6d-pitch').value);
@@ -1093,7 +1061,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         update6DRobotics();
     }
 
-    // Muiswiel-zoom op Viewport 1
     document.getElementById('vp1-stage').addEventListener('wheel', (e) => {
         if (state.globeInteractive) return;
         e.preventDefault();
@@ -1104,7 +1071,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }, { passive: false });
 
     // =========================================================================================
-    // 5. VLAGGETJES PLAATSEN (LINKS-KLIK) & WISSEN (RECHTS-KLIK) + PERCEELGRENS BEREKENING
+    // 6. VLAGGETJES & PLANIMETER KINEMATICA
     // =========================================================================================
     function toggleFlagClickMode() {
         state.flagClickMode = !state.flagClickMode;
@@ -1141,7 +1108,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         renderAllThreeViewports();
     }
 
-    // Bereken Perceeloppervlakte (Gauss Shoelace) & Omtrek op basis van de geplaatste Vlaggetjes
     function computeParcelMetrics() {
         const pts = state.flags;
         let areaPx2 = 0;
@@ -1157,7 +1123,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         }
         areaPx2 = Math.abs(areaPx2) * 0.5;
         const areaCm2 = areaPx2 / (PX_PER_CM * PX_PER_CM);
-        // Op kadastrale schaal 1:1000 komt 1 cm² overeen met 10,00 m²
         const areaM2 = areaCm2 * 10.0;
         const perimCm = perimPx / PX_PER_CM;
         const perimM = perimCm * Math.sqrt(10.0);
@@ -1175,7 +1140,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
             const polyStr = pts.map(p => `${p.x},${p.y}`).join(' ');
             h += `<polygon points="${polyStr}" fill="rgba(16, 185, 129, 0.16)" stroke="#10b981" stroke-width="1.8" stroke-dasharray="4,2"/>`;
 
-            // Lengtelabels op elk perceelgrens-segment
             for (let i = 0; i < pts.length; i++) {
                 const p1 = pts[i], p2 = pts[(i + 1) % pts.length];
                 const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
@@ -1185,7 +1149,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
             }
         }
 
-        // Teken elk vlaggetje (Rechtsklik op vlaggetje wist het direct!)
         pts.forEach((p, idx) => {
             h += `<g oncontextmenu="event.preventDefault(); event.stopPropagation(); removeFlagByIndex(${idx});" style="cursor:pointer;">`;
             h += `<circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#f5b027" stroke="#ffffff" stroke-width="1.2"/>`;
@@ -1207,7 +1170,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         document.getElementById('out-f-area').textContent = `${metrics.areaM2.toFixed(2)} m² (${metrics.areaCm2.toFixed(2)} cm²)`;
         document.getElementById('out-f-nonius').textContent = `ΔU = ${metrics.noniusDelta} | L = ${metrics.perimM.toFixed(2)} m`;
 
-        // Update Vlaggetjes-tabel in VP-03
         const tbody = document.getElementById('flags-table-tbody');
         tbody.innerHTML = pts.map((p, idx) => {
             const xCm = (p.x / PX_PER_CM).toFixed(2);
@@ -1225,9 +1187,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         }).join('');
     }
 
-    // =========================================================================================
-    // 6. EXACTE A. OTT NR. 573 POOLPLANIMETER KINEMATICA
-    // =========================================================================================
     function solveOtt573Kinematics(px, py, tx, ty) {
         const dx = tx - px, dy = ty - py;
         const d = Math.hypot(dx, dy);
@@ -1283,14 +1242,13 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }
 
     // =========================================================================================
-    // 7. REALTIME ZON, MAAN, STERREN & GETIJDEN / WATERSTANDEN ENGINE
+    // 7. REALTIME ZON, MAAN & WATERSTANDEN
     // =========================================================================================
     function updateRealtimeSunStarsAndTides() {
         const now = new Date();
         document.getElementById('hdr-clock').textContent = now.toLocaleTimeString('nl-NL') + ' CEST';
         document.getElementById('astro-time-lbl').textContent = now.toISOString().slice(0, 10);
 
-        // Bereken Realtime Zon Azimut & Hoogte voor huidige kaartcoördinaat
         const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
         const declRad = -23.44 * (Math.PI / 180) * Math.cos((2 * Math.PI / 365) * (dayOfYear + 10));
         const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
@@ -1304,7 +1262,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         let sunAzDeg = Math.acos(Math.max(-1, Math.min(1, cosAz))) * (180 / Math.PI);
         if (hourAngleRad > 0) sunAzDeg = 360 - sunAzDeg;
 
-        // Maanfase & Siderische Tijd (LST)
         const synodicMonth = 29.53058867;
         const refNewMoon = new Date('2026-10-10T15:50:00Z').getTime();
         const moonAge = (((now.getTime() - refNewMoon) / 86400000) % synodicMonth + synodicMonth) % synodicMonth;
@@ -1318,10 +1275,9 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         document.getElementById('rt-moon-pos').textContent = `${moonIllum}% (${moonAge.toFixed(1)}d) / ${moonAltDeg}°`;
         document.getElementById('rt-lst').textContent = `${String(lstH).padStart(2,'0')}:${String(lstM).padStart(2,'0')}`;
 
-        // Realtime Harmonische Getijden & Waterstand (Oosterschelde / Reimerswaal M2 + S2)
         const tHours = now.getTime() / 3600000;
-        const m2Period = 12.4206012; // M2 Maansgetijde in uren
-        const s2Period = 12.0000000; // S2 Zonsgetijde in uren
+        const m2Period = 12.4206012;
+        const s2Period = 12.0000000;
         const m2Phase = (2 * Math.PI * tHours) / m2Period;
         const s2Phase = (2 * Math.PI * tHours) / s2Period;
 
@@ -1336,7 +1292,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }
 
     // =========================================================================================
-    // 8. LIVE PDOK KADASTER / BAG API & ARCHEOLOGISCHE SITES
+    // 8. PDOK KADASTER / BAG API
     // =========================================================================================
     async function queryPdokKadasterApi() {
         const q = document.getElementById('pdok-search-inp').value.trim();
@@ -1399,7 +1355,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }
 
     // =========================================================================================
-    // 9. RENDERING VAN ALLE 3 VIEWPORTS, SPECTRAAL & EXPORTS
+    // 9. RENDERING VAN VIEWPORTS & EXPORT
     // =========================================================================================
     function buildStereographicFrameAndStars() {
         const frameLayer = document.getElementById('stereographic-frame-layer');
@@ -1413,7 +1369,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         }
         frameLayer.innerHTML = fHtml;
 
-        // Sterrenbeelden Laag (Standaard verborgen tenzij aangezet in het menu)
         const starsLayer = document.getElementById('constellations-layer');
         starsLayer.innerHTML = `
             <polyline points="-95,-72 -68,-45 -45,-28 -25,-12" fill="none" stroke="#f5b027" stroke-width="1.3"/>
@@ -1489,7 +1444,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
 
         document.getElementById('vp1-readout').textContent = `θ = ${state.azDeg.toFixed(1)}° | ρ = ${state.rhoCm.toFixed(2)} cm | Nonius: ${signedNonius}`;
 
-        // Update Uitvoervelden in VP-03
         const txCm = (kin.tx / PX_PER_CM).toFixed(2), tyCm = (-kin.ty / PX_PER_CM).toFixed(2);
         const gxCm = (kin.gx / PX_PER_CM).toFixed(2), gyCm = (-kin.gy / PX_PER_CM).toFixed(2);
         const syIdx = Math.floor((state.azDeg / 360) * 64) % 64;
@@ -1498,11 +1452,9 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         document.getElementById('out-f-gxy').textContent = `G(${gxCm}, ${gyCm}) cm`;
         document.getElementById('out-f-hex').textContent = `#${syIdx + 1} (${syIdx.toString(2).padStart(6,'0')}) | Jiazi #${jzIdx + 1}`;
 
-        // 1. Render Planimeter-arm & Vlaggetjes in VP-01
         document.getElementById('ott573-arm-layer').innerHTML = buildCleanPlanimeterArmSVG(kin, signedNonius, true);
         renderFlagsAndParcelLayer();
 
-        // 2. Render VP-02 (Vectoren + 6D Robotica + Planimeter)
         const svg2 = document.getElementById('vector-anchor-svg');
         let h2 = `<circle cx="0" cy="0" r="${R_SVG_PX}" fill="none" stroke="#00e5ff" stroke-width="1.5"/>`;
         h2 += `<line x1="-220" y1="0" x2="220" y2="0" stroke="#1e293b"/><line x1="0" y1="-220" x2="0" y2="220" stroke="#1e293b"/>`;
@@ -1517,10 +1469,9 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
         h2 += buildCleanPlanimeterArmSVG(kin, signedNonius, false);
         svg2.innerHTML = h2;
 
-        // 3. Render VP-03 CAD Uitvoertekening & Code
         const outSvg = document.getElementById('output-drawing-svg');
         const polyPts = state.flags.map(p => `${p.x},${p.y}`).join(' ');
-        let cad = `<rect x="-240" y="-240" width="480" height="480" fill="#050811"/>`;
+        let cad = `<rect x="-240" y="-240" width="480" height="480" fill="${isDayMode ? '#ffffff' : '#050811'}"/>`;
         cad += `<circle cx="0" cy="0" r="${R_SVG_PX}" fill="none" stroke="#00e5ff" stroke-width="1.5"/>`;
         if (state.flags.length >= 2) {
             cad += `<polygon points="${polyPts}" fill="rgba(16,185,129,0.22)" stroke="#10b981" stroke-width="2"/>`;
@@ -1539,7 +1490,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     }
 
     // =========================================================================================
-    // 10. MUIS- EN TOETSENBORDBESTURING (LINKSKLIK = VLAG/ARM, RECHTSKLIK = WIS VLAG)
+    // 10. MUIS & TOETSENBORD
     // =========================================================================================
     const svg1 = document.getElementById('planimeter-svg');
     function getSvgCoords(svgElem, e) {
@@ -1583,7 +1534,6 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
 
     window.addEventListener('pointerup', () => { state.draggingPole = false; });
 
-    // Rechtsklik op het SVG-canvas wist direct het dichtstbijzijnde vlaggetje (of het laatst geplaatste)
     svg1.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         if (state.flags.length === 0) return;
@@ -1614,7 +1564,7 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     });
 
     // =========================================================================================
-    // 11. AUDIO FFT, TABS, WOO-PDF & EXPORT (SVG, JPG, BMP, GEOJSON)
+    // 11. AUDIO, TABS, WOO-PDF & EXPORT
     // =========================================================================================
     let audioCtx = null;
     function triggerSpectralTone(freqHz, dur = 0.18) {
@@ -1738,7 +1688,8 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
             const canvas = document.createElement('canvas');
             canvas.width = 960; canvas.height = 960;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#050811'; ctx.fillRect(0, 0, 960, 960);
+            ctx.fillStyle = isDayMode ? '#ffffff' : '#050811'; 
+            ctx.fillRect(0, 0, 960, 960);
             ctx.drawImage(img, 0, 0, 960, 960);
             URL.revokeObjectURL(url);
             const a = document.createElement('a');
