@@ -697,36 +697,65 @@ Onderwerp: Bezwaarprocedure en preciseringsverzoek Woo-verzoek (13 januari 2026)
     // =========================================================================================
     // 2. ZEEGRID + OPENSEAMAP ALS ALLEREERSTE & KAARTPROVIDERS ZONDER API-KEYS
     // =========================================================================================
-    const MAP_PROVIDERS = {
-        opensea_first: {
-            tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
-            maxzoom: 19
-        },
-        pdok_kadaster: {
-            tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'],
-            maxzoom: 19,
-            kadasterWms: true
-        },
-        pdok_brt: {
-            tiles: ['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'],
-            maxzoom: 19
-        },
-        esri_ocean: {
-            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}'],
-            maxzoom: 16
-        },
-        esri_sat: {
-            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-            maxzoom: 19
-        },
-        osm_std: {
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            maxzoom: 19
-        },
-        opentopo: {
-            tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png'],
-            maxzoom: 17
-        }
+
+    
+// Validatie & Definities voor Kaartproviders (EPSG:3857 Web Mercator compliant)
+const MAP_PROVIDERS = {
+    pdok_brt: {
+        name: 'PDOK BRT Achtergrondkaart (Standaard)',
+        url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png',
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.kadaster.nl">Kadaster</a> / <a href="https://www.pdok.nl">PDOK</a>'
+    },
+    pdok_luchtfoto: {
+        name: 'PDOK Actueel OrthoHR (Luchtfoto)',
+        url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.kadaster.nl">Kadaster</a> / <a href="https://www.pdok.nl">PDOK Luchtfoto</a>'
+    },
+    carto_dark: {
+        name: 'Carto Dark (Soevereine Mode)',
+        url: 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    },
+    osm_std: {
+        name: 'OpenStreetMap Standard',
+        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }
+};
+
+// Veilige initialisatie en validatie functie voor de Leaflet / MapLibre kaartlaag
+function initValidatedMap(mapContainerId, initialProvider = 'pdok_brt') {
+    const provider = MAP_PROVIDERS[initialProvider] || MAP_PROVIDERS.pdok_brt;
+    
+    // Controleer of container bestaat
+    const container = document.getElementById(mapContainerId);
+    if (!container) {
+        console.error(`[GEOCENTRUM ERROR] Kaartcontainer #${mapContainerId} niet gevonden.`);
+        return null;
+    }
+
+    // Coördinaten gecentreerd op Tholen / Zeeland / Poolanker P
+    const map = L.map(mapContainerId, {
+        center: [51.5242, 4.2251], // Tholen / Sint-Maartensdijk regio
+        zoom: 12,
+        minZoom: 6,
+        maxZoom: provider.maxZoom,
+        zoomControl: true
+    });
+
+    const activeTileLayer = L.tileLayer(provider.url, {
+        maxZoom: provider.maxZoom,
+        attribution: provider.attribution,
+        errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' // transparante fallback bij 404/CORS fout
+    }).addTo(map);
+
+    console.log(`[GEOCENTRUM OK] Kaart geladen met provider: ${provider.name}`);
+    return { map, activeTileLayer };
+}
     };
 
     function buildNauticalSeaGridGeoJSON() {
