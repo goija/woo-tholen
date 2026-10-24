@@ -38,7 +38,7 @@
 
     .container {
       width: 100%;
-      max-width: 720px;
+      max-width: 680px;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -71,7 +71,6 @@
       justify-content: center;
       gap: 6px;
       margin-top: 4px;
-      flex-wrap: wrap;
     }
 
     .badge {
@@ -162,17 +161,16 @@
     <!-- HEADER -->
     <header>
       <h1>🏛️ WOO-THOLEN // VORTEX OS NAVIGATIE</h1>
-      <div class="subtitle">Centrale link-pagina voor geodatakanaal, dossiers, klantcontact & beheeromgeving</div>
+      <div class="subtitle">Centrale link-pagina voor geodatakanaal, dossiers & beheeromgeving</div>
       <div class="badge-row">
         <span class="badge">VP-01 GEODATA</span>
         <span class="badge">VP-02 DOSSIER</span>
         <span class="badge">VP-03 KLANTCONTACT</span>
-        <span class="badge">WEBRTC CAMERA</span>
       </div>
     </header>
 
-    <!-- SECTIE 1: ROOT / HOOFDINTERFACES -->
-    <div class="section-title"><span>🖥️ ROOT INTERFACES (DESKTOP)</span><span>[/]</span></div>
+    <!-- SECTIE 1: HOOFDINTERFACES -->
+    <div class="section-title"><span>🖥️ DESKTOP & WEB INTERFACES</span><span>[ROOT]</span></div>
     <div class="link-list">
       <a href="index.html" class="link-card">
         <div class="link-info">
@@ -182,74 +180,27 @@
         <span class="link-arrow">→</span>
       </a>
 
-      <a href="verzend.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>📤</span> Verzend & ProtonMail Gateway (verzend.html)</span>
-          <span class="link-desc">Directe root-interface voor beveiligde dossierverzending en e-mailkoppeling.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-    </div>
+  
 
-    <!-- SECTIE 2: KLANTCONTACT SUBMAP -->
-    <div class="section-title"><span>📱 KLANTCONTACT SUBMAP</span><span>[/klantcontact]</span></div>
+    <!-- SECTIE 2: KLANTCONTACT & MOBIEL -->
     <div class="link-list">
       <a href="klantcontact/index.html" class="link-card">
         <div class="link-info">
-          <span class="link-title"><span>📱</span> Klantcontact Geomapping Client (klantcontact/index.html)</span>
-          <span class="link-desc">Mobiele en submap-specifieke interface voor kaartlagen en P2P-telemetrie.</span>
+          <span class="link-title"><span>📱</span> Klantcontact & Mobiele Geomapping</span>
+          <span class="link-desc">Geïntegreerde client in de submap klantcontact voor mobiele en P2P-sessies.</span>
         </div>
         <span class="link-arrow">→</span>
       </a>
 
       <a href="klantcontact/verzend.html" class="link-card">
         <div class="link-info">
-          <span class="link-title"><span>✉️</span> Klantcontact Verzendportaal (klantcontact/verzend.html)</span>
-          <span class="link-desc">Verzendmodule specifiek ingericht voor de klantcontact-omgeving en rapportages.</span>
+          <span class="link-title"><span>✉️</span> Klantcontact Verzendportaal</span>
+          <span class="link-desc">Submap verzendmodule voor e-mailkoppelingen en logboekexport.</span>
         </div>
         <span class="link-arrow">→</span>
       </a>
     </div>
 
-    <!-- SECTIE 3: REKENCENTRUM & TIJDSCAPSULE -->
-    <div class="section-title"><span>🧬 REKENCENTRUM & ARCHIEF</span><span>[/rekencentrum]</span></div>
-    <div class="link-list">
-      <a href="rekencentrum/tijdscapsule/index.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>⏳</span> Tijdscapsule & Geodetische Metadata</span>
-          <span class="link-desc">Historische coördinaten, tijdberekeningen en tijdcapsule-architectuur.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-    </div>
-
-    <!-- SECTIE 4: BLUE / RED TEAM DOCUMENTATIE -->
-    <div class="section-title"><span>🛡️ BEHEER & SEC-OPS DOCUMENTATIE</span><span>[/docs]</span></div>
-    <div class="link-list">
-      <a href="docs/beheer/blue_team/ir_playbook.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>🛡️</span> Blue Team: Incident Response Playbook</span>
-          <span class="link-desc">Procedures voor respons, monitoring en netwerkverdediging.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-
-      <a href="docs/beheer/blue_team/system_hardening.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>🔒</span> System Hardening & Server Security</span>
-          <span class="link-desc">Richtlijnen voor veilige host-configuratie en zero-trust.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-
-      <a href="docs/beheer/red_team/rtfm_manual.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>🎯</span> Red Team: RTFM Handleiding</span>
-          <span class="link-desc">Technisch referentiemateriaal en veldhandleiding.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-    </div>
 
     <!-- FOOTER -->
     <div class="footer">
