@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WOO-THOLEN // VORTEX OS NAVIGATIE & LINKPAGINA</title>
+  <style>
+    :root {
+      --bg-0: #070a0f;
+      --bg-1: #0d131c;
+      --bg-2: #131c29;
+      --border: #24344d;
+      --accent: #00e5ff;
+      --accent-amber: #ffb300;
+      --accent-green: #00e676;
+      --text-main: #e2e8f0;
+      --text-dim: #94a3b8;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-0);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    header {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    h1 {
+      font-size: 15px;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .badge {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-amber);
+      margin-top: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px dashed var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .link-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .link-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+
+    .link-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-2);
+      transform: translateY(-1px);
+    }
+
+    .link-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .link-title {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .link-desc {
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    .link-arrow {
+      color: var(--accent-amber);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 10px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <h1>🏛️ WOO-THOLEN // VORTEX OS NAVIGATIE</h1>
+      <div class="subtitle">Centrale link-pagina voor geodatakanaal, dossiers & beheeromgeving</div>
+      <div class="badge-row">
+        <span class="badge">VP-01 GEODATA</span>
+        <span class="badge">VP-02 DOSSIER</span>
+        <span class="badge">VP-03 KLANTCONTACT</span>
+      </div>
+    </header>
+
+    <!-- SECTIE 1: HOOFDINTERFACES -->
+    <div class="section-title"><span>🖥️ DESKTOP & WEB INTERFACES</span><span>[ROOT]</span></div>
+    <div class="link-list">
+      <a href="index.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>🗺️</span> Hoofdgeodatacentrum (index.html)</span>
+          <span class="link-desc">Viewport matrix (VP-01 t/m VP-03), PDOK, A. Ott 573 Planimeter & WebRTC Oude Kaart Camera.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="verzend.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>📤</span> Verzend & ProtonMail Gateway (verzend.html)</span>
+          <span class="link-desc">Directe interface voor beveiligde rapportage en dossierverzending.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <!-- SECTIE 2: KLANTCONTACT & MOBIEL -->
+    <div class="link-list">
+      <a href="klantcontact/index.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>📱</span> Klantcontact & Mobiele Geomapping</span>
+          <span class="link-desc">Geïntegreerde client in de submap klantcontact voor mobiele en P2P-sessies.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="klantcontact/verzend.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>✉️</span> Klantcontact Verzendportaal</span>
+          <span class="link-desc">Submap verzendmodule voor e-mailkoppelingen en logboekexport.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <!-- SECTIE 3: REKENCENTRUM & TIJDSCAPSULE -->
+    <div class="section-title"><span>🧬 REKENCENTRUM & ARCHIEF</span><span>[VORTEX]</span></div>
+    <div class="link-list">
+      <a href="rekencentrum/tijdscapsule/index.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>⏳</span> Tijdscapsule & Geodetische Metadata</span>
+          <span class="link-desc">Historische coordinaten, tijdberekeningen en tijdcapsule-architectuur.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <!-- SECTIE 4: BLUE / RED TEAM DOCUMENTATIE -->
+    <div class="section-title"><span>🛡️ BEHEER & SEC-OPS DOCUMENTATIE</span><span>[DOCS]</span></div>
+    <div class="link-list">
+      <a href="docs/beheer/blue_team/ir_playbook.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>🛡️</span> Blue Team: Incident Response Playbook</span>
+          <span class="link-desc">Procedures voor respons, monitoring en netwerkverdediging.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="docs/beheer/blue_team/system_hardening.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>🔒</span> System Hardening & Server Security</span>
+          <span class="link-desc">Richtlijnen voor veilige host-configuratie en zero-trust.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="docs/beheer/red_team/rtfm_manual.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>🎯</span> Red Team: RTFM Handleiding</span>
+          <span class="link-desc">Technisch referentiemateriaal en veldhandleiding.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      WOO-THOLEN MONOREPO // SECURE DEPLOYMENT READY (VERCEL / LOCAL BARE-METAL)
+    </div>
+  </div>
+
+</body>
+</html>
