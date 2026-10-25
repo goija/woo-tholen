@@ -11,7 +11,7 @@
 <body>
     <canvas id="mapCanvas" width="800" height="600"></canvas>
     <script>
-        fetch('percelen_export.json')
+        fetch('/api/percelen')
             .then(res => res.json())
             .then(data => drawPolygons(data));
 
