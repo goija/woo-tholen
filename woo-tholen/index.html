@@ -25,7 +25,6 @@
     <canvas id="mapCanvas" width="800" height="600"></canvas>
     
     <script>
-        // Laad standaardkaart bij het openen
         laadKaart();
 
         function laadKaart() {
@@ -35,19 +34,26 @@
             const maxY = document.getElementById('maxY').value;
             const bbox = `${minX},${minY},${maxX},${maxY}`;
             
-            fetch(`/api/percelen?bbox=${bbox}`)
+            fetch(`api/percelen?bbox=${bbox}`)
                 .then(res => res.json())
                 .then(data => drawPolygons(data))
                 .catch(err => console.error("Fout bij laden:", err));
+        }
+
+        // Shoelace formule voor de oppervlakte (in vierkante meters)
+        function berekenOppervlakte(coords) {
+            let area = 0;
+            for (let i = 0; i < coords.length - 1; i++) {
+                area += (coords[i][0] * coords[i+1][1]) - (coords[i+1][0] * coords[i][1]);
+            }
+            return Math.abs(area) / 2;
         }
 
         function drawPolygons(data) {
             const canvas = document.getElementById('mapCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Maak canvas leeg voor de nieuwe kaart
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             if (!data || data.length === 0) return;
 
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
@@ -68,6 +74,7 @@
 
             ctx.strokeStyle = '#00ff00';
             ctx.lineWidth = 2;
+            ctx.font = '11px monospace';
 
             data.forEach(p => {
                 ctx.beginPath();
@@ -81,11 +88,19 @@
                 ctx.closePath();
                 ctx.stroke();
                 
+                // Bereken oppervlakte via shoelace
+                const opp = berekenOppervlakte(coords);
+                
+                // Bepaal de positie voor de tekst
                 const startCoord = coords[0];
                 const textX = (startCoord[0] - minX) * scale + offsetX;
                 const textY = canvas.height - ((startCoord[1] - minY) * scale + offsetY);
+                
+                // Teken perceel ID en de oppervlakte
                 ctx.fillStyle = '#fff';
                 ctx.fillText(p.id, textX, textY);
+                ctx.fillStyle = '#aaa';
+                ctx.fillText(`${Math.round(opp)} m²`, textX, textY + 12);
             });
         }
     </script>
