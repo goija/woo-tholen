@@ -1,265 +1,232 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WOO-THOLEN // VORTEX OS NAVIGATIE & LINKPAGINA</title>
-  <style>
-    :root {
-      --bg-0: #070a0f;
-      --bg-1: #0d131c;
-      --bg-2: #131c29;
-      --border: #24344d;
-      --accent: #00e5ff;
-      --accent-amber: #ffb300;
-      --accent-green: #00e676;
-      --text-main: #e2e8f0;
-      --text-dim: #94a3b8;
-      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOO-THOLEN // VORTEX OS VIEWPORT MATRIX (tree.html)</title>
+    <style>
+        :root {
+            --bg-body: #e4e9f0;
+            --container-bg: #eef2f7;
+            --border-color: #cbd5e1;
+            --panel-bg: #f8fafc;
+            --card-border: #94a3b8;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --accent-orange: #ea580c;
+            --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      background: var(--bg-0);
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      font-size: 13px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
-    }
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 100vh;
+        }
 
-    .container {
-      width: 100%;
-      max-width: 680px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+        /* Bovenste configuratie / thema balk */
+        .top-control-bar {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 16px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
-    header {
-      background: var(--bg-1);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 20px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+        /* Knoppen stijl */
+        .theme-btn {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-main);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .theme-btn:hover {
+            background: #f1f5f9;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-yellow { background: #f59e0b; }
+        .dot-amber { background: #d97706; }
+        .dot-sun { background: #eab308; }
+        .dot-red { background: #dc2626; }
 
-    h1 {
-      font-size: 15px;
-      color: var(--accent);
-      letter-spacing: 0.5px;
-    }
+        /* Hoofdgrid met twee viewports (VP-1 en VP-2) */
+        .viewport-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            flex: 1;
+        }
 
-    .subtitle {
-      color: var(--text-dim);
-      font-size: 11px;
-    }
+        @media (max-width: 1024px) {
+            .viewport-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
-    .badge-row {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 4px;
-      flex-wrap: wrap;
-    }
+        /* Viewport container box */
+        .viewport-box {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-    .badge {
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-size: 10px;
-    }
+        .viewport-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-main);
+            letter-spacing: -0.2px;
+        }
 
-    .section-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent-amber);
-      margin-top: 8px;
-      padding-bottom: 4px;
-      border-bottom: 1px dashed var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        /* VP-1 Inhoud */
+        .search-row {
+            display: flex;
+            gap: 8px;
+        }
 
-    .link-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+        .dork-input {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-main);
+        }
 
-    .link-card {
-      background: var(--bg-1);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      text-decoration: none;
-      color: var(--text-main);
-      transition: all 0.2s ease;
-    }
+        .action-btn {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            white-space: nowrap;
+        }
+        .action-btn:hover {
+            background: #f1f5f9;
+        }
 
-    .link-card:hover {
-      border-color: var(--accent);
-      background: var(--bg-2);
-      transform: translateY(-1px);
-    }
+        .helper-text {
+            color: var(--text-dim);
+            font-size: 11px;
+            margin-top: 2px;
+        }
 
-    .link-info {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
+        /* VP-2 Inhoud */
+        .pdf-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
-    .link-title {
-      font-weight: 700;
-      color: var(--accent);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+        .file-display {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-dim);
+        }
 
-    .link-desc {
-      color: var(--text-dim);
-      font-size: 11px;
-    }
+        .load-zaak-btn {
+            background: var(--accent-orange);
+            color: #ffffff;
+            border: 1px solid #c2410c;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+        .load-zaak-btn:hover {
+            background: #c2410c;
+        }
 
-    .link-arrow {
-      color: var(--accent-amber);
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .footer {
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 10px;
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
-  </style>
+        .pdf-viewer-canvas {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            flex: 1;
+            min-height: 420px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- HEADER -->
-    <header>
-      <h1>🏛️ WOO-THOLEN // VORTEX OS NAVIGATIE</h1>
-      <div class="subtitle">Centrale link-pagina voor geocentrum viewports, tijdscapsule & API's</div>
-      <div class="badge-row">
-        <span class="badge">VP-01 GEOCENTRUM</span>
-        <span class="badge">VP-02 TIJDSCAPSULE</span>
-        <span class="badge">VP-03 KADASTRALE CHECK</span>
-        <span class="badge">VP-04 KLANTCONTACT</span>
-      </div>
-    </header>
-
-    <!-- SECTIE 1: HOOFDINTERFACES & GEOCENTRUM -->
-    <div class="section-title"><span>🖥️ DESKTOP & WEB INTERFACES</span><span>[ROOT]</span></div>
-    <div class="link-list">
-      <a href="index.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>🗺️</span> Multi-Layer OGC Kaartviewer (index.html)</span>
-          <span class="link-desc">Canvas visualisatie voor percelen, kadastrale grenzen, bebouwing en openbare ruimte (EPSG:28992).</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-
-      <a href="pdok.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>🛰️</span> PDOK Directe Viewer (pdok.html)</span>
-          <span class="link-desc">Dedicated interface voor PDOK geodata en brk-kadastrale-kaart streaming.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-
-      <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>🌀</span> Vortex Clean Viewports v158</span>
-          <span class="link-desc">Geavanceerde 3D geodetische en cartografische viewport matrix (v158 monorepo).</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-
-      <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>⏳</span> Rekencentrum Tijdscapsule (tijdscapsule_index.html)</span>
-          <span class="link-desc">Historische simulatie- en archiefomgeving binnen het rekencentrum monorepo.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-
-      <a href="swagger.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>📜</span> API Swagger Documentatie (swagger.html)</span>
-          <span class="link-desc">OpenAPI specificaties voor lokale serverless proxy endpoints en geodata routering.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
+    <!-- Bovenste knoppenbalk (Thema's) -->
+    <div class="top-control-bar">
+        <button class="theme-btn"><span class="dot dot-yellow"></span> Helder</button>
+        <button class="theme-btn"><span class="dot dot-amber"></span> Donker</button>
+        <button class="theme-btn"><span class="dot dot-sun"></span> Daglicht</button>
+        <button class="theme-btn"><span class="dot dot-red"></span> Nachtlicht</button>
     </div>
 
-    <!-- SECTIE 2: KADASTRALE WEBSERVICES & CHECK -->
-    <div class="section-title"><span>🔍 KADASTRALE WEBSERVICES (KADATA)</span><span>[API EXTERN]</span></div>
-    <div class="link-list">
-      <a href="https://kadatawebservice.kadaster.nl/kadastercheck/docs/index/index.html" target="_blank" rel="noopener noreferrer" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>🏢</span> KadasterCheck API Documentatie ↗</span>
-          <span class="link-desc">Officiële Swagger UI voor KadasterCheck (bouwjaar, woningtype, monumentenstatus, pandkenmerken).</span>
+    <!-- Twee Viewport Secties -->
+    <div class="viewport-grid">
+        
+        <!-- VP-1: Google Dork Woo-Search -->
+        <div class="viewport-box">
+            <div class="viewport-title">VP-1: Google Dork Woo-Search</div>
+            <div class="search-row">
+                <input type="text" class="dork-input" value="site:tholen.nl filetype:pdf woo">
+                <button class="action-btn">Zoek (Google)</button>
+            </div>
+            <div class="helper-text">Zoek direct naar openbare Woo-verzoeken, besluiten en kadastrale mutaties.</div>
         </div>
-        <span class="link-arrow">→</span>
-      </a>
 
-      <a href="https://www.kadaster.nl/zakelijk/datasets/maatwerk-api-s-kadaster" target="_blank" rel="noopener noreferrer" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>⚙️</span> Kadaster Maatwerk API's Overzicht ↗</span>
-          <span class="link-desc">Informatie over Objectinformatie API, Koopsom API en Inzicht via de Kaart API via kadatawebservice.</span>
+        <!-- VP-2: PDF Woo-Reader (PDF.js) -->
+        <div class="viewport-box">
+            <div class="viewport-title">VP-2: PDF Woo-Reader (PDF.js)</div>
+            <div class="pdf-controls">
+                <button class="action-btn">Bladeren...</button>
+                <div class="file-display">Geen bestand...geselecteerd.</div>
+                <button class="load-zaak-btn">Laad Zaak 1504573 (Scherpenisse)</button>
+            </div>
+            <div class="pdf-viewer-canvas"></div>
         </div>
-        <span class="link-arrow">→</span>
-      </a>
+
     </div>
-
-    <!-- SECTIE 3: KLANTCONTACT & MOBIEL -->
-    <div class="section-title"><span>📱 KLANTCONTACT & MOBIELE GEOMAPPING</span><span>[/KLANTCONTACT]</span></div>
-    <div class="link-list">
-      <a href="klantcontact/index.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>📱</span> Klantcontact & Mobiele Geomapping</span>
-          <span class="link-desc">Geïntegreerde client in de submap klantcontact voor mobiele en P2P-sessies.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-
-      <a href="klantcontact/verzend.html" class="link-card">
-        <div class="link-info">
-          <span class="link-title"><span>✉️</span> Klantcontact Verzendportaal</span>
-          <span class="link-desc">Submap verzendmodule voor e-mailkoppelingen, formulierinzendingen en logboekexport.</span>
-        </div>
-        <span class="link-arrow">→</span>
-      </a>
-    </div>
-
-    <!-- FOOTER -->
-    <div class="footer">
-      WOO-THOLEN MONOREPO // SECURE DEPLOYMENT READY (VERCEL / LOCAL BARE-METAL)
-    </div>
-  </div>
 
 </body>
 </html>
