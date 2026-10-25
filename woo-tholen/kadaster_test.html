@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Rust API Test</title>
+    <style>body { background: #1a1a1a; color: #00ff00; font-family: monospace; padding: 20px; }</style>
+</head>
+<body>
+    <h3>BBOX Test</h3>
+    <button onclick="testAPI()">Test API Route</button>
+    <pre id="output">Klik op test...</pre>
+    <script>
+        function testAPI() {
+            fetch('/api/percelen?bbox=66000,396000,67000,397000')
+                .then(r => r.text())
+                .then(t => document.getElementById('output').innerText = t.substring(0, 1000) + '\n\n... (data ingekort)')
+                .catch(e => document.getElementById('output').innerText = "Fout: " + e);
+        }
+    </script>
+</body>
+</html>
