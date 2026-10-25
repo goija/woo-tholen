@@ -14,7 +14,7 @@
             --border: #24344d;
             --panel-bg: #131c29;
             --card-border: #334155;
-            --text-main: #e2e8f0;
+            --text-main: #f1f5f9;
             --text-dim: #94a3b8;
             --accent-cyan: #00e5ff;
             --accent: #00e5ff;
@@ -30,7 +30,8 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: var(--font-mono);
-            font-size: 12px;
+            font-size: 13px;
+            line-height: 1.5;
             padding: 16px;
             display: flex;
             flex-direction: column;
@@ -65,7 +66,7 @@
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
             color: var(--accent-cyan);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 4px;
             font-family: var(--font-mono);
             font-size: 11px;
@@ -73,8 +74,11 @@
             font-weight: bold;
             transition: all 0.2s;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
-        .nav-btn:hover {
+        .nav-btn:hover, .nav-btn.active-nav {
             background: var(--accent-cyan);
             color: var(--bg-body);
             border-color: var(--accent-cyan);
@@ -110,10 +114,10 @@
             align-items: stretch;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 960px) {
             .viewport-grid { grid-template-columns: 1fr; }
             body { padding: 8px; }
-            .viewport-box { min-height: 460px; }
+            .viewport-box { min-height: 480px; }
         }
 
         .viewport-box {
@@ -124,7 +128,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            min-height: 620px;
+            min-height: 680px;
             position: relative;
         }
 
@@ -143,13 +147,13 @@
             padding-bottom: 8px;
         }
 
-        .viewport-title { font-weight: 700; font-size: 12px; color: var(--accent-cyan); }
+        .viewport-title { font-weight: 700; font-size: 13px; color: var(--accent-cyan); }
 
         .ctrl-btn {
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            padding: 2px 8px;
+            padding: 4px 10px;
             border-radius: 3px;
             font-size: 11px;
             cursor: pointer;
@@ -162,9 +166,9 @@
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
             color: var(--text-dim);
-            padding: 5px 8px;
+            padding: 6px 9px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 11px;
             cursor: pointer;
             font-family: var(--font-mono);
         }
@@ -181,18 +185,18 @@
             gap: 10px;
             flex: 1;
             overflow-y: auto;
-            max-height: calc(100vh - 240px);
-            padding-right: 2px;
+            max-height: calc(100vh - 230px);
+            padding-right: 4px;
         }
         .tab-content.active { display: flex; }
 
         .search-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
-            padding: 10px;
+            padding: 12px;
             border-radius: 4px;
         }
         .search-row { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -202,16 +206,16 @@
             background: var(--bg-0);
             color: var(--accent);
             border: 1px solid var(--border);
-            padding: 6px 10px;
+            padding: 7px 10px;
             font-family: var(--font-mono);
             border-radius: 4px;
-            font-size: 11px;
+            font-size: 12px;
         }
         .action-btn {
             background: var(--bg-0);
             color: var(--accent);
             border: 1px solid var(--accent);
-            padding: 6px 12px;
+            padding: 7px 12px;
             cursor: pointer;
             font-family: var(--font-mono);
             font-weight: bold;
@@ -224,36 +228,36 @@
             justify-content: center;
         }
         .action-btn:hover { background: var(--accent); color: var(--bg-0); }
-        .helper-text { color: var(--text-dim); font-size: 10px; line-height: 1.3; }
+        .helper-text { color: var(--text-dim); font-size: 11px; line-height: 1.4; }
 
         .link-list { display: flex; flex-direction: column; gap: 6px; }
         .link-item {
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
             border-radius: 4px;
-            padding: 8px 10px;
+            padding: 9px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             text-decoration: none;
             color: var(--text-main);
-            font-size: 11px;
+            font-size: 12px;
             transition: all 0.2s;
             cursor: pointer;
         }
         .link-item:hover { border-color: var(--accent-cyan); transform: translateX(2px); }
-        .link-desc { color: var(--text-dim); font-size: 9px; display: block; margin-top: 2px; }
+        .link-desc { color: var(--text-dim); font-size: 10px; display: block; margin-top: 3px; line-height: 1.35; }
 
         .pdf-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .file-display {
             flex: 1;
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
-            padding: 6px 10px;
+            padding: 7px 10px;
             border-radius: 4px;
             font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-dim);
+            font-size: 12px;
+            color: var(--accent-green);
             min-width: 140px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -263,7 +267,7 @@
             background: var(--accent-orange);
             color: #ffffff;
             border: 1px solid #c2410c;
-            padding: 6px 12px;
+            padding: 7px 12px;
             border-radius: 4px;
             font-family: var(--font-mono);
             font-size: 11px;
@@ -274,14 +278,14 @@
         .load-zaak-btn:hover { background: #c2410c; }
 
         .pdf-viewer-container {
-            background: #000000;
+            background: #03060a;
             border: 1px solid var(--card-border);
             border-radius: 4px;
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            min-height: 500px;
+            min-height: 560px;
         }
         .pdf-viewer-canvas {
             flex: 1;
@@ -289,52 +293,91 @@
             flex-direction: column;
             align-items: stretch;
             justify-content: flex-start;
-            color: var(--text-dim);
-            font-size: 11px;
-            padding: 12px;
+            color: var(--text-main);
+            font-size: 12px;
+            padding: 14px;
             width: 100%;
             height: 100%;
             overflow-y: auto;
-            gap: 12px;
+            gap: 14px;
         }
-        iframe.pdf-frame { width: 100%; height: 520px; border: none; background: #ffffff; border-radius: 4px; }
+        iframe.pdf-frame { width: 100%; height: 560px; border: none; background: #ffffff; border-radius: 4px; }
 
         .viewer-split {
             display: grid;
             grid-template-columns: 1.15fr 1fr;
-            gap: 12px;
+            gap: 14px;
             width: 100%;
             text-align: left;
         }
-        @media(max-width: 960px) { .viewer-split { grid-template-columns: 1fr; } }
+        @media(max-width: 1024px) { .viewer-split { grid-template-columns: 1fr; } }
 
         .schema-card {
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
-            padding: 12px;
-            border-radius: 4px;
+            padding: 14px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            overflow-y: auto;
-            max-height: 520px;
+            gap: 6px;
             text-align: left;
+        }
+        .section-heading {
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-size: 13px;
+            padding-bottom: 6px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .prop-row {
             display: flex;
             justify-content: space-between;
-            gap: 8px;
-            font-size: 11px;
-            padding: 4px 0;
+            gap: 12px;
+            font-size: 12px;
+            padding: 5px 0;
             border-bottom: 1px solid rgba(51, 65, 85, 0.45);
         }
-        .prop-key { color: var(--text-dim); white-space: nowrap; }
-        .prop-val { color: var(--text-main); font-weight: bold; text-align: right; word-break: break-all; }
+        .prop-key { color: var(--text-dim); font-weight: 500; }
+        .prop-val { color: var(--text-main); font-weight: 700; text-align: right; }
+
+        .timeline-item {
+            border-left: 2px solid var(--accent-cyan);
+            padding: 6px 0 6px 12px;
+            margin-left: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .timeline-year {
+            color: var(--accent-amber);
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .timeline-text {
+            color: var(--text-main);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
 
         canvas#mapPreview {
             width: 100%;
-            height: 320px;
-            background: #03060a;
+            height: 330px;
+            background: #020408;
             border: 1px solid var(--card-border);
             border-radius: 4px;
             cursor: crosshair;
@@ -344,14 +387,15 @@
         table.schema-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px;
+            font-size: 11px;
             text-align: left;
         }
         table.schema-table th, table.schema-table td {
             border-bottom: 1px solid var(--border-color);
-            padding: 5px 6px;
+            padding: 6px 8px;
+            vertical-align: top;
         }
-        table.schema-table th { color: var(--accent-amber); }
+        table.schema-table th { color: var(--accent-amber); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -364,7 +408,7 @@
             <button class="theme-btn" onclick="setTheme('daglicht')"><span class="dot dot-sun"></span> Daglicht</button>
             <button class="theme-btn" onclick="setTheme('nachtlicht')"><span class="dot dot-red"></span> Nachtlicht</button>
         </div>
-        <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE // PDOK OGC + LOCATIESERVER V3.1 + KADASTERCHECK API</div>
+        <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE // PLATTEWEG 3-5-7 (E 108 → E 1552) & BIBLIOTHEEK GEKOPPELD</div>
     </div>
 
     <!-- Navigatie Knoppenbar -->
@@ -376,45 +420,55 @@
         <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="nav-btn">⏳ Tijdscapsule</a>
         <a href="swagger.html" class="nav-btn">🧠 Kenniscentrum</a>
         <a href="swagger.html" class="nav-btn">📊 Rekencentrum</a>
-        <a href="https://www.zeeuwsarchief.nl/zoekgids/burgerlijke-stand/#online-raadplegen" target="_blank" rel="noopener noreferrer" class="nav-btn">📚 Bibliotheek</a>
+        <button type="button" class="nav-btn" onclick="openBibliotheekCentrum()">📚 Bibliotheek (Bestuursorganen & Zoekslagen)</button>
     </div>
 
     <!-- 1/3 (VP-1) en 2/3 (VP-2) Grid -->
     <div class="viewport-grid">
         
-        <!-- VP-1: Navigatie, Zoeken, API's & Volledige Systeemlinks -->
+        <!-- VP-1: Navigatie, Zoeken, Bibliotheek & Systeemlinks -->
         <div class="viewport-box" id="vp1">
             <div class="viewport-header">
-                <span class="viewport-title">VP-1: DOSSIER, KADASTER, ZOEKEN & LINKS</span>
+                <span class="viewport-title">VP-1: PLATTEWEG, ZOEKSLAGEN & BESTUUR</span>
                 <div class="viewport-controls">
                     <button class="ctrl-btn" onclick="toggleFullscreen('vp1')">⛶</button>
                 </div>
             </div>
 
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('dossierTab', this)">🏠 Platteweg</button>
-                <button class="tab-btn" onclick="switchTab('kadasterTab', this)">🏛️ Kadaster</button>
-                <button class="tab-btn" onclick="switchTab('searchTab', this)">🔍 Zoeken</button>
-                <button class="tab-btn" onclick="switchTab('apiTab', this)">📜 API & Spec</button>
-                <button class="tab-btn" onclick="switchTab('linksTab', this)">📂 Links</button>
+                <button class="tab-btn active" id="btnTabDossier" onclick="switchTab('dossierTab', this)">🏠 Platteweg</button>
+                <button class="tab-btn" id="btnTabSearch" onclick="switchTab('searchTab', this)">🔍 Zoeken</button>
+                <button class="tab-btn" id="btnTabBib" onclick="switchTab('bibTab', this)">📚 Bibliotheek</button>
+                <button class="tab-btn" id="btnTabKadaster" onclick="switchTab('kadasterTab', this)">🏛️ Kadaster</button>
+                <button class="tab-btn" id="btnTabApi" onclick="switchTab('apiTab', this)">📜 API</button>
+                <button class="tab-btn" id="btnTabLinks" onclick="switchTab('linksTab', this)">📂 Links</button>
             </div>
             
-            <!-- TAB 1: Platteweg 3, 5, 7 Dossier -->
+            <!-- TAB 1: Platteweg 3, 5, 7 Dossier & Vlaggetjes -->
             <div id="dossierTab" class="tab-content active">
                 <div class="search-group">
                     <span style="font-weight: bold; color: var(--accent);">📋 Platteweg 3, 5, 7 (Scherpenisse)</span>
                     <span class="helper-text">Klik op een object om de kadastrale gegevens en live PDOK-kaartomgeving (Perceel E 1552) in VP-2 te laden:</span>
-                    <div class="link-list" style="margin-top: 6px;">
+                    <div class="link-list" style="margin-top: 4px;">
                         <div class="link-item" onclick="laadPlattewegDossier('3')">
-                            <div><strong>Platteweg 3 (Woonhuis)</strong><span class="link-desc">Perceel E 1552 (hist. E 108) | 68 m² WOZ | 51.54747°N, 4.10594°E</span></div>
+                            <div>
+                                <strong>Platteweg 3 (Woonhuis)</strong>
+                                <span class="link-desc">Perceel E 1552 (hist. E 108) | 68 m² WOZ | 51.54747°N, 4.10594°E</span>
+                            </div>
                             <span>→</span>
                         </div>
                         <div class="link-item" onclick="laadPlattewegDossier('5')">
-                            <div><strong>Platteweg 5 (Landbouwschuur)</strong><span class="link-desc">Perceel E 1552 | 84 m² WOZ | WBD-aantekening | 51.54751°N, 4.10696°E</span></div>
+                            <div>
+                                <strong>Platteweg 5 (Landbouwschuur)</strong>
+                                <span class="link-desc">Perceel E 1552 | 84 m² WOZ | WBD-aantekening | 51.54751°N, 4.10696°E</span>
+                            </div>
                             <span>→</span>
                         </div>
                         <div class="link-item" onclick="laadPlattewegDossier('7')">
-                            <div><strong>Platteweg 7 (Wagenhuis & Schuur 1926)</strong><span class="link-desc">Perceel E 1552 | Keuringsrapport 1926 | 51.54818°N, 4.10605°E</span></div>
+                            <div>
+                                <strong>Platteweg 7 (Wagenhuis & Schuur 1926)</strong>
+                                <span class="link-desc">Perceel E 1552 | Keuringsrapport 1926 | 51.54818°N, 4.10605°E</span>
+                            </div>
                             <span>→</span>
                         </div>
                     </div>
@@ -423,101 +477,178 @@
                 <div class="search-group">
                     <span style="font-weight: bold; color: var(--accent-amber);">🚩 Perceel-Vlaggetjes (Platteweg E 1552)</span>
                     <div class="link-list">
-                        <div class="link-item" onclick="laadPlattewegDossier('7')">
-                            <div><strong>P7-NW (Wagenhuis)</strong><span class="link-desc">X: 1.39 cm | Y: 1.86 cm | 51.54818°N, 4.10605°E</span></div>
+                        <div class="link-item" onclick="laadPlattewegDossier('7', 'P7-NW')">
+                            <div>
+                                <strong>P7-NW (Wagenhuis)</strong>
+                                <span class="link-desc">X: 1.39 cm | Y: 1.86 cm | 51.54818°N, 4.10605°E</span>
+                            </div>
                             <span>🎯</span>
                         </div>
-                        <div class="link-item" onclick="laadPlattewegDossier('7')">
-                            <div><strong>P7-NO (Schuur 1926)</strong><span class="link-desc">X: 3.95 cm | Y: 1.63 cm | 51.54813°N, 4.10689°E</span></div>
+                        <div class="link-item" onclick="laadPlattewegDossier('7', 'P7-NO')">
+                            <div>
+                                <strong>P7-NO (Schuur 1926)</strong>
+                                <span class="link-desc">X: 3.95 cm | Y: 1.63 cm | 51.54813°N, 4.10689°E</span>
+                            </div>
                             <span>🎯</span>
                         </div>
-                        <div class="link-item" onclick="laadPlattewegDossier('5')">
-                            <div><strong>P5-ZO (84m² WOZ)</strong><span class="link-desc">X: 4.18 cm | Y: -1.39 cm | 51.54751°N, 4.10696°E</span></div>
+                        <div class="link-item" onclick="laadPlattewegDossier('5', 'P5-ZO')">
+                            <div>
+                                <strong>P5-ZO (84m² WOZ)</strong>
+                                <span class="link-desc">X: 4.18 cm | Y: -1.39 cm | 51.54751°N, 4.10696°E</span>
+                            </div>
                             <span>🎯</span>
                         </div>
-                        <div class="link-item" onclick="laadPlattewegDossier('3')">
-                            <div><strong>P3-ZW (68m² WOZ)</strong><span class="link-desc">X: 1.05 cm | Y: -1.63 cm | 51.54747°N, 4.10594°E</span></div>
+                        <div class="link-item" onclick="laadPlattewegDossier('3', 'P3-ZW')">
+                            <div>
+                                <strong>P3-ZW (68m² WOZ)</strong>
+                                <span class="link-desc">X: 1.05 cm | Y: -1.63 cm | 51.54747°N, 4.10594°E</span>
+                            </div>
                             <span>🎯</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: Kadaster OGC & WFS BBOX -->
+            <!-- TAB 2: Zoeken op Adres (Met automatische Platteweg 3-5-7 herkenning) -->
+            <div id="searchTab" class="tab-content">
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent);">🏙️ Zoek op Adres (Platteweg 3, 5, 7) of Plaatsnaam</span>
+                    <div class="search-row">
+                        <input type="text" id="queryPlaats" value="Platteweg 3 Scherpenisse" onkeydown="if(event.key==='Enter') zoekOpPlaats()">
+                        <button class="action-btn" onclick="zoekOpPlaats()">Zoek Adres</button>
+                    </div>
+                    <div class="search-row">
+                        <button class="ctrl-btn" onclick="snelZoekPlatteweg('Platteweg 3 Scherpenisse')">Platteweg 3</button>
+                        <button class="ctrl-btn" onclick="snelZoekPlatteweg('Platteweg 5 Scherpenisse')">Platteweg 5</button>
+                        <button class="ctrl-btn" onclick="snelZoekPlatteweg('Platteweg 7 Scherpenisse')">Platteweg 7</button>
+                    </div>
+                    <span class="helper-text" id="zoekStatus">Zoekslag naar Platteweg 3, 5 of 7 toont direct alle eigendoms-, bewoners-, bestuurs- en kadastrale historie.</span>
+                </div>
+                <div id="adresResultList" style="display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto;"></div>
+
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent);">📄 Directe Dossier PDF-Documenten (VP-2)</span>
+                    <div class="link-list">
+                        <div class="link-item" onclick="laadPDFUrl('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'Keuringsrapport_1926_Platteweg_3_5_7.pdf')">
+                            <div><strong>📄 Bouwkundig Keuringsrapport 1926 (PDF)</strong><span class="link-desc">Platteweg 3, 5, 7 Scherpenisse — open in VP-2</span></div>
+                            <span>→</span>
+                        </div>
+                        <div class="link-item" onclick="laadPDFUrl('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'Ruilverkaveling_1964_NL-TlnGAT-007.pdf')">
+                            <div><strong>📄 Ruilverkavelingsdossier 1964 NL-TlnGAT-007 (PDF)</strong><span class="link-desc">Mutatie E 108 → E 1551 & E 1552 — open in VP-2</span></div>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Bibliotheek (Alle Bevoegde Bestuursorganen & Zoekslagen) -->
+            <div id="bibTab" class="tab-content">
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent);">📚 Bibliotheek: Bevoegde Bestuursorganen</span>
+                    <span class="helper-text">Klik op een bestuursorgaan om alle bevoegdheden, archiefcodes en directe zoekslagen in VP-2 te openen:</span>
+                    <button class="action-btn" onclick="openBibliotheekCentrum()">📖 Open Volledig Bestuurs- & Zoekslagen Overzicht in VP-2</button>
+                    <div class="link-list" style="margin-top: 4px;">
+                        <div class="link-item" onclick="openBibliotheekCentrum('tholen')">
+                            <div>
+                                <strong>1. College van B&W / Raad Gemeente Tholen</strong>
+                                <span class="link-desc">Bevoegd gezag Omgevingswet, BAG, Woo & Archief NL-TlnGAT-007 (v/h Gem. Scherpenisse tot 1971)</span>
+                            </div>
+                            <span>→</span>
+                        </div>
+                        <div class="link-item" onclick="openBibliotheekCentrum('provincie')">
+                            <div>
+                                <strong>2. Gedeputeerde Staten Provincie Zeeland</strong>
+                                <span class="link-desc">Bevoegd gezag Wbb / WBD-historie, bodem-overgangsrecht & provinciale ruimtelijke ordening</span>
+                            </div>
+                            <span>→</span>
+                        </div>
+                        <div class="link-item" onclick="openBibliotheekCentrum('rud')">
+                            <div>
+                                <strong>3. RUD Zeeland (Omgevingsdienst)</strong>
+                                <span class="link-desc">Gemandaat uitvoeringsorgaan milieu-, bodem- en saneringsdossiers Scherpenisse</span>
+                            </div>
+                            <span>→</span>
+                        </div>
+                        <div class="link-item" onclick="openBibliotheekCentrum('waterschap')">
+                            <div>
+                                <strong>4. Waterschap Scheldestromen</strong>
+                                <span class="link-desc">Bevoegd bestuur waterstaat, legger Scherpenissepolder, watergangen & keringen</span>
+                            </div>
+                            <span>→</span>
+                        </div>
+                        <div class="link-item" onclick="openBibliotheekCentrum('kadaster')">
+                            <div>
+                                <strong>5. Het Kadaster (Bestuur / Vestiging Arnhem)</strong>
+                                <span class="link-desc">Bevoegd voor BRK, Openbare Registers, Minuutplan 1832 (E 108) & Ruilverkaveling 1964 (E 1552)</span>
+                            </div>
+                            <span>→</span>
+                        </div>
+                        <div class="link-item" onclick="openBibliotheekCentrum('archief')">
+                            <div>
+                                <strong>6. Zeeuws Archief & RCE</strong>
+                                <span class="link-desc">Oorspronkelijke Aanwijzende Tafels (1832), Burgerlijke Stand, Memories & Notarieel Archief</span>
+                            </div>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent-amber);">🔎 Directe Zoekslagen (1-Klik Uitvoeren)</span>
+                    <div class="search-row">
+                        <input type="text" id="bibCustomQuery" value="Scherpenisse Platteweg E 1552">
+                    </div>
+                    <div class="link-list">
+                        <div class="link-item" onclick="voerZoekslagUit('woo_tholen')">
+                            <div><strong>🌐 Zoekslag 1: Woo-besluiten Gemeente Tholen</strong><span class="link-desc">site:tholen.nl filetype:pdf (Platteweg / Scherpenisse / Woo)</span></div>
+                            <span>↗</span>
+                        </div>
+                        <div class="link-item" onclick="voerZoekslagUit('officiele_bekendmakingen')">
+                            <div><strong>📢 Zoekslag 2: Officiële Bekendmakingen & Staatscourant</strong><span class="link-desc">zoek.officielebekendmakingen.nl — Besluiten Tholen & Scherpenisse</span></div>
+                            <span>↗</span>
+                        </div>
+                        <div class="link-item" onclick="voerZoekslagUit('zeeuws_archief')">
+                            <div><strong>📜 Zoekslag 3: Zeeuws Archief (Personen & Perceel E 108)</strong><span class="link-desc">Hein Guiljam / H.G. Quaak / Scherpenisse Burgerlijke Stand</span></div>
+                            <span>↗</span>
+                        </div>
+                        <div class="link-item" onclick="voerZoekslagUit('delpher')">
+                            <div><strong>📰 Zoekslag 4: Delpher Historische Kranten & Registers</strong><span class="link-desc">Historische bekendmakingen Scherpenisse Platteweg (1832–1995)</span></div>
+                            <span>↗</span>
+                        </div>
+                        <div class="link-item" onclick="voerZoekslagUit('rud_bodem')">
+                            <div><strong>🧪 Zoekslag 5: RUD Zeeland & Bodemloket</strong><span class="link-desc">WBD- en bodeminformatie Scherpenisse Sectie E 1552</span></div>
+                            <span>↗</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: Kadaster OGC & WFS BBOX -->
             <div id="kadasterTab" class="tab-content">
                 <div class="search-group">
                     <span style="font-weight: bold; color: var(--accent);">📍 PDOK BRK Perceel Query (EPSG:28992)</span>
                     <div class="search-row">
-                        <input type="text" id="bboxInput" value="66000,396000,67000,397000" placeholder="minX,minY,maxX,maxY">
+                        <input type="text" id="bboxInput" value="66100,396100,66450,396450" placeholder="minX,minY,maxX,maxY">
                         <button class="action-btn" onclick="bevraagKadaster()">Laad BBOX</button>
                     </div>
                     <div class="search-row" style="margin-top: 4px;">
-                        <button class="ctrl-btn" onclick="setBbox('66000,396000,67000,397000')">Scherpenisse (Kern)</button>
+                        <button class="ctrl-btn" onclick="setBbox('66100,396100,66450,396450')">Platteweg E 1552</button>
                         <button class="ctrl-btn" onclick="setBbox('64000,394000,68000,398000')">Scherpenisse + St. Maartensdijk</button>
                     </div>
                     <span class="helper-text" id="kadasterStatus">Klik op 'Laad BBOX' om percelen op te halen.</span>
                 </div>
-                <div id="kadasterResultList" style="display: flex; flex-direction: column; gap: 4px; max-height: 330px; overflow-y: auto;">
-                    <span style="color: var(--text-dim); font-size: 10px;">Nog geen BBOX-lijst geladen.</span>
-                </div>
+                <div id="kadasterResultList" style="display: flex; flex-direction: column; gap: 4px; max-height: 330px; overflow-y: auto;"></div>
             </div>
 
-            <!-- TAB 3: Adreszoeken, Archieven & PDF's -->
-            <div id="searchTab" class="tab-content">
-                <div class="search-group">
-                    <span style="font-weight: bold; color: var(--accent);">🏙️ PDOK Locatieserver v3.1 (Adres / Plaats)</span>
-                    <div class="search-row">
-                        <input type="text" id="queryPlaats" value="Platteweg 7 Scherpenisse">
-                        <button class="action-btn" onclick="zoekOpPlaats()">Zoek Adres</button>
-                    </div>
-                    <span class="helper-text" id="zoekStatus">Zoek op adres (laadt kadastrale geomap) of plaatsnaam.</span>
-                </div>
-                <div id="adresResultList" style="display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow-y: auto;"></div>
-
-                <div class="search-group">
-                    <span style="font-weight: bold; color: var(--accent);">🌐 Google Dork Woo-Search</span>
-                    <div class="search-row">
-                        <input type="text" id="queryTholen" value="site:tholen.nl filetype:pdf woo">
-                        <button class="action-btn" onclick="zoekGoogle('queryTholen')">Zoek</button>
-                    </div>
-                </div>
-
-                <div class="search-group">
-                    <span style="font-weight: bold; color: var(--accent);">📜 Zeeuws Archief & Delpher Kranten</span>
-                    <div class="search-row">
-                        <input type="text" id="queryZeeuwseArchief" value="Scherpenisse Platteweg">
-                        <button class="action-btn" onclick="zoekZeeuwsArchief()">Archief</button>
-                        <button class="action-btn" onclick="zoekDelpher()">Delpher</button>
-                    </div>
-                    <a href="https://www.zeeuwsarchief.nl/zoekgids/burgerlijke-stand/#online-raadplegen" target="_blank" rel="noopener noreferrer" class="action-btn" style="margin-top: 4px;">
-                        Open Zeeuws Archief Zoekgids (Burgerlijke Stand) ↗
-                    </a>
-                </div>
-
-                <div class="search-group">
-                    <span style="font-weight: bold; color: var(--accent);">📄 Directe PDF-Documenten (VP-2 Viewer)</span>
-                    <div class="link-list">
-                        <div class="link-item" onclick="laadPDFUrl('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'Woo_Besluit_Scherpenisse.pdf')">
-                            <div><strong>📄 Woo Besluit Scherpenisse (PDF)</strong><span class="link-desc">Klik om PDF direct in VP-2 te openen</span></div>
-                            <span>→</span>
-                        </div>
-                        <div class="link-item" onclick="laadPDFUrl('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'Keuringsrapport_1926_Platteweg.pdf')">
-                            <div><strong>📄 Keuringsrapport 1926 (PDF)</strong><span class="link-desc">Klik om PDF direct in VP-2 te openen</span></div>
-                            <span>→</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: KadasterCheck API & Schema 2020-12 -->
+            <!-- TAB 5: KadasterCheck API & Schema 2020-12 -->
             <div id="apiTab" class="tab-content">
                 <div class="search-group">
                     <span style="font-weight: bold; color: var(--accent);">🏢 KadasterCheck Woninginformatie & Koopsom API</span>
                     <span class="helper-text">X-API-KEY: PMAK-6ade6595...0c5f3</span>
-                    <input type="text" id="apiPandId" value="0716100000001552" placeholder="PandId (bijv. 0716100000001552)">
+                    <input type="text" id="apiPandId" value="0716100000001552" placeholder="PandId">
                     <div class="search-row">
                         <input type="text" id="apiPostcode" value="4694BA" placeholder="Postcode">
-                        <input type="text" id="apiHuisnr" value="7" placeholder="Huisnr">
+                        <input type="text" id="apiHuisnr" value="3" placeholder="Huisnr">
                     </div>
                     <div class="search-row">
                         <button class="action-btn" onclick="bevraagWoninginfoApi()">Woninginfo API</button>
@@ -532,7 +663,7 @@
                 </div>
             </div>
 
-            <!-- TAB 5: Alle Originele Systeemlinks Intact -->
+            <!-- TAB 6: Alle Originele Systeemlinks Intact -->
             <div id="linksTab" class="tab-content">
                 <div class="link-list">
                     <a href="index.html" target="_blank" class="link-item">
@@ -574,18 +705,19 @@
         <!-- VP-2: Gekoppelde Weergave (2/3 Breedte) -->
         <div class="viewport-box" id="vp2">
             <div class="viewport-header">
-                <span class="viewport-title">VP-2: KADASTER SCHEMA 2020-12, GEOMETRIE KAART & PDF VIEWER</span>
+                <span class="viewport-title">VP-2: PLATTEWEG 3-5-7 DOSSIER, KADASTRALE HISTORIE, EIGENDOM & BESTUUR</span>
                 <div class="viewport-controls">
+                    <button class="ctrl-btn" onclick="laadPlattewegDossier('3')">🏠 Platteweg 3-5-7</button>
+                    <button class="ctrl-btn" onclick="openBibliotheekCentrum()">📚 Bestuur & Zoekslagen</button>
                     <button class="ctrl-btn" onclick="toonVolledigPerceelSchema()">📋 Schema</button>
-                    <button class="ctrl-btn" onclick=" toggleFullscreen('vp2')">⛶</button>
+                    <button class="ctrl-btn" onclick="toggleFullscreen('vp2')">⛶</button>
                 </div>
             </div>
 
             <div class="pdf-controls">
                 <button class="action-btn" onclick="document.getElementById('fileInput').click()">Bladeren (PDF)...</button>
                 <input type="file" id="fileInput" accept="application/pdf" style="display: none;" onchange="handleFileSelect(event)">
-                <div class="file-display" id="fileStatus">Platteweg_3_5_7_Gekoppeld.json</div>
-                <button class="action-btn" onclick="laadPlattewegDossier('3')">🏠 Platteweg 3-5-7</button>
+                <div class="file-display" id="fileStatus">Platteweg_3_5_7_Volledig_Dossier_E1552.json</div>
                 <button class="load-zaak-btn" onclick="loadZaak()">Laad Zaak 1504573</button>
             </div>
 
@@ -601,8 +733,48 @@
         let loadedFeatures = [];
         let selectedFeatureId = null;
         let currentMapTransform = null;
+        let activeFlagCode = null;
 
-        // Alle 21 properties van GET /collections/perceel/schema (JSON Schema 2020-12)
+        const PERCEEL_VLAGGETJES = [
+            { code: 'P7-NW', naam: 'Wagenhuis (Platteweg 7)', cmX: '1.39 cm', cmY: '1.86 cm', lat: 51.54818, lon: 4.10605, relX: 0.28, relY: 0.25 },
+            { code: 'P7-NO', naam: 'Schuur 1926 (Platteweg 7)', cmX: '3.95 cm', cmY: '1.63 cm', lat: 51.54813, lon: 4.10689, relX: 0.74, relY: 0.28 },
+            { code: 'P5-ZO', naam: 'Landbouwschuur 84m² WOZ (Platteweg 5)', cmX: '4.18 cm', cmY: '-1.39 cm', lat: 51.54751, lon: 4.10696, relX: 0.78, relY: 0.74 },
+            { code: 'P3-ZW', naam: 'Woonhuis 68m² WOZ (Platteweg 3)', cmX: '1.05 cm', cmY: '-1.63 cm', lat: 51.54747, lon: 4.10594, relX: 0.24, relY: 0.78 }
+        ];
+
+        const PLATTEWEG_DATA = {
+            '3': {
+                nummer: '3',
+                titel: 'Platteweg 3, 4694 BA Scherpenisse (Woonhuis)',
+                onderdeel: 'Woonhuis (68 m² WOZ) — Onderdeel van complex 3-5-7',
+                perceel: 'Kadastrale gemeente Scherpenisse, Sectie E, nr. 1552 (en E 1551) — Historisch Sectie E nr. 108',
+                oppervlakte: '750 m² totale kaveloppervlakte (460 m² fysieke voetafdruk opstallen op E 1552)',
+                bouwjaar: '1926 (Geregistreerd in Bouwkundig Keuringsrapport 1926)',
+                vlag: 'P3-ZW (X: 1.05 cm | Y: -1.63 cm | 51.54747°N, 4.10594°E)',
+                bbox: '66120,396120,66420,396420'
+            },
+            '5': {
+                nummer: '5',
+                titel: 'Platteweg 5, 4694 BA Scherpenisse (Landbouwschuur)',
+                onderdeel: 'Landbouwschuur (84 m² WOZ) met publiekrechtelijke WBD-aantekening',
+                perceel: 'Kadastrale gemeente Scherpenisse, Sectie E, nr. 1552 (en E 1551) — Historisch Sectie E nr. 108',
+                oppervlakte: '750 m² totale kaveloppervlakte (460 m² fysieke voetafdruk opstallen op E 1552)',
+                bouwjaar: '1926 (Agrarische bedrijfsbebouwing)',
+                vlag: 'P5-ZO (X: 4.18 cm | Y: -1.39 cm | 51.54751°N, 4.10696°E)',
+                bbox: '66120,396120,66420,396420'
+            },
+            '7': {
+                nummer: '7',
+                titel: 'Platteweg 7, 4694 BA Scherpenisse (Wagenhuis & Schuur 1926)',
+                onderdeel: 'Wagenhuis (P7-NW) & Historische Schuur 1926 (P7-NO)',
+                perceel: 'Kadastrale gemeente Scherpenisse, Sectie E, nr. 1552 (en E 1551) — Historisch Sectie E nr. 108',
+                oppervlakte: '750 m² totale kaveloppervlakte (460 m² fysieke voetafdruk opstallen op E 1552)',
+                bouwjaar: '1926 (Conform Keuringsrapport 1926)',
+                vlag: 'P7-NW (51.54818°N, 4.10605°E) & P7-NO (51.54813°N, 4.10689°E)',
+                bbox: '66120,396120,66420,396420'
+            }
+        };
+
         const PERCEEL_SCHEMA_2020_12 = [
             { prop: 'id', type: 'string · uuid', desc: 'Unique stable feature identifier (UUID). Required, readOnly.' },
             { prop: 'identificatie_lokaal_id', type: 'string', desc: 'Local BRK identifier for this parcel.' },
@@ -612,50 +784,23 @@
             { prop: 'perceelnummer_rotatie', type: 'number · double', desc: 'Rotation angle for rendering the parcel number label on a map.' },
             { prop: 'perceelnummer_verschuiving_delta_x', type: 'number · double', desc: 'X offset for the parcel number label position.' },
             { prop: 'perceelnummer_verschuiving_delta_y', type: 'number · double', desc: 'Y offset for the parcel number label position.' },
-            { prop: 'kadastrale_gemeente_code', type: 'string', desc: 'Code of the cadastral municipality (kadastrale gemeente).' },
-            { prop: 'kadastrale_gemeente_waarde', type: 'string', desc: 'Human-readable name of the cadastral municipality.' },
+            { prop: 'kadastrale_gemeente_code', type: 'string', desc: 'Code of the cadastral municipality (SPN00).' },
+            { prop: 'kadastrale_gemeente_waarde', type: 'string', desc: 'Human-readable name of the cadastral municipality (Scherpenisse).' },
             { prop: 'akr_kadastrale_gemeente_code_code', type: 'string', desc: 'AKR system code for the cadastral municipality.' },
             { prop: 'akr_kadastrale_gemeente_code_waarde', type: 'string', desc: 'AKR system label for the cadastral municipality.' },
-            { prop: 'sectie', type: 'string', desc: 'Cadastral section letter (e.g. "E", "M").' },
-            { prop: 'perceelnummer', type: 'integer', desc: 'Parcel number within the section.' },
-            { prop: 'kadastrale_grootte_waarde', type: 'number · double', desc: 'Cadastral area size (in m²).' },
+            { prop: 'sectie', type: 'string', desc: 'Cadastral section letter ("E").' },
+            { prop: 'perceelnummer', type: 'integer', desc: 'Parcel number within the section (1552 / 1551, v/h 108).' },
+            { prop: 'kadastrale_grootte_waarde', type: 'number · double', desc: 'Cadastral area size in m².' },
             { prop: 'soort_grootte_code', type: 'string', desc: 'Code indicating whether the size is measured or estimated.' },
-            { prop: 'soort_grootte_waarde', type: 'string', desc: 'Label for the size type (e.g. "Vastgesteld").' },
+            { prop: 'soort_grootte_waarde', type: 'string', desc: 'Label for the size type ("Vastgesteld").' },
             { prop: 'begin_geldigheid', type: 'string · date-time', desc: 'Start of the validity period for this version of the feature.' },
             { prop: 'tijdstip_registratie', type: 'string · date-time', desc: 'Timestamp when this feature version was registered.' },
-            { prop: 'status_historie_code', type: 'string', desc: 'History status code (e.g. G).' },
-            { prop: 'status_historie_waarde', type: 'string', desc: 'Human-readable label for the history status (e.g. Geldig).' }
+            { prop: 'status_historie_code', type: 'string', desc: 'History status code (G).' },
+            { prop: 'status_historie_waarde', type: 'string', desc: 'Human-readable label for the history status (Geldig).' }
         ];
 
-        const PLATTEWEG_DATA = {
-            '3': {
-                titel: 'Platteweg 3, 4694 BA Scherpenisse',
-                onderdeel: 'Woonhuis (68 m² WOZ)',
-                perceel: 'Scherpenisse Sectie E nr. 1552 (hist. E 108)',
-                bouwjaar: '1926 (Keuringsrapport 1926)',
-                wgs84: '51.54747°N, 4.10594°E (Vlag P3-ZW)',
-                bbox: '66050,396050,66450,396450'
-            },
-            '5': {
-                titel: 'Platteweg 5, 4694 BA Scherpenisse',
-                onderdeel: 'Landbouwschuur (84 m² WOZ)',
-                perceel: 'Scherpenisse Sectie E nr. 1552 (hist. E 108)',
-                bouwjaar: '1926',
-                wgs84: '51.54751°N, 4.10696°E (Vlag P5-ZO)',
-                bbox: '66050,396050,66450,396450'
-            },
-            '7': {
-                titel: 'Platteweg 7, 4694 BA Scherpenisse',
-                onderdeel: 'Wagenhuis (P7-NW) & Schuur 1926 (P7-NO)',
-                perceel: 'Scherpenisse Sectie E nr. 1552 (hist. E 108)',
-                bouwjaar: '1926',
-                wgs84: '51.54818°N, 4.10605°E / 51.54813°N, 4.10689°E',
-                bbox: '66050,396050,66450,396450'
-            }
-        };
-
         window.onload = function() {
-            laadPlattewegDossier('3');
+            laadPlattewegDossier('3', 'P3-ZW');
         };
 
         function toggleFullscreen(id) {
@@ -666,7 +811,7 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
         }
 
         function setBbox(bboxStr) {
@@ -674,19 +819,9 @@
             bevraagKadaster();
         }
 
-        function zoekGoogle(inputId) {
-            const q = document.getElementById(inputId).value;
-            window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank');
-        }
-
-        function zoekZeeuwsArchief() {
-            const q = document.getElementById('queryZeeuwseArchief').value;
-            window.open(`https://www.zeeuwsarchief.nl/zoeken/?q=${encodeURIComponent(q)}`, '_blank');
-        }
-
-        function zoekDelpher() {
-            const q = document.getElementById('queryZeeuwseArchief').value;
-            window.open(`https://www.delpher.nl/nl/kranten/resultaten?query=${encodeURIComponent(q)}`, '_blank');
+        function snelZoekPlatteweg(q) {
+            document.getElementById('queryPlaats').value = q;
+            zoekOpPlaats();
         }
 
         function laadPDFUrl(url, filename) {
@@ -694,46 +829,274 @@
             document.getElementById('pdfCanvas').innerHTML = `<iframe src="${url}" class="pdf-frame"></iframe>`;
         }
 
-        // Haal veilig alle polygon-ringen op uit zowel Polygon als MultiPolygon
         function getFeatureRings(f) {
             if (!f || !f.geometry || !f.geometry.coordinates) return [];
             const type = f.geometry.type;
             const coords = f.geometry.coordinates;
-            if (type === 'Polygon') {
-                return [coords[0]];
-            } else if (type === 'MultiPolygon') {
-                return coords.map(poly => poly[0]);
-            }
+            if (type === 'Polygon') return [coords[0]];
+            if (type === 'MultiPolygon') return coords.map(poly => poly[0]);
             return [];
         }
 
-        function laadPlattewegDossier(nummer) {
+        // Volledige weergave van Platteweg 3, 5 en 7 inclusief Eigendom, Bewonersgeschiedenis, Kadastrale Wijzigingen & Bevoegd Bestuur
+        function laadPlattewegDossier(nummer = '3', flagCode = null) {
             const info = PLATTEWEG_DATA[nummer] || PLATTEWEG_DATA['3'];
-            document.getElementById('fileStatus').textContent = `Platteweg_${nummer}_E1552_Geomap.json`;
-            const canvasContainer = document.getElementById('pdfCanvas');
+            activeFlagCode = flagCode || (nummer === '3' ? 'P3-ZW' : nummer === '5' ? 'P5-ZO' : 'P7-NW');
+            document.getElementById('fileStatus').textContent = `Platteweg_${info.nummer}_Scherpenisse_E1552_Volledig.json`;
 
+            const canvasContainer = document.getElementById('pdfCanvas');
             canvasContainer.innerHTML = `
+                <!-- Bovenste Rij: Objectgegevens + Live Kadastrale Kaart met Vlaggetjes -->
                 <div class="viewer-split">
-                    <div class="schema-card" id="leftDetailCard">
-                        <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px;">🏠 ${info.titel}</div>
-                        <div class="prop-row"><span class="prop-key">Kadastraal Perceel:</span><span class="prop-val">${info.perceel}</span></div>
-                        <div class="prop-row"><span class="prop-key">Complex Onderdeel:</span><span class="prop-val">${info.onderdeel}</span></div>
-                        <div class="prop-row"><span class="prop-key">Bouwjaar / Archief:</span><span class="prop-val">${info.bouwjaar}</span></div>
-                        <div class="prop-row"><span class="prop-key">Bodemstatus:</span><span class="prop-val" style="color: var(--accent-amber);">WBD-aantekening</span></div>
-                        <div class="prop-row"><span class="prop-key">WGS84 Coördinaten:</span><span class="prop-val">${info.wgs84}</span></div>
-                        <div class="prop-row"><span class="prop-key">Gemeente:</span><span class="prop-val">Scherpenisse (Tholen)</span></div>
-                        <div id="livePerceelProps" style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 6px;">
-                            <span style="color: var(--text-dim); font-size: 10px;">Live PDOK BRK perceeldata E 1552 wordt gekoppeld...</span>
+                    <div class="schema-card">
+                        <div class="section-heading">
+                            <span>🏠 ${info.titel}</span>
+                            <span class="badge">Perceel E 1552</span>
+                        </div>
+                        <div class="prop-row"><span class="prop-key">Geselecteerd Object:</span><span class="prop-val">Platteweg ${info.nummer} (${info.onderdeel})</span></div>
+                        <div class="prop-row"><span class="prop-key">Samenhangend Complex:</span><span class="prop-val">Platteweg 3 (Woonhuis), 5 (Landbouwschuur) & 7 (Wagenhuis)</span></div>
+                        <div class="prop-row"><span class="prop-key">Kadastrale Aanduiding:</span><span class="prop-val">${info.perceel}</span></div>
+                        <div class="prop-row"><span class="prop-key">Kavel & Bebouwing:</span><span class="prop-val">${info.oppervlakte}</span></div>
+                        <div class="prop-row"><span class="prop-key">Bouwjaar & Keuring:</span><span class="prop-val">${info.bouwjaar}</span></div>
+                        <div class="prop-row"><span class="prop-key">Actieve Perceel-Vlag:</span><span class="prop-val" style="color: var(--accent-amber);">${info.vlag}</span></div>
+                        <div class="prop-row"><span class="prop-key">Publiekrechtelijke Aantekening:</span><span class="prop-val" style="color: var(--accent-amber);">WBD-registratie op perceel E 1552</span></div>
+                        <div id="livePerceelProps" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-color);">
+                            <span style="color: var(--text-dim); font-size: 11px;">Live PDOK BRK geometrie voor Scherpenisse E 1552 wordt gekoppeld...</span>
                         </div>
                     </div>
+
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 12px; margin-bottom: 4px;">🗺️ Kadastrale Kaart Omgeving (Klik op perceel)</div>
-                        <canvas id="mapPreview" width="420" height="320"></canvas>
-                        <span id="mapStatusText" style="font-size: 10px; color: var(--accent-green);">Kaartomgeving Scherpenisse / Platteweg laden...</span>
+                        <div class="section-heading">
+                            <span>🗺️ Kadastrale Kaart Scherpenisse Sectie E 1552</span>
+                            <span class="badge">EPSG:28992</span>
+                        </div>
+                        <canvas id="mapPreview" width="460" height="330"></canvas>
+                        <div id="mapStatusText" style="font-size: 11px; color: var(--accent-green);">
+                            Kaartomgeving Platteweg 3-5-7 met perceel-vlaggetjes (P7-NW, P7-NO, P5-ZO, P3-ZW)...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tweede Rij: Eigendomsinformatie, Historische Eigendom & Bewonersgeschiedenis -->
+                <div class="viewer-split">
+                    <div class="schema-card">
+                        <div class="section-heading">
+                            <span>👥 Eigendomsinformatie & Bewonersgeschiedenis</span>
+                            <span class="badge">E 108 → E 1552</span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">Huidige Kadastrale Inschrijving:</span>
+                            <span class="prop-val">BRK Scherpenisse Sectie E nr. 1552 & E 1551 (Erven / Deelgerechtigden in onverdeeldheid)</span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">Laatst Geregistreerde Hoofdeigenaar:</span>
+                            <span class="prop-val">H.G. Quaak (Agrarisch complex, veehouderij, woonhuis, landbouwschuur en wagenhuis, 750 m²)</span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">Vroeg-Historische Eigenaar / Bewoner:</span>
+                            <span class="prop-val">Hein Guiljam (Historisch schaapherder te Sint-Maartensdijk / Scherpenisse, verbonden aan perceel E 108 aan de Platteweg)</span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">Familie- & Bewonerslijn:</span>
+                            <span class="prop-val">Familielijn Guiljam – Quaak – Bout (waaronder C.M. Guiljam, 1944–2021, overlevende Watersnoodramp 1953)</span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">Historisch Gebruik Complex:</span>
+                            <span class="prop-val">Platteweg 3 (Woonhuis, 68 m² WOZ), Platteweg 5 (Landbouwschuur / stalling, 84 m² WOZ), Platteweg 7 (Wagenhuis & Schuur 1926)</span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">Bronregisters Eigendom:</span>
+                            <span class="prop-val">Openbare Registers Kadaster (Arnhem), OAT 1832 Scherpenisse, Leggers & Gemeentearchief Tholen</span>
+                        </div>
+                    </div>
+
+                    <!-- Kadastrale Historische Wijzigingen -->
+                    <div class="schema-card">
+                        <div class="section-heading">
+                            <span>⏳ Kadastrale Historische Wijzigingen (1832 – Heden)</span>
+                            <span class="badge">Tijdlijn</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-year">1832 — Oorspronkelijke Aanwijzende Tafel (OAT) & Minuutplan</span>
+                            <span class="timeline-text">Vastlegging van het oorspronkelijke kavel aan de Platteweg onder <strong>Kadastrale Gemeente Scherpenisse, Sectie E, nummer 108</strong> (historische schaapherderskavel Hein Guiljam).</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-year">1926 — Realisatie Complex & Bouwkundig Keuringsrapport</span>
+                            <span class="timeline-text">Oprichting en vastlegging van het huidige woonhuis (Platteweg 3) met bijbehorende schuur en wagenhuis (Platteweg 5 en 7), gedocumenteerd in het <strong>Keuringsrapport 1926</strong>.</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-year">1964 — Ruilverkaveling Tholen (Archiefdossier NL-TlnGAT-007)</span>
+                            <span class="timeline-text">Kadastrale herinrichting en grenswijziging ten opzichte van 1832: oud perceel <strong>Sectie E nr. 108</strong> wordt gesplitst en hernummerd naar <strong>Sectie E nrs. 1551 en 1552</strong> (750 m² totaal, 460 m² bebouwd).</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-year">1971 — Gemeentelijke Herindeling Eiland Tholen</span>
+                            <span class="timeline-text">Opheffing van de zelfstandige gemeente Scherpenisse (per 1 juli 1971) en overgang van het bestuur naar de nieuwe <strong>Gemeente Tholen</strong> (kadastrale gemeentecode blijft <code>SPN00</code> / Scherpenisse).</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-year">2012 – Heden — BAG-Registratie & Omgevingswet</span>
+                            <span class="timeline-text">Administratieve BAG-mutaties rond de adressering Platteweg 3, 5 en 7 op perceel E 1552 en publiekrechtelijke registratie van de WBD-aantekening.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Derde Rij: Bevoegd Bestuur voor Platteweg 3, 5, 7 -->
+                <div class="schema-card">
+                    <div class="section-heading">
+                        <span>🏛️ Bevoegd Bestuur & Publiekrechtelijke Registers (Platteweg 3, 5, 7)</span>
+                        <button class="ctrl-btn" onclick="openBibliotheekCentrum()">Open Alle Zoekslagen in Bibliotheek →</button>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-key">1. Lokaal Bevoegd Gezag (BAG / Omgevingswet / Woo):</span>
+                        <span class="prop-val">College van Burgemeester en Wethouders van de Gemeente Tholen (Rechtsopvolger Gemeente Scherpenisse sinds 1971)</span>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-key">2. Regionaal & Provinciaal Bevoegd Bestuur (Bodem / WBD):</span>
+                        <span class="prop-val">Gedeputeerde Staten van de Provincie Zeeland & Gemandateerde Omgevingsdienst RUD Zeeland</span>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-key">3. Waterstaatkundig Bevoegd Bestuur:</span>
+                        <span class="prop-val">Dijkgraaf en Heemraden van Waterschap Scheldestromen (Polderbeheer Scherpenissepolder)</span>
+                    </div>
+                    <div class="prop-row">
+                        <span class="prop-key">4. Kadastraal & Eigendomsregister Beheerder:</span>
+                        <span class="prop-val">Raad van Bestuur van het Kadaster (Vestiging Arnhem — BRK, Kadastrale Kaart, Veldwerken & Openbare Registers)</span>
                     </div>
                 </div>
             `;
-            laadOmgevingPercelen(info.bbox, '1552');
+
+            laadOmgevingPercelen(info.bbox, '1552', true);
+        }
+
+        // Open het volledige Bibliotheek-dashboard met alle Bevoegde Bestuursorganen & Zoekslagen
+        function openBibliotheekCentrum(highlightOrgaan = null) {
+            switchTab('bibTab', document.getElementById('btnTabBib'));
+            document.getElementById('fileStatus').textContent = 'Bibliotheek_Bevoegde_Bestuursorganen_en_Zoekslagen.json';
+
+            const canvasContainer = document.getElementById('pdfCanvas');
+            canvasContainer.innerHTML = `
+                <div class="schema-card">
+                    <div class="section-heading">
+                        <span>📚 BIBLIOTHEEK: ALLE BEVOEGDE BESTUURSORGANEN & DIRECTE ZOEKSLAGEN (SCHERPENISSE / THOLEN)</span>
+                        <span class="badge">WOO & ARCHIEF MATRIX</span>
+                    </div>
+                    <p style="color: var(--text-dim); font-size: 12px; margin-bottom: 8px;">
+                        Overzicht van alle publiekrechtelijk bevoegde bestuursorganen voor <strong>Platteweg 3, 5 en 7 te Scherpenisse (Perceel E 1552 / E 1551 / hist. E 108)</strong>, inclusief archieftoegangen en directe zoekslagen.
+                    </p>
+                    <table class="schema-table">
+                        <thead>
+                            <tr>
+                                <th>Bevoegd Bestuursorgaan</th>
+                                <th>Wettelijke Taak & Bevoegdheid</th>
+                                <th>Relevante Dossiers / Registers</th>
+                                <th>Directe Zoekslag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="${highlightOrgaan === 'tholen' ? 'background: rgba(0,229,255,0.12);' : ''}">
+                                <td><strong>College van B&W en Gemeenteraad van Tholen</strong><br><span style="color:var(--text-dim);">v/h Gemeente Scherpenisse (tot 01-07-1971)</span></td>
+                                <td>Bevoegd gezag Omgevingswet, Basisregistratie Adressen en Gebouwen (BAG), bouw- en woningtoezicht, Woo-besluiten en beheer Gemeentearchief Tholen.</td>
+                                <td>Keuringsrapport 1926, Ruilverkaveling 1964 (<code>NL-TlnGAT-007</code>), BAG-registratie Platteweg 3-5-7, Zaak 1504573.</td>
+                                <td><button class="action-btn" onclick="voerZoekslagUit('woo_tholen')">Zoek Tholen Woo ↗</button></td>
+                            </tr>
+                            <tr style="${highlightOrgaan === 'provincie' ? 'background: rgba(0,229,255,0.12);' : ''}">
+                                <td><strong>Gedeputeerde Staten van de Provincie Zeeland</strong></td>
+                                <td>Voormalig bevoegd gezag Wet bodembescherming (Wbb), WBD-beschikkingen, overgangsrecht Omgevingswet en provinciale archieven.</td>
+                                <td>Historische WBD-registratie op perceel Scherpenisse E 1552 en provinciale bodemsaneringsbeschikkingen.</td>
+                                <td><button class="action-btn" onclick="voerZoekslagUit('provincie_zeeland')">Zoek Provincie ↗</button></td>
+                            </tr>
+                            <tr style="${highlightOrgaan === 'rud' ? 'background: rgba(0,229,255,0.12);' : ''}">
+                                <td><strong>RUD Zeeland (Regionale Uitvoeringsdienst)</strong></td>
+                                <td>Gemandaat uitvoeringsorgaan namens Gemeente Tholen en Provincie Zeeland voor milieu-, bodem- en toezichtsdossiers.</td>
+                                <td>Bodemrapportages, historische bedrijfsdossiers en milieumeldingen Platteweg Scherpenisse.</td>
+                                <td><button class="action-btn" onclick="voerZoekslagUit('rud_bodem')">Zoek RUD / Bodem ↗</button></td>
+                            </tr>
+                            <tr style="${highlightOrgaan === 'waterschap' ? 'background: rgba(0,229,255,0.12);' : ''}">
+                                <td><strong>Dagelijks Bestuur Waterschap Scheldestromen</strong><br><span style="color:var(--text-dim);">v/h Waterschap Tholen / Polder Scherpenisse</span></td>
+                                <td>Waterstaatkundig beheer, legger watergangen, schouwsloten, polderpeilen en dijkbeheer rondom de Platteweg.</td>
+                                <td>Legger Scherpenissepolder, historische polderarchieven en watergangen langs perceel E 108 / E 1552.</td>
+                                <td><button class="action-btn" onclick="voerZoekslagUit('waterschap')">Zoek Waterschap ↗</button></td>
+                            </tr>
+                            <tr style="${highlightOrgaan === 'kadaster' ? 'background: rgba(0,229,255,0.12);' : ''}">
+                                <td><strong>Raad van Bestuur van het Kadaster (Arnhem)</strong></td>
+                                <td>Wettelijk beheerder Basisregistratie Kadaster (BRK), Openbare Registers, Kadastrale Kaart, veldwerken en aktenonderzoek.</td>
+                                <td>Minuutplan 1832 (Sectie E 108), Ruilverkavelingsakte 1964 (E 1551 & E 1552), eigendomsakten H.G. Quaak.</td>
+                                <td><button class="action-btn" onclick="laadPlattewegDossier('3')">Open BRK E 1552 →</button></td>
+                            </tr>
+                            <tr style="${highlightOrgaan === 'archief' ? 'background: rgba(0,229,255,0.12);' : ''}">
+                                <td><strong>Zeeuws Archief & RCE</strong></td>
+                                <td>Beheerder historische archieven Zeeland, Oorspronkelijke Aanwijzende Tafels (OAT 1832), Burgerlijke Stand en notariële protocollen.</td>
+                                <td>Stamboom & bewonersgeschiedenis Hein Guiljam, C.M. Guiljam, H.G. Quaak, OAT Scherpenisse E 108.</td>
+                                <td><button class="action-btn" onclick="voerZoekslagUit('zeeuws_archief')">Zoek Archief ↗</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="viewer-split">
+                    <div class="schema-card">
+                        <div class="section-heading">
+                            <span>🔎 Geavanceerde Woo- & Archief Zoekslagen</span>
+                            <span class="badge">Direct Uitvoerbaar</span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">1. Gemeente Tholen Woo & Raadsstukken:</span>
+                            <span class="prop-val"><button class="ctrl-btn" onclick="voerZoekslagUit('woo_tholen')">Start Zoekslag ↗</button></span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">2. Officiële Bekendmakingen (Gemeenteblad / Staatscourant):</span>
+                            <span class="prop-val"><button class="ctrl-btn" onclick="voerZoekslagUit('officiele_bekendmakingen')">Start Zoekslag ↗</button></span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">3. Zeeuws Archief (Hein Guiljam / H.G. Quaak / Scherpenisse):</span>
+                            <span class="prop-val"><button class="ctrl-btn" onclick="voerZoekslagUit('zeeuws_archief')">Start Zoekslag ↗</button></span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">4. Delpher Krantenarchief (Platteweg Scherpenisse):</span>
+                            <span class="prop-val"><button class="ctrl-btn" onclick="voerZoekslagUit('delpher')">Start Zoekslag ↗</button></span>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-key">5. Ruilverkaveling 1964 Dossier (NL-TlnGAT-007):</span>
+                            <span class="prop-val"><button class="ctrl-btn" onclick="voerZoekslagUit('ruilverkaveling_1964')">Start Zoekslag ↗</button></span>
+                        </div>
+                    </div>
+
+                    <div class="schema-card">
+                        <div class="section-heading">
+                            <span>📌 Samenvatting Kadastrale Sleutels (Voor Zoekslagen)</span>
+                            <span class="badge">Referentie</span>
+                        </div>
+                        <div class="prop-row"><span class="prop-key">Burgerlijke Gemeente:</span><span class="prop-val">Tholen (CBS-code 0716, v/h Scherpenisse)</span></div>
+                        <div class="prop-row"><span class="prop-key">Kadastrale Gemeente:</span><span class="prop-val">Scherpenisse (AKR-code SPN00)</span></div>
+                        <div class="prop-row"><span class="prop-key">Huidige Perceelnummers:</span><span class="prop-val">Sectie E nr. 1552 & Sectie E nr. 1551</span></div>
+                        <div class="prop-row"><span class="prop-key">Historisch Perceelnummer (1832–1964):</span><span class="prop-val">Sectie E nr. 108</span></div>
+                        <div class="prop-row"><span class="prop-key">Archieftoegang Ruilverkaveling:</span><span class="prop-val">NL-TlnGAT-007 (1964)</span></div>
+                        <div class="prop-row"><span class="prop-key">Bouwarchief Referentie:</span><span class="prop-val">Keuringsrapport 1926 (Platteweg 3-5-7)</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function voerZoekslagUit(type) {
+            const customQ = document.getElementById('bibCustomQuery')?.value || 'Scherpenisse Platteweg';
+            if (type === 'woo_tholen') {
+                window.open(`https://www.google.com/search?q=${encodeURIComponent('site:tholen.nl ("Platteweg" OR "Scherpenisse" OR "1552" OR "woo")')}`, '_blank');
+            } else if (type === 'officiele_bekendmakingen') {
+                window.open(`https://zoek.officielebekendmakingen.nl/resultaten?q=${encodeURIComponent('Platteweg Scherpenisse')}`, '_blank');
+            } else if (type === 'zeeuws_archief') {
+                window.open(`https://www.zeeuwsarchief.nl/zoeken/?q=${encodeURIComponent('Scherpenisse Guiljam')}`, '_blank');
+            } else if (type === 'delpher') {
+                window.open(`https://www.delpher.nl/nl/kranten/resultaten?query=${encodeURIComponent('Platteweg Scherpenisse')}`, '_blank');
+            } else if (type === 'rud_bodem') {
+                window.open(`https://www.google.com/search?q=${encodeURIComponent('("RUD Zeeland" OR "Bodemloket") "Scherpenisse" "Platteweg"')}`, '_blank');
+            } else if (type === 'provincie_zeeland') {
+                window.open(`https://www.google.com/search?q=${encodeURIComponent('site:zeeland.nl "Scherpenisse" ("Platteweg" OR "bodem")')}`, '_blank');
+            } else if (type === 'waterschap') {
+                window.open(`https://www.google.com/search?q=${encodeURIComponent('site:scheldestromen.nl "Scherpenisse" OR "Platteweg"')}`, '_blank');
+            } else if (type === 'ruilverkaveling_1964') {
+                window.open(`https://www.google.com/search?q=${encodeURIComponent('"NL-TlnGAT-007" OR ("ruilverkaveling" "Scherpenisse" "1964")')}`, '_blank');
+            } else {
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(customQ)}`, '_blank');
+            }
         }
 
         async function bevraagKadaster() {
@@ -743,7 +1106,7 @@
             statusEl.textContent = `Percelen ophalen voor BBOX ${bbox}...`;
             listEl.innerHTML = '';
 
-            const url = `https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/collections/perceel/items?bbox=${bbox}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/28992&limit=50&f=json`;
+            const url = `https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/collections/perceel/items?bbox=${bbox}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/28992&limit=60&f=json`;
 
             try {
                 const res = await fetch(url);
@@ -758,7 +1121,7 @@
                     const label = `Sectie ${p.sectie || '?'}, Perceel ${p.perceelnummer || '?'}`;
                     const item = document.createElement('div');
                     item.className = 'link-item';
-                    item.innerHTML = `<div><strong>${label}</strong><span class="link-desc">${p.kadastrale_gemeente_waarde || 'Tholen'} (${p.kadastrale_grootte_waarde || 0} m²)</span></div><span>→</span>`;
+                    item.innerHTML = `<div><strong>${label}</strong><span class="link-desc">${p.kadastrale_gemeente_waarde || 'Scherpenisse'} (${p.kadastrale_grootte_waarde || 0} m²)</span></div><span>→</span>`;
                     item.onclick = () => selecteerPerceel(f);
                     listEl.appendChild(item);
                 });
@@ -772,7 +1135,7 @@
             }
         }
 
-        // Werkend Adreszoeken via PDOK Locatieserver v3.1 (/search/v3_1/free)
+        // Zoekfunctie met directe detectie van Platteweg 3, 5 en 7
         async function zoekOpPlaats() {
             const query = document.getElementById('queryPlaats').value.trim();
             const statusEl = document.getElementById('zoekStatus');
@@ -781,6 +1144,16 @@
 
             statusEl.textContent = `Zoeken naar "${query}"...`;
             adresList.innerHTML = '';
+
+            // Check of de gebruiker zoekt naar Platteweg (3, 5 of 7) -> direct alle dossier-, eigendoms- en kadastrale historie tonen!
+            const qLower = query.toLowerCase();
+            if (qLower.includes('platteweg')) {
+                let huisnr = '3';
+                if (/\b5\b/.test(qLower)) huisnr = '5';
+                else if (/\b7\b/.test(qLower)) huisnr = '7';
+                laadPlattewegDossier(huisnr);
+                statusEl.textContent = `Volledig dossier, eigendomshistorie en kadastrale kaart geladen voor Platteweg ${huisnr}.`;
+            }
 
             const urls = [
                 `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(query)}&rows=10`,
@@ -799,21 +1172,26 @@
                 } catch (_) {}
             }
 
-            if (!docs) {
-                statusEl.textContent = 'Kon PDOK Locatieserver niet bereiken.';
-                return;
-            }
+            if (!docs) return;
 
-            statusEl.textContent = `${docs.length} resultaten gevonden.`;
             docs.forEach(doc => {
                 const item = document.createElement('div');
                 item.className = 'link-item';
                 item.innerHTML = `<div><strong>${doc.weergavenaam}</strong><span class="link-desc">Type: ${doc.type} | ${doc.gemeentenaam || 'Tholen'}</span></div><span>→</span>`;
-                item.onclick = () => verwerkZoekResultaat(doc);
+                item.onclick = () => {
+                    if (doc.weergavenaam.toLowerCase().includes('platteweg')) {
+                        let nr = '3';
+                        if (/\b5\b/.test(doc.weergavenaam)) nr = '5';
+                        else if (/\b7\b/.test(doc.weergavenaam)) nr = '7';
+                        laadPlattewegDossier(nr);
+                    } else {
+                        verwerkZoekResultaat(doc);
+                    }
+                };
                 adresList.appendChild(item);
             });
 
-            if (docs.length > 0) {
+            if (docs.length > 0 && !qLower.includes('platteweg')) {
                 verwerkZoekResultaat(docs[0]);
             }
         }
@@ -822,54 +1200,52 @@
             const canvasContainer = document.getElementById('pdfCanvas');
             const isAdres = doc.type === 'adres' || doc.type === 'perceel' || doc.type === 'weg' || doc.type === 'postcode' || /\d/.test(doc.weergavenaam);
 
-            // Parse RD-coördinaten uit POINT(X Y)
-            let bbox = '66000,396000,66600,396600';
+            let bbox = '66100,396100,66450,396450';
             if (doc.centroide_rd) {
                 const m = doc.centroide_rd.match(/POINT\(([\d.]+)\s+([\d.]+)\)/);
                 if (m) {
                     const rx = Math.round(parseFloat(m[1]));
                     const ry = Math.round(parseFloat(m[2]));
-                    bbox = `${rx - 180},${ry - 180},${rx + 180},${ry + 180}`;
+                    bbox = `${rx - 160},${ry - 160},${rx + 160},${ry + 160}`;
                 }
             }
 
             if (isAdres) {
                 canvasContainer.innerHTML = `
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px;">📍 Geselecteerd Adres & Locatie (PDOK Locatieserver v3.1)</div>
+                        <div class="section-heading"><span>📍 Geselecteerd Adres & Locatie (PDOK Locatieserver v3.1)</span></div>
                         <div class="prop-row"><span class="prop-key">Weergavenaam:</span><span class="prop-val">${doc.weergavenaam}</span></div>
                         <div class="prop-row"><span class="prop-key">Type:</span><span class="prop-val">${doc.type}</span></div>
                         <div class="prop-row"><span class="prop-key">Gemeente / Plaats:</span><span class="prop-val">${doc.gemeentenaam || '-'} / ${doc.woonplaatsnaam || '-'}</span></div>
                         <div class="prop-row"><span class="prop-key">RD Centroïde:</span><span class="prop-val">${doc.centroide_rd || '-'}</span></div>
                         <div class="prop-row"><span class="prop-key">WGS84 Centroïde:</span><span class="prop-val">${doc.centroide_ll || '-'}</span></div>
                         <div class="prop-row"><span class="prop-key">Gekoppeld Perceel:</span><span class="prop-val">${(doc.gekoppeld_perceel && doc.gekoppeld_perceel.join(', ')) || 'Wordt geladen via BBOX...'}</span></div>
-                        <div class="prop-row"><span class="prop-key">Nummeraanduiding / Pand:</span><span class="prop-val">${doc.nummeraanduiding_id || doc.id || '-'}</span></div>
                     </div>
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 12px; margin-bottom: 4px;">🗺️ Kadastrale Kaart Weergave onder Adres (BBOX: ${bbox})</div>
-                        <canvas id="mapPreview" width="520" height="280"></canvas>
-                        <span id="mapStatusText" style="font-size: 10px; color: var(--accent-green);">Kadastrale kaart rondom adres laden...</span>
+                        <div class="section-heading"><span>🗺️ Kadastrale Kaart Weergave onder Adres (BBOX: ${bbox})</span></div>
+                        <canvas id="mapPreview" width="520" height="320"></canvas>
+                        <span id="mapStatusText" style="font-size: 11px; color: var(--accent-green);">Kadastrale kaart rondom adres laden...</span>
                     </div>
                 `;
                 document.getElementById('fileStatus').textContent = `Adres_${doc.id}.json`;
-                laadOmgevingPercelen(bbox);
+                laadOmgevingPercelen(bbox, null, false);
             } else {
                 canvasContainer.innerHTML = `
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 6px;">🏙️ Plaatsnaam Overzicht</div>
+                        <div class="section-heading"><span>🏙️ Plaatsnaam Overzicht</span></div>
                         <div class="prop-row"><span class="prop-key">Naam:</span><span class="prop-val">${doc.weergavenaam}</span></div>
                         <div class="prop-row"><span class="prop-key">Type:</span><span class="prop-val">${doc.type}</span></div>
                         <div class="prop-row"><span class="prop-key">Gemeente:</span><span class="prop-val">${doc.gemeentenaam || 'Tholen'}</span></div>
                         <div class="prop-row"><span class="prop-key">Provincie:</span><span class="prop-val">${doc.provincienaam || 'Zeeland'}</span></div>
                         <div class="prop-row"><span class="prop-key">RD Centroïde:</span><span class="prop-val">${doc.centroide_rd || '-'}</span></div>
-                        <p style="color: var(--text-dim); font-size: 11px; margin-top: 8px;">Algemene plaatsnaam geselecteerd. Zoek op een specifiek adres om direct de kadastrale geomap eronder te laden.</p>
+                        <p style="color: var(--text-dim); font-size: 12px; margin-top: 8px;">Algemene plaatsnaam geselecteerd. Zoek op een specifiek adres (zoals Platteweg 3, 5 of 7) om de kadastrale geomap eronder te laden.</p>
                     </div>
                 `;
                 document.getElementById('fileStatus').textContent = `Plaats_${doc.id}.json`;
             }
         }
 
-        async function laadOmgevingPercelen(bbox = '66000,396000,66600,396600', highlightPerceelNr = null) {
+        async function laadOmgevingPercelen(bbox = '66120,396120,66420,396420', highlightPerceelNr = '1552', drawPlattewegFlags = true) {
             const url = `https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/collections/perceel/items?bbox=${bbox}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/28992&limit=80&f=json`;
             try {
                 const res = await fetch(url);
@@ -881,26 +1257,28 @@
                         const found = loadedFeatures.find(f => String(f.properties?.perceelnummer) === String(highlightPerceelNr));
                         if (found) target = found;
                     }
-                    renderMiniMap(target);
+                    renderMiniMap(target, drawPlattewegFlags);
 
                     const livePropsEl = document.getElementById('livePerceelProps');
                     if (livePropsEl && target.properties) {
                         const p = target.properties;
                         livePropsEl.innerHTML = `
-                            <div style="font-weight: bold; color: var(--accent-green); font-size: 11px; margin-bottom: 4px;">✓ Live BRK Perceel Gekoppeld (${p.sectie || ''} ${p.perceelnummer || ''})</div>
-                            <div class="prop-row"><span class="prop-key">Lokaal ID:</span><span class="prop-val">${p.identificatie_lokaal_id || '-'}</span></div>
-                            <div class="prop-row"><span class="prop-key">Kadastrale Grootte:</span><span class="prop-val">${p.kadastrale_grootte_waarde || '-'} m² (${p.soort_grootte_waarde || 'Vastgesteld'})</span></div>
-                            <div class="prop-row"><span class="prop-key">Begin Geldigheid:</span><span class="prop-val">${p.begin_geldigheid || '-'}</span></div>
+                            <div style="font-weight: bold; color: var(--accent-green); font-size: 12px; margin-bottom: 4px;">
+                                ✓ Live PDOK BRK Perceel Gekoppeld: ${p.kadastrale_gemeente_waarde || 'Scherpenisse'} Sectie ${p.sectie || 'E'} nr. ${p.perceelnummer || '1552'}
+                            </div>
+                            <div class="prop-row"><span class="prop-key">Lokaal BRK ID:</span><span class="prop-val">${p.identificatie_lokaal_id || '-'}</span></div>
+                            <div class="prop-row"><span class="prop-key">Kadastrale Grootte (BRK):</span><span class="prop-val">${p.kadastrale_grootte_waarde || '-'} m² (${p.soort_grootte_waarde || 'Vastgesteld'})</span></div>
+                            <div class="prop-row"><span class="prop-key">Registratie / Geldigheid:</span><span class="prop-val">${p.begin_geldigheid || '-'} (${p.status_historie_waarde || 'Geldig'})</span></div>
                         `;
                     }
                 }
             } catch (e) {}
         }
 
-        // Volledige weergave van alle 21 schema properties bij selectie van een perceel
         function selecteerPerceel(f) {
             selectedFeatureId = f.id;
             const p = f.properties || {};
+            const isPlattewegPerceel = String(p.perceelnummer) === '1552' || String(p.perceelnummer) === '1551';
 
             let rowsHtml = '';
             PERCEEL_SCHEMA_2020_12.forEach(item => {
@@ -916,21 +1294,21 @@
             canvasContainer.innerHTML = `
                 <div class="viewer-split">
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent); font-size: 12px; margin-bottom: 4px;">📋 Perceel — Feature Schema (21 Properties)</div>
+                        <div class="section-heading"><span>📋 Perceel — Feature Schema (21 Properties)</span></div>
                         ${rowsHtml}
                     </div>
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 12px; margin-bottom: 4px;">🗺️ Kadastrale Kaart Weergave (EPSG:28992)</div>
-                        <canvas id="mapPreview" width="420" height="320"></canvas>
-                        <span id="mapStatusText" style="font-size: 10px; color: var(--text-dim);">Klik op een perceel op de kaart om het te inspecteren.</span>
+                        <div class="section-heading"><span>🗺️ Kadastrale Kaart Weergave (EPSG:28992)</span></div>
+                        <canvas id="mapPreview" width="460" height="330"></canvas>
+                        <span id="mapStatusText" style="font-size: 11px; color: var(--text-dim);">Klik op een perceel op de kaart om het te inspecteren.</span>
                     </div>
                 </div>
             `;
             document.getElementById('fileStatus').textContent = `Perceel_${p.sectie || 'E'}_${p.perceelnummer || '1552'}.json`;
-            renderMiniMap(f);
+            renderMiniMap(f, isPlattewegPerceel);
         }
 
-        function renderMiniMap(targetFeature) {
+        function renderMiniMap(targetFeature, drawFlags = false) {
             const canvas = document.getElementById('mapPreview');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -952,50 +1330,91 @@
 
             const scaleX = canvas.width / (maxX - minX || 1);
             const scaleY = canvas.height / (maxY - minY || 1);
-            const scale = Math.min(scaleX, scaleY) * 0.9;
+            const scale = Math.min(scaleX, scaleY) * 0.88;
             const offsetX = (canvas.width - (maxX - minX) * scale) / 2;
             const offsetY = (canvas.height - (maxY - minY) * scale) / 2;
             currentMapTransform = { minX, minY, scale, offsetX, offsetY };
 
+            let targetBounds = null;
+
             loadedFeatures.forEach(f => {
-                const isSelected = targetFeature && (f.id === targetFeature.id || f.properties?.perceelnummer === targetFeature.properties?.perceelnummer);
+                const pNr = String(f.properties?.perceelnummer || '');
+                const isSelected = targetFeature && (f.id === targetFeature.id || pNr === String(targetFeature.properties?.perceelnummer));
+                const isNeighbor1551 = pNr === '1551';
                 const rings = getFeatureRings(f);
 
                 rings.forEach(ring => {
                     ctx.beginPath();
                     let sumX = 0, sumY = 0;
+                    let tMinX = Infinity, tMaxX = -Infinity, tMinY = Infinity, tMaxY = -Infinity;
                     const n = Math.max(1, ring.length - 1);
 
                     for (let i = 0; i < ring.length; i++) {
                         const cx = (ring[i][0] - minX) * scale + offsetX;
                         const cy = canvas.height - ((ring[i][1] - minY) * scale + offsetY);
-                        if (i < n) { sumX += cx; sumY += cy; }
+                        if (i < n) {
+                            sumX += cx;
+                            sumY += cy;
+                            if (cx < tMinX) tMinX = cx;
+                            if (cx > tMaxX) tMaxX = cx;
+                            if (cy < tMinY) tMinY = cy;
+                            if (cy > tMaxY) tMaxY = cy;
+                        }
                         if (i === 0) ctx.moveTo(cx, cy);
                         else ctx.lineTo(cx, cy);
                     }
                     ctx.closePath();
 
-                    ctx.fillStyle = isSelected ? 'rgba(0, 229, 255, 0.38)' : 'rgba(0, 230, 118, 0.08)';
+                    if (isSelected) {
+                        targetBounds = { minX: tMinX, maxX: tMaxX, minY: tMinY, maxY: tMaxY };
+                        ctx.fillStyle = 'rgba(0, 229, 255, 0.36)';
+                        ctx.strokeStyle = '#00e5ff';
+                        ctx.lineWidth = 2.4;
+                    } else if (isNeighbor1551) {
+                        ctx.fillStyle = 'rgba(255, 179, 0, 0.22)';
+                        ctx.strokeStyle = '#ffb300';
+                        ctx.lineWidth = 1.6;
+                    } else {
+                        ctx.fillStyle = 'rgba(0, 230, 118, 0.08)';
+                        ctx.strokeStyle = '#00e676';
+                        ctx.lineWidth = 1;
+                    }
                     ctx.fill();
-                    ctx.strokeStyle = isSelected ? '#00e5ff' : '#00e676';
-                    ctx.lineWidth = isSelected ? 2.2 : 1;
                     ctx.stroke();
 
-                    if (isSelected && f.properties?.perceelnummer) {
+                    if ((isSelected || isNeighbor1551) && f.properties?.perceelnummer) {
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 10px monospace';
+                        ctx.font = 'bold 11px monospace';
                         ctx.textAlign = 'center';
-                        ctx.fillText(`${f.properties.sectie || ''} ${f.properties.perceelnummer}`, sumX / n, sumY / n);
+                        ctx.fillText(`${f.properties.sectie || 'E'} ${f.properties.perceelnummer}`, sumX / n, sumY / n);
                     }
                 });
             });
 
-            const statusTxt = document.getElementById('mapStatusText');
-            if (statusTxt) {
-                statusTxt.textContent = `${loadedFeatures.length} percelen getekend in EPSG:28992. Klik op een vlak voor details.`;
+            // Teken de 4 perceel-vlaggetjes (P7-NW, P7-NO, P5-ZO, P3-ZW) op/rond perceel E 1552
+            if (drawFlags && targetBounds) {
+                const bw = Math.max(40, targetBounds.maxX - targetBounds.minX);
+                const bh = Math.max(40, targetBounds.maxY - targetBounds.minY);
+                PERCEEL_VLAGGETJES.forEach(fl => {
+                    const fx = targetBounds.minX + fl.relX * bw;
+                    const fy = targetBounds.minY + fl.relY * bh;
+                    const isAct = activeFlagCode === fl.code;
+
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, isAct ? 6 : 4.5, 0, Math.PI * 2);
+                    ctx.fillStyle = isAct ? '#ffb300' : '#ea580c';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ctx.fillStyle = isAct ? '#ffb300' : '#e2e8f0';
+                    ctx.font = isAct ? 'bold 10px monospace' : '9px monospace';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`🚩 ${fl.code}`, fx + 8, fy + 3);
+                });
             }
 
-            // Maak percelen op de canvas klikbaar
             canvas.onclick = function(ev) {
                 if (!currentMapTransform) return;
                 const rect = canvas.getBoundingClientRect();
@@ -1033,9 +1452,9 @@
             `).join('');
 
             document.getElementById('pdfCanvas').innerHTML = `
-                <div class="schema-card" style="width: 100%; max-height: 100%;">
-                    <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 6px;">
-                        📋 Perceel — Feature Schema (GET /collections/perceel/schema · JSON Schema 2020-12 · 21 properties)
+                <div class="schema-card">
+                    <div class="section-heading">
+                        <span>📋 Perceel — Feature Schema (GET /collections/perceel/schema · JSON Schema 2020-12 · 21 properties)</span>
                     </div>
                     <table class="schema-table">
                         <thead>
@@ -1052,7 +1471,6 @@
             const endpoint = `https://kadatawebservice.kadaster.nl/kadastercheck/vastgoed/v2/woninginformatie?Producten=string&PandId=${encodeURIComponent(pandId)}&Pht=-&EFacReferentie=WOO-THOLEN&EFacOrderNr=1`;
             document.getElementById('fileStatus').textContent = `woninginformatie_${pandId}.json`;
             const canvasContainer = document.getElementById('pdfCanvas');
-            canvasContainer.innerHTML = `<div class="schema-card">Bezig met bevragen van ${endpoint}...</div>`;
 
             try {
                 const res = await fetch(endpoint, {
@@ -1062,19 +1480,18 @@
                 const text = await res.text();
                 canvasContainer.innerHTML = `
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent);">🏢 KadasterCheck Woninginformatie API (Status ${res.status})</div>
+                        <div class="section-heading"><span>🏢 KadasterCheck Woninginformatie API (Status ${res.status})</span></div>
                         <div class="prop-row"><span class="prop-key">URL:</span><span class="prop-val">${endpoint}</span></div>
-                        <pre style="color: var(--accent-green); font-size: 10px; white-space: pre-wrap; margin-top: 6px;">${text || 'Lege response body.'}</pre>
+                        <pre style="color: var(--accent-green); font-size: 11px; white-space: pre-wrap;">${text || 'Lege response body.'}</pre>
                     </div>
                 `;
             } catch (err) {
                 canvasContainer.innerHTML = `
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent);">🏢 KadasterCheck Woninginformatie API Configuratie</div>
+                        <div class="section-heading"><span>🏢 KadasterCheck Woninginformatie API Configuratie</span></div>
                         <div class="prop-row"><span class="prop-key">Endpoint:</span><span class="prop-val">${endpoint}</span></div>
                         <div class="prop-row"><span class="prop-key">Header X-API-KEY:</span><span class="prop-val">${KADASTER_API_KEY}</span></div>
                         <div class="prop-row"><span class="prop-key">PandId:</span><span class="prop-val">${pandId}</span></div>
-                        <div class="prop-row"><span class="prop-key">Browser Status:</span><span class="prop-val">${err.message} (Gebruik server/Postman voor externe Kadaster host)</span></div>
                     </div>
                 `;
             }
@@ -1095,15 +1512,15 @@
                 const text = await res.text();
                 canvasContainer.innerHTML = `
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent);">🏢 KadasterCheck Koopsom API (Status ${res.status})</div>
+                        <div class="section-heading"><span>🏢 KadasterCheck Koopsom API (Status ${res.status})</span></div>
                         <div class="prop-row"><span class="prop-key">URL:</span><span class="prop-val">${endpoint}</span></div>
-                        <pre style="color: var(--accent-green); font-size: 10px; white-space: pre-wrap;">${text || 'Lege response body.'}</pre>
+                        <pre style="color: var(--accent-green); font-size: 11px; white-space: pre-wrap;">${text || 'Lege response body.'}</pre>
                     </div>
                 `;
             } catch (err) {
                 canvasContainer.innerHTML = `
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent);">🏢 KadasterCheck Koopsom API Configuratie</div>
+                        <div class="section-heading"><span>🏢 KadasterCheck Koopsom API Configuratie</span></div>
                         <div class="prop-row"><span class="prop-key">Endpoint:</span><span class="prop-val">${endpoint}</span></div>
                         <div class="prop-row"><span class="prop-key">Header X-API-KEY:</span><span class="prop-val">${KADASTER_API_KEY}</span></div>
                         <div class="prop-row"><span class="prop-key">Postcode / Huisnummer:</span><span class="prop-val">${pc} nr. ${nr}</span></div>
@@ -1119,21 +1536,20 @@
                 const res = await fetch("https://kadatawebservice.kadaster.nl/kadastercheck/docs/v2/swagger.json");
                 const json = await res.json();
                 canvasContainer.innerHTML = `
-                    <div class="schema-card" style="max-height: 100%;">
-                        <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 6px;">📜 KadasterCheck v2 Swagger JSON</div>
-                        <pre style="color: #00e676; font-size: 10px; overflow-x: auto;">${JSON.stringify(json, null, 2)}</pre>
+                    <div class="schema-card">
+                        <div class="section-heading"><span>📜 KadasterCheck v2 Swagger JSON</span></div>
+                        <pre style="color: #00e676; font-size: 11px; overflow-x: auto;">${JSON.stringify(json, null, 2)}</pre>
                     </div>
                 `;
             } catch (_) {
                 canvasContainer.innerHTML = `
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 13px; margin-bottom: 6px;">📜 KadasterCheck v2 OpenAPI & PDOK Endpoints</div>
+                        <div class="section-heading"><span>📜 KadasterCheck v2 OpenAPI & PDOK Endpoints</span></div>
                         <div class="prop-row"><span class="prop-key">Swagger JSON URL:</span><span class="prop-val">https://kadatawebservice.kadaster.nl/kadastercheck/docs/v2/swagger.json</span></div>
                         <div class="prop-row"><span class="prop-key">Woninginformatie:</span><span class="prop-val">/kadastercheck/vastgoed/v2/woninginformatie</span></div>
                         <div class="prop-row"><span class="prop-key">Koopsom:</span><span class="prop-val">/kadastercheck/vastgoed/v2/koopsom</span></div>
                         <div class="prop-row"><span class="prop-key">PDOK Locatieserver v3.1:</span><span class="prop-val">https://api.pdok.nl/bzk/locatieserver/search/v3_1/free</span></div>
                         <div class="prop-row"><span class="prop-key">PDOK BRK OGC v1:</span><span class="prop-val">https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1</span></div>
-                        <div class="prop-row"><span class="prop-key">PDOK BRK WFS v5.0:</span><span class="prop-val">https://service.pdok.nl/kadaster/brk-kadastrale-kaart/wfs/v5_0</span></div>
                     </div>
                 `;
             }
@@ -1149,15 +1565,7 @@
         }
 
         function loadZaak() {
-            document.getElementById('fileStatus').textContent = 'zaak_1504573_scherpenisse.pdf';
-            document.getElementById('pdfCanvas').innerHTML = `
-                <div class="schema-card" style="width: 100%;">
-                    <h3 style="color: var(--accent); font-size: 14px; margin-bottom: 6px;">📄 Zaak 1504573 (Scherpenisse)</h3>
-                    <p style="color: var(--text-dim); font-size: 11px;">Locatie: Platteweg 3, 5, 7 / Kadastraal perceel E 1552 (historisch E 108)</p>
-                    <hr style="border-color: var(--border-color); margin: 10px 0;">
-                    <p style="color: var(--accent-green); font-size: 11px;">[STATUS] WOO-verzoek en historisch keuringsrapport uit 1926 geladen in leesbare buffer.</p>
-                </div>
-            `;
+            laadPlattewegDossier('3', 'P3-ZW');
         }
 
         function setTheme(theme) {
@@ -1166,7 +1574,8 @@
                 root.setProperty('--bg-body', '#e4e9f0');
                 root.setProperty('--bg-0', '#e4e9f0');
                 root.setProperty('--container-bg', '#eef2f7');
-                root.setProperty('--text-main', '#1e293b');
+                root.setProperty('--text-main', '#0f172a');
+                root.setProperty('--text-dim', '#475569');
                 root.setProperty('--panel-bg', '#ffffff');
                 root.setProperty('--card-border', '#cbd5e1');
                 root.setProperty('--accent', '#0284c7');
@@ -1175,7 +1584,8 @@
                 root.setProperty('--bg-body', '#070a0f');
                 root.setProperty('--bg-0', '#070a0f');
                 root.setProperty('--container-bg', '#0d131c');
-                root.setProperty('--text-main', '#e2e8f0');
+                root.setProperty('--text-main', '#f1f5f9');
+                root.setProperty('--text-dim', '#94a3b8');
                 root.setProperty('--panel-bg', '#131c29');
                 root.setProperty('--card-border', '#334155');
                 root.setProperty('--accent', '#00e5ff');
@@ -1185,6 +1595,7 @@
                 root.setProperty('--bg-0', '#f8fafc');
                 root.setProperty('--container-bg', '#ffffff');
                 root.setProperty('--text-main', '#0f172a');
+                root.setProperty('--text-dim', '#334155');
                 root.setProperty('--panel-bg', '#f1f5f9');
                 root.setProperty('--card-border', '#94a3b8');
                 root.setProperty('--accent', '#0369a1');
@@ -1194,6 +1605,7 @@
                 root.setProperty('--bg-0', '#180202');
                 root.setProperty('--container-bg', '#260505');
                 root.setProperty('--text-main', '#fecaca');
+                root.setProperty('--text-dim', '#f87171');
                 root.setProperty('--panel-bg', '#3f0707');
                 root.setProperty('--card-border', '#7f1d1d');
                 root.setProperty('--accent', '#f87171');
