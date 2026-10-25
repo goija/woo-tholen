@@ -1,0 +1,25 @@
+{
+  "status": "READY",
+  "target": "Platteweg Scherpenisse (Tholen)",
+  "layers": [
+    {
+      "name": "Locatieserver Geocode",
+      "endpoint": "https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=Platteweg+Scherpenisse"
+    },
+    {
+      "name": "WFS Kadastrale Kaart v2.0",
+      "endpoint": "https://service.pdok.nl/kadastralekaart/wfs/v2_0",
+      "types": ["kadastralekaart:perceel", "kadastralekaart:grens"]
+    },
+    {
+      "name": "OGC API Features",
+      "endpoint": "https://service.pdok.nl/kadastralekaart/ogc/v1_0/collections/perceel/items"
+    }
+  ],
+  "spatialReference": {
+    "crs": "EPSG:28992",
+    "bboxRD": [67000, 397000, 68500, 398500],
+    "wgs84Center": [51.5478, 4.1056]
+  },
+  "notes": "Postman-omgeving en collectie geladen voor direct gebruik in de sovereign stack."
+}
