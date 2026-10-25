@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOO-THOLEN // LIVE PDOK KADASTRALE OPVRAAG (BRK OGC)</title>
+    <style>
+        :root {
+            --bg-0: #070a0f;
+            --bg-1: #0d131c;
+            --bg-2: #131c29;
+            --border: #24344d;
+            --accent: #00e5ff;
+            --accent-amber: #ffb300;
+            --accent-green: #00e676;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-0);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        header {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 14px;
+            color: var(--accent);
+        }
+
+        .nav-link {
+            font-size: 11px;
+            color: var(--accent-amber);
+            text-decoration: none;
+        }
+        .nav-link:hover { text-decoration: underline; }
+
+        .search-box {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            min-width: 220px;
+            background: var(--bg-2);
+            color: var(--accent);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            font-family: var(--font-mono);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        button {
+            background: var(--bg-2);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        button:hover {
+            background: var(--accent);
+            color: var(--bg-0);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-1);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 550px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--accent-amber);
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 6px;
+        }
+
+        .parcel-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .parcel-card:hover {
+            border-color: var(--accent);
+        }
+
+        .prop-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(36,52,77,0.4);
+        }
+        .prop-key { color: var(--text-dim); }
+        .prop-val { color: var(--text-main); font-weight: bold; }
+
+        #status {
+            color: var(--accent-green);
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🏛️ LIVE PDOK KADASTRALE OPVRAAG (BRK OGC API)</h1>
+            <a href="kadaster_test.html" class="nav-link">← Terug naar Navigatie</a>
+        </header>
+
+        <div class="search-box">
+            <span style="font-size: 11px; color: var(--text-dim);">Locatie / BBOX Bevraging (Standaard ingesteld op Scherpenisse / Platteweg omstreken)</span>
+            <div class="input-row">
+                <input type="text" id="bboxInput" value="66000,396000,67000,397000" placeholder="BBOX: minX,minY,maxX,maxY">
+                <button onclick="bevraagKadaster()">🔍 Bevraag Kadaster API</button>
+            </div>
+            <div id="status">Systeem gereed. Klik op bevragen om percelen op te halen.</div>
+        </div>
+
+        <div class="results-grid">
+            <!-- Linkerkant: Lijst van gevonden percelen -->
+            <div class="panel">
+                <div class="panel-title">📦 Gevonden Percelen (<span id="parcelCount">0</span>)</div>
+                <div id="parcelList" style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="color: var(--text-dim); font-size: 11px;">Nog geen data geladen.</span>
+                </div>
+            </div>
+
+            <!-- Rechterkant: Gedetailleerde Schema-properties van geselecteerd perceel -->
+            <div class="panel">
+                <div class="panel-title">📋 Perceel Eigenschappen (Schema 2020-12)</div>
+                <div id="parcelDetails" style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="color: var(--text-dim); font-size: 11px;">Klik op een perceel links om alle 21 properties in te zien.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function bevraagKadaster() {
+            const bbox = document.getElementById('bboxInput').value;
+            const statusEl = document.getElementById('status');
+            const listEl = document.getElementById('parcelList');
+            const countEl = document.getElementById('parcelCount');
+            const detailsEl = document.getElementById('parcelDetails');
+
+            statusEl.textContent = `Bezig met ophalen van percelen voor BBOX ${bbox}...`;
+            listEl.innerHTML = '';
+            detailsEl.innerHTML = '<span style="color: var(--text-dim); font-size: 11px;">Gegevens worden geladen...</span>';
+
+            const url = `https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/collections/perceel/items?bbox=${bbox}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/28992&limit=50&f=json`;
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP fout: ${res.status}`);
+                const data = await res.json();
+                const features = data.features || [];
+
+                countEl.textContent = features.length;
+                if (features.length === 0) {
+                    statusEl.textContent = 'Geen percelen gevonden in deze BBOX.';
+                    listEl.innerHTML = '<span style="color: var(--text-dim); font-size: 11px;">Geen resultaten.</span>';
+                    detailsEl.innerHTML = '';
+                    return;
+                }
+
+                statusEl.textContent = `${features.length} percelen succesvol geladen.`;
+
+                features.forEach((f, idx) => {
+                    const p = f.properties || {};
+                    const label = `Sectie ${p.sectie || '?'}, Perceel ${p.perceelnummer || 'Onbekend'}`;
+                    const gemeente = p.kadastrale_gemeente_waarde || 'Onbekende gemeente';
+                    const grootte = p.kadastrale_grootte_waarde ? `${p.kadastrale_grootte_waarde} m²` : 'N.B.';
+
+                    const card = document.createElement('div');
+                    card.className = 'parcel-card';
+                    card.innerHTML = `
+                        <div style="font-weight: bold; color: var(--accent); font-size: 12px;">${label}</div>
+                        <div style="font-size: 11px; color: var(--text-dim);">${gemeente} — Grootte: ${grootte}</div>
+                    `;
+                    card.onclick = () => toonDetails(p);
+                    listEl.appendChild(card);
+
+                    // Selecteer de eerste automatisch
+                    if (idx === 0) toonDetails(p);
+                });
+
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = `Fout bij bevraging: ${err.message}`;
+            }
+        }
+
+        function toonDetails(p) {
+            const detailsEl = document.getElementById('parcelDetails');
+            detailsEl.innerHTML = '';
+
+            const schemaFields = [
+                { key: 'id', label: 'UUID (id)' },
+                { key: 'identificatie_lokaal_id', label: 'Lokaal ID' },
+                { key: 'identificatie_namespace', label: 'Namespace' },
+                { key: 'volgnummer', label: 'Volgnummer' },
+                { key: 'kadastrale_gemeente_code', label: 'Gemeente Code' },
+                { key: 'kadastrale_gemeente_waarde', label: 'Gemeente Naam' },
+                { key: 'akr_kadastrale_gemeente_code_code', label: 'AKR Code' },
+                { key: 'akr_kadastrale_gemeente_code_waarde', label: 'AKR Label' },
+                { key: 'sectie', label: 'Sectie' },
+                { key: 'perceelnummer', label: 'Perceelnummer' },
+                { key: 'kadastrale_grootte_waarde', label: 'Kadastrale Grootte (m²)' },
+                { key: 'soort_grootte_code', label: 'Soort Grootte Code' },
+                { key: 'soort_grootte_waarde', label: 'Soort Grootte Label' },
+                { key: 'begin_geldigheid', label: 'Begin Geldigheid' },
+                { key: 'tijdstip_registratie', label: 'Registratie Tijdstip' },
+                { key: 'status_historie_code', label: 'Status Code' },
+                { key: 'status_historie_waarde', label: 'Status Label' }
+            ];
+
+            schemaFields.forEach(field => {
+                const val = p[field.key] !== undefined && p[field.key] !== null ? p[field.key] : '-';
+                const row = document.createElement('div');
+                row.className = 'prop-row';
+                row.innerHTML = `
+                    <span class="prop-key">${field.label}:</span>
+                    <span class="prop-val">${val}</span>
+                `;
+                detailsEl.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
