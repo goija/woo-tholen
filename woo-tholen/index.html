@@ -34,13 +34,13 @@
             const maxY = document.getElementById('maxY').value;
             const bbox = `${minX},${minY},${maxX},${maxY}`;
             
-            fetch(`https://woo-tholen.vercel.app/api/percelen?bbox=${bbox}`)
+            // FIX: Relatieve URL gebruikt om CORS conflicten op Vercel te voorkomen
+            fetch(`/api/percelen?bbox=${bbox}`)
                 .then(res => res.json())
                 .then(data => drawPolygons(data))
-                .catch(err => console.error("Fout bij laden:", err));
+                .catch(err => console.error("Fout bij laden API:", err));
         }
 
-        // Shoelace formule voor de oppervlakte (in vierkante meters)
         function berekenOppervlakte(coords) {
             let area = 0;
             for (let i = 0; i < coords.length - 1; i++) {
@@ -49,21 +49,31 @@
             return Math.abs(area) / 2;
         }
 
-        function drawPolygons(data) {
+        function drawPolygons(geojsonData) {
             const canvas = document.getElementById('mapCanvas');
             const ctx = canvas.getContext('2d');
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (!data || data.length === 0) return;
+            
+            // FIX: GeoJSON object structuur correct uitlezen
+            if (!geojsonData || !geojsonData.features || geojsonData.features.length === 0) {
+                console.warn("Geen features gevonden");
+                return;
+            }
+
+            const features = geojsonData.features;
 
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            data.forEach(p => {
-                p.coordinates[0].forEach(coord => {
-                    if (coord[0] < minX) minX = coord[0];
-                    if (coord[0] > maxX) maxX = coord[0];
-                    if (coord[1] < minY) minY = coord[1];
-                    if (coord[1] > maxY) maxY = coord[1];
-                });
+            features.forEach(f => {
+                if (f.geometry && f.geometry.coordinates) {
+                    const coords = f.geometry.coordinates[0];
+                    coords.forEach(coord => {
+                        if (coord[0] < minX) minX = coord[0];
+                        if (coord[0] > maxX) maxX = coord[0];
+                        if (coord[1] < minY) minY = coord[1];
+                        if (coord[1] > maxY) maxY = coord[1];
+                    });
+                }
             });
 
             const scaleX = canvas.width / (maxX - minX);
@@ -75,32 +85,152 @@
             ctx.strokeStyle = '#00ff00';
             ctx.lineWidth = 2;
             ctx.font = '11px monospace';
+            ctx.textAlign = 'center'; // Tekst netjes in het midden
 
-            data.forEach(p => {
+            features.forEach(f => {
+                if (!f.geometry || !f.geometry.coordinates) return;
+                
+                const coords = f.geometry.coordinates[0];
                 ctx.beginPath();
-                const coords = p.coordinates[0];
+                
+                let sumX = 0, sumY = 0;
+                
                 for (let i = 0; i < coords.length; i++) {
                     const cx = (coords[i][0] - minX) * scale + offsetX;
                     const cy = canvas.height - ((coords[i][1] - minY) * scale + offsetY);
+#!/bin/bash
+# Bash script om index.html te herstellen met GeoJSON fix en naar GitHub te pushen
+
+echo "Ga naar de map woo-tholen..."
+cd ~/woo-tholen || { echo "Map woo-tholen niet gevonden. Start dit in de juiste map!"; exit 1; }
+
+echo "Overschrijven van index.html met de correcte GeoJSON en CORS-veilige versie..."
+
+cat << 'EOF' > index.html
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Kadastrale Kaart Canvas (RD-coördinaten)</title>
+    <style>
+        body { background: #1a1a1a; color: #fff; font-family: monospace; padding: 20px; }
+        canvas { border: 1px solid #444; background: #000; margin-top: 15px; }
+        .controls { margin-bottom: 10px; }
+        input { margin-right: 10px; width: 90px; background: #333; color: #0f0; border: 1px solid #555; padding: 5px; font-family: monospace; }
+        button { background: #444; color: #fff; border: 1px solid #777; padding: 6px 12px; cursor: pointer; }
+        button:hover { background: #555; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <strong>BBOX (RD):</strong>
+        <label>X-min: <input type="number" id="minX" value="66000"></label>
+        <label>Y-min: <input type="number" id="minY" value="396000"></label>
+        <label>X-max: <input type="number" id="maxX" value="67000"></label>
+        <label>Y-max: <input type="number" id="maxY" value="397000"></label>
+        <button onclick="laadKaart()">Laad Percelen</button>
+    </div>
+    
+    <canvas id="mapCanvas" width="800" height="600"></canvas>
+    
+    <script>
+        laadKaart();
+
+        function laadKaart() {
+            const minX = document.getElementById('minX').value;
+            const minY = document.getElementById('minY').value;
+            const maxX = document.getElementById('maxX').value;
+            const maxY = document.getElementById('maxY').value;
+            const bbox = `${minX},${minY},${maxX},${maxY}`;
+            
+            // FIX: Relatieve URL gebruikt om CORS conflicten op Vercel te voorkomen
+            fetch(`/api/percelen?bbox=${bbox}`)
+                .then(res => res.json())
+                .then(data => drawPolygons(data))
+                .catch(err => console.error("Fout bij laden API:", err));
+        }
+
+        function berekenOppervlakte(coords) {
+            let area = 0;
+            for (let i = 0; i < coords.length - 1; i++) {
+                area += (coords[i][0] * coords[i+1][1]) - (coords[i+1][0] * coords[i][1]);
+            }
+            return Math.abs(area) / 2;
+        }
+
+        function drawPolygons(geojsonData) {
+            const canvas = document.getElementById('mapCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // FIX: GeoJSON object structuur correct uitlezen
+            if (!geojsonData || !geojsonData.features || geojsonData.features.length === 0) {
+                console.warn("Geen features gevonden");
+                return;
+            }
+
+            const features = geojsonData.features;
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            features.forEach(f => {
+                if (f.geometry && f.geometry.coordinates) {
+                    const coords = f.geometry.coordinates[0];
+                    coords.forEach(coord => {
+                        if (coord[0] < minX) minX = coord[0];
+                        if (coord[0] > maxX) maxX = coord[0];
+                        if (coord[1] < minY) minY = coord[1];
+                        if (coord[1] > maxY) maxY = coord[1];
+                    });
+                }
+            });
+
+            const scaleX = canvas.width / (maxX - minX);
+            const scaleY = canvas.height / (maxY - minY);
+            const scale = Math.min(scaleX, scaleY) * 0.9; 
+            const offsetX = (canvas.width - (maxX - minX) * scale) / 2;
+            const offsetY = (canvas.height - (maxY - minY) * scale) / 2;
+
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            ctx.font = '11px monospace';
+            ctx.textAlign = 'center'; // Tekst netjes in het midden
+
+            features.forEach(f => {
+                if (!f.geometry || !f.geometry.coordinates) return;
+                
+                const coords = f.geometry.coordinates[0];
+                ctx.beginPath();
+                
+                let sumX = 0, sumY = 0;
+                
+                for (let i = 0; i < coords.length; i++) {
+                    const cx = (coords[i][0] - minX) * scale + offsetX;
+                    const cy = canvas.height - ((coords[i][1] - minY) * scale + offsetY);
+                    
+                    if (i < coords.length - 1) { 
+                        sumX += cx;
+                        sumY += cy;
+                    }
+
                     if (i === 0) ctx.moveTo(cx, cy);
                     else ctx.lineTo(cx, cy);
                 }
                 ctx.closePath();
                 ctx.stroke();
                 
-                // Bereken oppervlakte via shoelace
                 const opp = berekenOppervlakte(coords);
                 
-                // Bepaal de positie voor de tekst
-                const startCoord = coords[0];
-                const textX = (startCoord[0] - minX) * scale + offsetX;
-                const textY = canvas.height - ((startCoord[1] - minY) * scale + offsetY);
+                const puntAantal = coords.length - 1;
+                const textX = sumX / puntAantal;
+                const textY = sumY / puntAantal;
                 
-                // Teken perceel ID en de oppervlakte
+                const perceelId = (f.properties && f.properties.id) ? f.properties.id : "Perceel";
+                
                 ctx.fillStyle = '#fff';
-                ctx.fillText(p.id, textX, textY);
+                ctx.fillText(perceelId, textX, textY - 6);
                 ctx.fillStyle = '#aaa';
-                ctx.fillText(`${Math.round(opp)} m²`, textX, textY + 12);
+                ctx.fillText(`${Math.round(opp)} m²`, textX, textY + 6);
             });
         }
     </script>
