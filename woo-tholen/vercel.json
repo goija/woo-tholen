@@ -1,12 +1,7 @@
 {
-  "builds": [
-    {
-      "src": "api/**/*.rs",
-      "use": "vercel-rust"
-    },
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
+  "functions": {
+    "api/**/*.rs": {
+      "runtime": "vercel-rust@4.0.0"
     }
-  ]
+  }
 }
