@@ -256,6 +256,7 @@
 </head>
 <body>
 
+    <!-- Bovenste knoppenbalk (Thema's & Systeemstatus) -->
     <div class="top-control-bar">
         <div class="theme-buttons">
             <button class="theme-btn" onclick="setTheme('helder')"><span class="dot dot-yellow"></span> Helder</button>
@@ -266,6 +267,7 @@
         <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE (VERCEL DEPLOYED)</div>
     </div>
 
+    <!-- Twee Viewport Secties -->
     <div class="viewport-grid">
         
         <!-- VP-1: Navigatie & Alle Systeemlinks -->
@@ -275,3 +277,185 @@
                 <div class="viewport-controls">
                     <button class="ctrl-btn" onclick="adjustSize('vp1', -1)">-</button>
                     <button class="ctrl-btn" onclick="adjustSize('vp1', 1)">+</button>
+                    <button class="ctrl-btn" onclick="toggleFullscreen('vp1')">⛶</button>
+                </div>
+            </div>
+            
+            <div class="link-list">
+                <a href="index.html" class="link-item">
+                    <div>
+                        <strong>🗺️ Multi-Layer OGC Kaartviewer</strong>
+                        <span class="link-desc">Canvas visualisatie voor percelen, grenzen & bebouwing (EPSG:28992).</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="pdok.html" class="link-item">
+                    <div>
+                        <strong>🛰️ PDOK Directe Viewer</strong>
+                        <span class="link-desc">Dedicated interface voor PDOK geodata en brk-kadastrale-kaart.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" class="link-item">
+                    <div>
+                        <strong>🌀 Vortex Clean Viewports v158</strong>
+                        <span class="link-desc">Geavanceerde 3D geodetische en cartografische viewport matrix.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="link-item">
+                    <div>
+                        <strong>⏳ Rekencentrum Tijdscapsule</strong>
+                        <span class="link-desc">Historische simulatie- en archiefomgeving binnen het monorepo.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="swagger.html" class="link-item">
+                    <div>
+                        <strong>📜 API Swagger Documentatie</strong>
+                        <span class="link-desc">OpenAPI specificaties voor lokale serverless proxy endpoints.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="https://kadatawebservice.kadaster.nl/kadastercheck/docs/index/index.html" target="_blank" rel="noopener noreferrer" class="link-item">
+                    <div>
+                        <strong>🏢 KadasterCheck API Documentatie ↗</strong>
+                        <span class="link-desc">Officiële Swagger UI voor bouwjaar, woningtype & monumentenstatus.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="https://www.kadaster.nl/zakelijk/datasets/maatwerk-api-s-kadaster" target="_blank" rel="noopener noreferrer" class="link-item">
+                    <div>
+                        <strong>⚙️ Kadaster Maatwerk API's Overzicht ↗</strong>
+                        <span class="link-desc">Informatie over Objectinformatie API, Koopsom API en Inzicht via de Kaart.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="klantcontact/index.html" class="link-item">
+                    <div>
+                        <strong>📱 Klantcontact & Mobiele Geomapping</strong>
+                        <span class="link-desc">Geïntegreerde client voor mobiele en P2P-sessies.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+
+                <a href="klantcontact/verzend.html" class="link-item">
+                    <div>
+                        <strong>✉️ Klantcontact Verzendportaal</strong>
+                        <span class="link-desc">Submap verzendmodule voor e-mailkoppelingen en logboekexport.</span>
+                    </div>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- VP-2: PDF Woo-Reader (PDF.js) -->
+        <div class="viewport-box" id="vp2">
+            <div class="viewport-header">
+                <span class="viewport-title">VP-2: PDF Woo-Reader & Viewer</span>
+                <div class="viewport-controls">
+                    <button class="ctrl-btn" onclick="adjustSize('vp2', -1)">-</button>
+                    <button class="ctrl-btn" onclick="adjustSize('vp2', 1)">+</button>
+                    <button class="ctrl-btn" onclick="toggleFullscreen('vp2')">⛶</button>
+                </div>
+            </div>
+
+            <div class="pdf-controls">
+                <button class="action-btn" onclick="document.getElementById('fileInput').click()">Bladeren...</button>
+                <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
+                <div class="file-display" id="fileStatus">Geen bestand... geselecteerd.</div>
+                <button class="load-zaak-btn" onclick="loadZaak()">Laad Zaak 1504573 (Scherpenisse)</button>
+            </div>
+
+            <div class="pdf-viewer-canvas" id="pdfCanvas">
+                [ PDF.js Canvas Geactiveerd — Selecteer een document of laad Zaak 1504573 ]
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Zoom / Schaal functionaliteit voor viewports
+        let scales = { vp1: 1, vp2: 1 };
+        function adjustSize(id, delta) {
+            scales[id] = Math.max(0.8, Math.min(1.4, scales[id] + (delta * 0.1)));
+            const el = document.getElementById(id);
+            el.style.transform = `scale(${scales[id]})`;
+            el.style.transformOrigin = 'top center';
+        }
+
+        // Volledig scherm / uitklap toggle
+        function toggleFullscreen(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('expanded');
+        }
+
+        // Bestand selectie handler
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileStatus').textContent = file.name;
+                document.getElementById('pdfCanvas').innerHTML = `
+                    <div style="text-align: left; width: 100%; padding: 10px; font-family: monospace; color: #00e5ff;">
+                        <h3>📄 Geladen Lokaal Bestand: ${file.name}</h3>
+                        <p style="color: #94a3b8; font-size: 11px; margin-top: 4px;">Grootte: ${(file.size / 1024).toFixed(1)} KB</p>
+                        <hr style="border-color: #24344d; margin: 8px 0;">
+                        <p style="color: #00e676; font-size: 12px;">[STATUS] Document lokaal ingelezen in VP-2 buffer.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Simulatie laden zaak 1504573
+        function loadZaak() {
+            document.getElementById('fileStatus').textContent = 'zaak_1504573_scherpenisse.pdf';
+            document.getElementById('pdfCanvas').innerHTML = `
+                <div style="text-align: left; width: 100%; padding: 10px; font-family: monospace; color: #00e5ff;">
+                    <h3>📄 Geselecteerd Dossier: Zaak 1504573</h3>
+                    <p style="color: #94a3b8; font-size: 11px; margin-top: 4px;">Locatie: Platteweg / Kadastraal perceel Scherpenisse</p>
+                    <hr style="border-color: #24344d; margin: 8px 0;">
+                    <p style="color: #00e676; font-size: 12px;">[STATUS] WOO-verzoek succesvol geladen via serverless proxy.</p>
+                    <p style="color: #e2e8f0; font-size: 11px; margin-top: 6px;">Pagina 1/12 — Bouwjaar: 1926 / Archiefreferentie keuringsrapport aanwezig.</p>
+                </div>
+            `;
+        }
+
+        // Thema switch functionaliteit
+        function setTheme(theme) {
+            if (theme === 'helder') {
+                document.documentElement.style.setProperty('--bg-body', '#e4e9f0');
+                document.documentElement.style.setProperty('--container-bg', '#eef2f7');
+                document.documentElement.style.setProperty('--text-main', '#1e293b');
+                document.documentElement.style.setProperty('--panel-bg', '#ffffff');
+                document.documentElement.style.setProperty('--card-border', '#cbd5e1');
+            } else if (theme === 'donker') {
+                document.documentElement.style.setProperty('--bg-body', '#070a0f');
+                document.documentElement.style.setProperty('--container-bg', '#0d131c');
+                document.documentElement.style.setProperty('--text-main', '#e2e8f0');
+                document.documentElement.style.setProperty('--panel-bg', '#131c29');
+                document.documentElement.style.setProperty('--card-border', '#334155');
+            } else if (theme === 'daglicht') {
+                document.documentElement.style.setProperty('--bg-body', '#f8fafc');
+                document.documentElement.style.setProperty('--container-bg', '#ffffff');
+                document.documentElement.style.setProperty('--text-main', '#0f172a');
+                document.documentElement.style.setProperty('--panel-bg', '#f1f5f9');
+                document.documentElement.style.setProperty('--card-border', '#94a3b8');
+            } else if (theme === 'nachtlicht') {
+                document.documentElement.style.setProperty('--bg-body', '#180202');
+                document.documentElement.style.setProperty('--container-bg', '#260505');
+                document.documentElement.style.setProperty('--text-main', '#fecaca');
+                document.documentElement.style.setProperty('--panel-bg', '#3f0707');
+                document.documentElement.style.setProperty('--card-border', '#7f1d1d');
+            }
+        }
+    </script>
+
+</body>
+</html>
