@@ -88,6 +88,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
             flex: 1;
+            align-items: start;
         }
 
         @media (max-width: 1024px) {
@@ -96,6 +97,7 @@
             }
         }
 
+        /* Viewport container box met muis-resizing en overflow handelend */
         .viewport-box {
             background-color: var(--container-bg);
             border: 1px solid var(--border-color);
@@ -104,18 +106,24 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease;
+            resize: both;
+            overflow: auto;
+            min-height: 480px;
+            min-width: 320px;
+            position: relative;
         }
 
         .viewport-box.expanded {
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            right: 16px;
-            bottom: 16px;
+            position: fixed !important;
+            top: 16px !important;
+            left: 16px !important;
+            right: 16px !important;
+            bottom: 16px !important;
+            width: calc(100vw - 32px) !important;
+            height: calc(100vh - 32px) !important;
             z-index: 1000;
-            max-width: none !important;
-            height: calc(100vh - 32px);
+            resize: none;
         }
 
         .viewport-header {
@@ -157,9 +165,9 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 480px;
             overflow-y: auto;
             padding-right: 4px;
+            flex: 1;
         }
 
         .link-item {
@@ -243,7 +251,7 @@
             border: 1px solid var(--card-border);
             border-radius: 4px;
             flex: 1;
-            min-height: 400px;
+            min-height: 350px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -382,8 +390,8 @@
     </div>
 
     <script>
-        // Zoom / Schaal functionaliteit voor viewports
         let scales = { vp1: 1, vp2: 1 };
+        
         function adjustSize(id, delta) {
             scales[id] = Math.max(0.8, Math.min(1.4, scales[id] + (delta * 0.1)));
             const el = document.getElementById(id);
@@ -391,13 +399,11 @@
             el.style.transformOrigin = 'top center';
         }
 
-        // Volledig scherm / uitklap toggle
         function toggleFullscreen(id) {
             const el = document.getElementById(id);
             el.classList.toggle('expanded');
         }
 
-        // Bestand selectie handler
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
@@ -413,7 +419,6 @@
             }
         }
 
-        // Simulatie laden zaak 1504573
         function loadZaak() {
             document.getElementById('fileStatus').textContent = 'zaak_1504573_scherpenisse.pdf';
             document.getElementById('pdfCanvas').innerHTML = `
@@ -427,7 +432,6 @@
             `;
         }
 
-        // Thema switch functionaliteit
         function setTheme(theme) {
             if (theme === 'helder') {
                 document.documentElement.style.setProperty('--bg-body', '#e4e9f0');
