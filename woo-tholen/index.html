@@ -34,7 +34,7 @@
             const maxY = document.getElementById('maxY').value;
             const bbox = `${minX},${minY},${maxX},${maxY}`;
             
-            fetch(`api/percelen?bbox=${bbox}`)
+            fetch(`https://woo-tholen.vercel.app/api/percelen?bbox=${bbox}`)
                 .then(res => res.json())
                 .then(data => drawPolygons(data))
                 .catch(err => console.error("Fout bij laden:", err));

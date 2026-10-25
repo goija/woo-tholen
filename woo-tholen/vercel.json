@@ -1,0 +1,12 @@
+{
+  "builds": [
+    {
+      "src": "api/**/*.rs",
+      "use": "vercel-rust"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ]
+}
