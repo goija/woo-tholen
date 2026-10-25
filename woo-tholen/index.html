@@ -4,21 +4,52 @@
     <meta charset="UTF-8">
     <title>Kadastrale Kaart Canvas (RD-coördinaten)</title>
     <style>
-        body { background: #1a1a1a; color: #fff; font-family: monospace; }
-        canvas { border: 1px solid #444; background: #000; }
+        body { background: #1a1a1a; color: #fff; font-family: monospace; padding: 20px; }
+        canvas { border: 1px solid #444; background: #000; margin-top: 15px; }
+        .controls { margin-bottom: 10px; }
+        input { margin-right: 10px; width: 90px; background: #333; color: #0f0; border: 1px solid #555; padding: 5px; font-family: monospace; }
+        button { background: #444; color: #fff; border: 1px solid #777; padding: 6px 12px; cursor: pointer; }
+        button:hover { background: #555; }
     </style>
 </head>
 <body>
+    <div class="controls">
+        <strong>BBOX (RD):</strong>
+        <label>X-min: <input type="number" id="minX" value="66000"></label>
+        <label>Y-min: <input type="number" id="minY" value="396000"></label>
+        <label>X-max: <input type="number" id="maxX" value="67000"></label>
+        <label>Y-max: <input type="number" id="maxY" value="397000"></label>
+        <button onclick="laadKaart()">Laad Percelen</button>
+    </div>
+    
     <canvas id="mapCanvas" width="800" height="600"></canvas>
+    
     <script>
-        fetch('/api/percelen')
-            .then(res => res.json())
-            .then(data => drawPolygons(data));
+        // Laad standaardkaart bij het openen
+        laadKaart();
+
+        function laadKaart() {
+            const minX = document.getElementById('minX').value;
+            const minY = document.getElementById('minY').value;
+            const maxX = document.getElementById('maxX').value;
+            const maxY = document.getElementById('maxY').value;
+            const bbox = `${minX},${minY},${maxX},${maxY}`;
+            
+            fetch(`/api/percelen?bbox=${bbox}`)
+                .then(res => res.json())
+                .then(data => drawPolygons(data))
+                .catch(err => console.error("Fout bij laden:", err));
+        }
 
         function drawPolygons(data) {
             const canvas = document.getElementById('mapCanvas');
             const ctx = canvas.getContext('2d');
             
+            // Maak canvas leeg voor de nieuwe kaart
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (!data || data.length === 0) return;
+
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             data.forEach(p => {
                 p.coordinates[0].forEach(coord => {
