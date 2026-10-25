@@ -83,12 +83,13 @@
         .dot-sun { background: #eab308; }
         .dot-red { background: #dc2626; }
 
+        /* Exact 1/3 (VP-1) en 2/3 (VP-2) verdeling */
         .viewport-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 16px;
             flex: 1;
-            align-items: start;
+            align-items: stretch;
         }
 
         @media (max-width: 1024px) {
@@ -97,7 +98,6 @@
             }
         }
 
-        /* Viewport container box met muis-resizing en overflow handelend */
         .viewport-box {
             background-color: var(--container-bg);
             border: 1px solid var(--border-color);
@@ -106,11 +106,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            transition: transform 0.2s ease;
-            resize: both;
-            overflow: auto;
-            min-height: 480px;
-            min-width: 320px;
+            min-height: 550px;
             position: relative;
         }
 
@@ -123,7 +119,6 @@
             width: calc(100vw - 32px) !important;
             height: calc(100vh - 32px) !important;
             z-index: 1000;
-            resize: none;
         }
 
         .viewport-header {
@@ -168,6 +163,7 @@
             overflow-y: auto;
             padding-right: 4px;
             flex: 1;
+            max-height: calc(100vh - 200px);
         }
 
         .link-item {
@@ -211,6 +207,9 @@
             font-size: 11px;
             color: var(--text-dim);
             min-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .action-btn {
@@ -246,12 +245,20 @@
             background: #c2410c;
         }
 
-        .pdf-viewer-canvas {
+        /* 2/3 PDF Viewer Container */
+        .pdf-viewer-container {
             background: #000000;
             border: 1px solid var(--card-border);
             border-radius: 4px;
             flex: 1;
-            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 480px;
+        }
+
+        .pdf-viewer-canvas {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -259,12 +266,21 @@
             font-size: 12px;
             text-align: center;
             padding: 20px;
+            width: 100%;
+            height: 100%;
+        }
+
+        iframe.pdf-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #ffffff;
         }
     </style>
 </head>
 <body>
 
-    <!-- Bovenste knoppenbalk (Thema's & Systeemstatus) -->
+    <!-- Bovenste knoppenbalk -->
     <div class="top-control-bar">
         <div class="theme-buttons">
             <button class="theme-btn" onclick="setTheme('helder')"><span class="dot dot-yellow"></span> Helder</button>
@@ -275,16 +291,14 @@
         <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE (VERCEL DEPLOYED)</div>
     </div>
 
-    <!-- Twee Viewport Secties -->
+    <!-- 1/3 (VP-1) en 2/3 (VP-2) Grid -->
     <div class="viewport-grid">
         
-        <!-- VP-1: Navigatie & Alle Systeemlinks -->
+        <!-- VP-1: Navigatie & Alle Systeemlinks (1/3 Breedte) -->
         <div class="viewport-box" id="vp1">
             <div class="viewport-header">
-                <span class="viewport-title">VP-1: VORTEX OS NAVIGATIE & ALLE LINKS</span>
+                <span class="viewport-title">VP-1: VORTEX OS LINKS</span>
                 <div class="viewport-controls">
-                    <button class="ctrl-btn" onclick="adjustSize('vp1', -1)">-</button>
-                    <button class="ctrl-btn" onclick="adjustSize('vp1', 1)">+</button>
                     <button class="ctrl-btn" onclick="toggleFullscreen('vp1')">⛶</button>
                 </div>
             </div>
@@ -292,142 +306,128 @@
             <div class="link-list">
                 <a href="index.html" class="link-item">
                     <div>
-                        <strong>🗺️ Multi-Layer OGC Kaartviewer</strong>
-                        <span class="link-desc">Canvas visualisatie voor percelen, grenzen & bebouwing (EPSG:28992).</span>
+                        <strong>🗺️ OGC Kaartviewer</strong>
+                        <span class="link-desc">Percelen & bebouwing (EPSG:28992).</span>
                     </div>
                     <span>→</span>
                 </a>
 
                 <a href="pdok.html" class="link-item">
                     <div>
-                        <strong>🛰️ PDOK Directe Viewer</strong>
-                        <span class="link-desc">Dedicated interface voor PDOK geodata en brk-kadastrale-kaart.</span>
+                        <strong>🛰️ PDOK Viewer</strong>
+                        <span class="link-desc">Brk-kadastrale-kaart streaming.</span>
                     </div>
                     <span>→</span>
                 </a>
 
                 <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" class="link-item">
                     <div>
-                        <strong>🌀 Vortex Clean Viewports v158</strong>
-                        <span class="link-desc">Geavanceerde 3D geodetische en cartografische viewport matrix.</span>
+                        <strong>🌀 Clean Viewports v158</strong>
+                        <span class="link-desc">3D geodetische viewport matrix.</span>
                     </div>
                     <span>→</span>
                 </a>
 
                 <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="link-item">
                     <div>
-                        <strong>⏳ Rekencentrum Tijdscapsule</strong>
-                        <span class="link-desc">Historische simulatie- en archiefomgeving binnen het monorepo.</span>
+                        <strong>⏳ Tijdscapsule</strong>
+                        <span class="link-desc">Historische archiefomgeving.</span>
                     </div>
                     <span>→</span>
                 </a>
 
                 <a href="swagger.html" class="link-item">
                     <div>
-                        <strong>📜 API Swagger Documentatie</strong>
-                        <span class="link-desc">OpenAPI specificaties voor lokale serverless proxy endpoints.</span>
+                        <strong>📜 API Swagger Docs</strong>
+                        <span class="link-desc">OpenAPI serverless endpoints.</span>
                     </div>
                     <span>→</span>
                 </a>
 
                 <a href="https://kadatawebservice.kadaster.nl/kadastercheck/docs/index/index.html" target="_blank" rel="noopener noreferrer" class="link-item">
                     <div>
-                        <strong>🏢 KadasterCheck API Documentatie ↗</strong>
-                        <span class="link-desc">Officiële Swagger UI voor bouwjaar, woningtype & monumentenstatus.</span>
-                    </div>
-                    <span>→</span>
-                </a>
-
-                <a href="https://www.kadaster.nl/zakelijk/datasets/maatwerk-api-s-kadaster" target="_blank" rel="noopener noreferrer" class="link-item">
-                    <div>
-                        <strong>⚙️ Kadaster Maatwerk API's Overzicht ↗</strong>
-                        <span class="link-desc">Informatie over Objectinformatie API, Koopsom API en Inzicht via de Kaart.</span>
+                        <strong>🏢 KadasterCheck API ↗</strong>
+                        <span class="link-desc">Bouwjaar & monumentenstatus.</span>
                     </div>
                     <span>→</span>
                 </a>
 
                 <a href="klantcontact/index.html" class="link-item">
                     <div>
-                        <strong>📱 Klantcontact & Mobiele Geomapping</strong>
-                        <span class="link-desc">Geïntegreerde client voor mobiele en P2P-sessies.</span>
+                        <strong>📱 Klantcontact Client</strong>
+                        <span class="link-desc">Mobiele en P2P-sessies.</span>
                     </div>
                     <span>→</span>
                 </a>
 
                 <a href="klantcontact/verzend.html" class="link-item">
                     <div>
-                        <strong>✉️ Klantcontact Verzendportaal</strong>
-                        <span class="link-desc">Submap verzendmodule voor e-mailkoppelingen en logboekexport.</span>
+                        <strong>✉️ Verzendportaal</strong>
+                        <span class="link-desc">E-mailkoppelingen & logboek.</span>
                     </div>
                     <span>→</span>
                 </a>
             </div>
         </div>
 
-        <!-- VP-2: PDF Woo-Reader (PDF.js) -->
+        <!-- VP-2: PDF Woo-Reader & Viewer (2/3 Breedte) -->
         <div class="viewport-box" id="vp2">
             <div class="viewport-header">
-                <span class="viewport-title">VP-2: PDF Woo-Reader & Viewer</span>
+                <span class="viewport-title">VP-2: PDF WOO-READER & LEESBARE VIEWER</span>
                 <div class="viewport-controls">
-                    <button class="ctrl-btn" onclick="adjustSize('vp2', -1)">-</button>
-                    <button class="ctrl-btn" onclick="adjustSize('vp2', 1)">+</button>
                     <button class="ctrl-btn" onclick="toggleFullscreen('vp2')">⛶</button>
                 </div>
             </div>
 
             <div class="pdf-controls">
                 <button class="action-btn" onclick="document.getElementById('fileInput').click()">Bladeren...</button>
-                <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
+                <input type="file" id="fileInput" accept="application/pdf" style="display: none;" onchange="handleFileSelect(event)">
                 <div class="file-display" id="fileStatus">Geen bestand... geselecteerd.</div>
                 <button class="load-zaak-btn" onclick="loadZaak()">Laad Zaak 1504573 (Scherpenisse)</button>
             </div>
 
-            <div class="pdf-viewer-canvas" id="pdfCanvas">
-                [ PDF.js Canvas Geactiveerd — Selecteer een document of laad Zaak 1504573 ]
+            <div class="pdf-viewer-container">
+                <div class="pdf-viewer-canvas" id="pdfCanvas">
+                    [ PDF Reader Gereed — Selecteer een lokaal PDF-bestand of laad Zaak 1504573 om te lezen ]
+                </div>
             </div>
         </div>
 
     </div>
 
     <script>
-        let scales = { vp1: 1, vp2: 1 };
-        
-        function adjustSize(id, delta) {
-            scales[id] = Math.max(0.8, Math.min(1.4, scales[id] + (delta * 0.1)));
-            const el = document.getElementById(id);
-            el.style.transform = `scale(${scales[id]})`;
-            el.style.transformOrigin = 'top center';
-        }
-
         function toggleFullscreen(id) {
             const el = document.getElementById(id);
             el.classList.toggle('expanded');
         }
 
+        // Lokaal PDF bestand inlezen en renderen in leesbaar formaat
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
                 document.getElementById('fileStatus').textContent = file.name;
+                const fileURL = URL.createObjectURL(file);
                 document.getElementById('pdfCanvas').innerHTML = `
-                    <div style="text-align: left; width: 100%; padding: 10px; font-family: monospace; color: #00e5ff;">
-                        <h3>📄 Geladen Lokaal Bestand: ${file.name}</h3>
-                        <p style="color: #94a3b8; font-size: 11px; margin-top: 4px;">Grootte: ${(file.size / 1024).toFixed(1)} KB</p>
-                        <hr style="border-color: #24344d; margin: 8px 0;">
-                        <p style="color: #00e676; font-size: 12px;">[STATUS] Document lokaal ingelezen in VP-2 buffer.</p>
-                    </div>
+                    <iframe src="${fileURL}" class="pdf-frame"></iframe>
                 `;
             }
         }
 
+        // Zaak 1504573 (Scherpenisse) laden en presenteren
         function loadZaak() {
             document.getElementById('fileStatus').textContent = 'zaak_1504573_scherpenisse.pdf';
+            // Voor demonstratie / leesbaarheid laden we een gestructureerde weergave van het dossier
             document.getElementById('pdfCanvas').innerHTML = `
-                <div style="text-align: left; width: 100%; padding: 10px; font-family: monospace; color: #00e5ff;">
-                    <h3>📄 Geselecteerd Dossier: Zaak 1504573</h3>
-                    <p style="color: #94a3b8; font-size: 11px; margin-top: 4px;">Locatie: Platteweg / Kadastraal perceel Scherpenisse</p>
-                    <hr style="border-color: #24344d; margin: 8px 0;">
-                    <p style="color: #00e676; font-size: 12px;">[STATUS] WOO-verzoek succesvol geladen via serverless proxy.</p>
-                    <p style="color: #e2e8f0; font-size: 11px; margin-top: 6px;">Pagina 1/12 — Bouwjaar: 1926 / Archiefreferentie keuringsrapport aanwezig.</p>
+                <div style="text-align: left; width: 100%; height: 100%; padding: 24px; font-family: monospace; color: #e2e8f0; background: #070a0f; overflow-y: auto;">
+                    <h3 style="color: #00e5ff; font-size: 15px; margin-bottom: 6px;">📄 DOSSIER INFORMATIE: Zaak 1504573</h3>
+                    <p style="color: #94a3b8; font-size: 12px;">Locatie: Platteweg / Kadastraal perceel Scherpenisse</p>
+                    <hr style="border-color: #24344d; margin: 12px 0;">
+                    <div style="background: #0d131c; border: 1px solid #24344d; padding: 14px; border-radius: 4px; margin-bottom: 12px;">
+                        <strong style="color: #ffb300;">[STATUS: WOO-VERZOEK GEACCEPTEERD]</strong>
+                        <p style="margin-top: 6px; font-size: 12px; line-height: 1.5;">Inventarisatie van openbare besluiten, kadastrale mutaties en historische keuringsrapporten uit 1926 met betrekking tot perceel E 1552 / E 108.</p>
+                    </div>
+                    <p style="color: #00e676; font-size: 12px; margin-bottom: 8px;">✓ Document volledig ontsloten en leesbaar in VP-2 buffer.</p>
+                    <p style="color: #94a3b8; font-size: 11px;">Gebruik de knop 'Bladeren...' hierboven om een eigen PDF-bestand toe te voegen en direct te bekijken.</p>
                 </div>
             `;
         }
