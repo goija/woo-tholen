@@ -71,6 +71,7 @@
       justify-content: center;
       gap: 6px;
       margin-top: 4px;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -161,21 +162,46 @@
     <!-- HEADER -->
     <header>
       <h1>🏛️ WOO-THOLEN // VORTEX OS NAVIGATIE</h1>
-      <div class="subtitle">Centrale link-pagina voor geodatakanaal, API-documentatie & dossiers</div>
+      <div class="subtitle">Centrale link-pagina voor geocentrum viewports, tijdscapsule & API's</div>
       <div class="badge-row">
-        <span class="badge">VP-01 GEODATA</span>
-        <span class="badge">VP-02 API & DOCS</span>
-        <span class="badge">VP-03 KLANTCONTACT</span>
+        <span class="badge">VP-01 GEOCENTRUM</span>
+        <span class="badge">VP-02 TIJDSCAPSULE</span>
+        <span class="badge">VP-03 KADASTRALE CHECK</span>
+        <span class="badge">VP-04 KLANTCONTACT</span>
       </div>
     </header>
 
-    <!-- SECTIE 1: HOOFDINTERFACES & GEODATA -->
+    <!-- SECTIE 1: HOOFDINTERFACES & GEOCENTRUM -->
     <div class="section-title"><span>🖥️ DESKTOP & WEB INTERFACES</span><span>[ROOT]</span></div>
     <div class="link-list">
       <a href="index.html" class="link-card">
         <div class="link-info">
-          <span class="link-title"><span>🗺️</span> Hoofdgeodatacentrum (index.html)</span>
-          <span class="link-desc">Viewport matrix (VP-01 t/m VP-03), PDOK Kadaster WFS, A. Ott 573 Planimeter & Canvas visualisatie.</span>
+          <span class="link-title"><span>🗺️</span> Multi-Layer OGC Kaartviewer (index.html)</span>
+          <span class="link-desc">Canvas visualisatie voor percelen, kadastrale grenzen, bebouwing en openbare ruimte (EPSG:28992).</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="pdok.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>🛰️</span> PDOK Directe Viewer (pdok.html)</span>
+          <span class="link-desc">Dedicated interface voor PDOK geodata en brk-kadastrale-kaart streaming.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>🌀</span> Vortex Clean Viewports v158</span>
+          <span class="link-desc">Geavanceerde 3D geodetische en cartografische viewport matrix (v158 monorepo).</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>⏳</span> Rekencentrum Tijdscapsule (tijdscapsule_index.html)</span>
+          <span class="link-desc">Historische simulatie- en archiefomgeving binnen het rekencentrum monorepo.</span>
         </div>
         <span class="link-arrow">→</span>
       </a>
@@ -183,13 +209,33 @@
       <a href="swagger.html" class="link-card">
         <div class="link-info">
           <span class="link-title"><span>📜</span> API Swagger Documentatie (swagger.html)</span>
-          <span class="link-desc">OpenAPI / Swagger UI specificaties voor de serverless endpoints en geodata proxy routes.</span>
+          <span class="link-desc">OpenAPI specificaties voor lokale serverless proxy endpoints en geodata routering.</span>
         </div>
         <span class="link-arrow">→</span>
       </a>
     </div>
 
-    <!-- SECTIE 2: KLANTCONTACT & MOBIEL -->
+    <!-- SECTIE 2: KADASTRALE WEBSERVICES & CHECK -->
+    <div class="section-title"><span>🔍 KADASTRALE WEBSERVICES (KADATA)</span><span>[API EXTERN]</span></div>
+    <div class="link-list">
+      <a href="https://kadatawebservice.kadaster.nl/kadastercheck/docs/index/index.html" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>🏢</span> KadasterCheck API Documentatie ↗</span>
+          <span class="link-desc">Officiële Swagger UI voor KadasterCheck (bouwjaar, woningtype, monumentenstatus, pandkenmerken).</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+
+      <a href="https://www.kadaster.nl/zakelijk/datasets/maatwerk-api-s-kadaster" target="_blank" rel="noopener noreferrer" class="link-card">
+        <div class="link-info">
+          <span class="link-title"><span>⚙️</span> Kadaster Maatwerk API's Overzicht ↗</span>
+          <span class="link-desc">Informatie over Objectinformatie API, Koopsom API en Inzicht via de Kaart API via kadatawebservice.</span>
+        </div>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <!-- SECTIE 3: KLANTCONTACT & MOBIEL -->
     <div class="section-title"><span>📱 KLANTCONTACT & MOBIELE GEOMAPPING</span><span>[/KLANTCONTACT]</span></div>
     <div class="link-list">
       <a href="klantcontact/index.html" class="link-card">
