@@ -46,12 +46,41 @@
             justify-content: space-between;
         }
 
+        .nav-buttons-bar {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            color: var(--accent-cyan);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-body);
+            border-color: var(--accent-cyan);
+        }
+
         .theme-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
 
         .theme-btn {
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 4px;
             font-family: var(--font-mono);
             font-size: 11px;
@@ -142,7 +171,7 @@
             gap: 10px;
             flex: 1;
             overflow-y: auto;
-            max-height: calc(100vh - 220px);
+            max-height: calc(100vh - 250px);
             padding-right: 2px;
         }
         .tab-content.active { display: flex; }
@@ -283,10 +312,19 @@
         .prop-row { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; border-bottom: 1px solid rgba(36,52,77,0.4); }
         .prop-key { color: var(--text-dim); }
         .prop-val { color: var(--text-main); font-weight: bold; text-align: right; }
+        
+        canvas#mapPreview {
+            width: 100%;
+            height: 240px;
+            background: #000000;
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Bovenste knoppenbalk: Thema's & Status -->
     <div class="top-control-bar">
         <div class="theme-buttons">
             <button class="theme-btn" onclick="setTheme('helder')"><span class="dot dot-yellow"></span> Helder</button>
@@ -294,15 +332,28 @@
             <button class="theme-btn" onclick="setTheme('daglicht')"><span class="dot dot-sun"></span> Daglicht</button>
             <button class="theme-btn" onclick="setTheme('nachtlicht')"><span class="dot dot-red"></span> Nachtlicht</button>
         </div>
-        <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE // DOSSIER PLATTEWEG 3-5-7 GELADEN</div>
+        <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE // STABIELE PRODUCTIE</div>
     </div>
 
+    <!-- Navigatie Knoppenbar (Gevraagd) -->
+    <div class="nav-buttons-bar">
+        <a href="index.html" class="nav-btn">🏠 Home</a>
+        <a href="klantcontact/index.html" class="nav-btn">🏢 Beheercentrum</a>
+        <a href="klantcontact/verzend.html" class="nav-btn">⚖️ Juridischcentrum</a>
+        <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" class="nav-btn">🌀 Geocentrum</a>
+        <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="nav-btn">⏳ Tijdscapsule</a>
+        <a href="swagger.html" class="nav-btn">🧠 Kenniscentrum</a>
+        <a href="swagger.html" class="nav-btn">📊 Rekencentrum</a>
+        <a href="https://www.zeeuwsarchief.nl/zoekgids/burgerlijke-stand/#online-raadplegen" target="_blank" rel="noopener noreferrer" class="nav-btn">📚 Bibliotheek</a>
+    </div>
+
+    <!-- 1/3 (VP-1) en 2/3 (VP-2) Grid -->
     <div class="viewport-grid">
         
-        <!-- VP-1: Navigatie & Dossierselectie -->
+        <!-- VP-1: Navigatie, Zoeken & Volledige Systeemlinks (1/3 Breedte) -->
         <div class="viewport-box" id="vp1">
             <div class="viewport-header">
-                <span class="viewport-title">VP-1: DOSSIER PLATTEWEG 3-5-7</span>
+                <span class="viewport-title">VP-1: ZOEKEN, DOSSIER & LINKS</span>
                 <div class="viewport-controls">
                     <button class="ctrl-btn" onclick="toggleFullscreen('vp1')">⛶</button>
                 </div>
@@ -314,22 +365,22 @@
                 <button class="tab-btn" onclick="switchTab('linksTab', this)">📂 Links</button>
             </div>
             
-            <!-- TAB 1: Platteweg 3, 5, 7 Dossieritems -->
+            <!-- TAB 1: Platteweg 3, 5, 7 Dossier -->
             <div id="dossierTab" class="tab-content active">
                 <div class="search-group">
-                    <span style="font-weight: bold; color: var(--accent);">📋 Vastgoedcomplex & Bodemdossier</span>
-                    <span class="helper-text">Selecteer een object om de juridische en taxatiegegevens in VP-2 te laden:</span>
+                    <span style="font-weight: bold; color: var(--accent);">📋 Platteweg 3, 5, 7 (Scherpenisse)</span>
+                    <span class="helper-text">Selecteer een object om de kadastrale kaartomgeving en dossiergegevens in VP-2 te laden:</span>
                     <div class="link-list" style="margin-top: 6px;">
                         <div class="link-item" onclick="laadPlattewegDossier('3')">
                             <div><strong>Platteweg 3 (Woonhuis)</strong><span class="link-desc">Perceel E 1552 | Bouwjaar 1926</span></div>
                             <span>→</span>
                         </div>
                         <div class="link-item" onclick="laadPlattewegDossier('5')">
-                            <div><strong>Platteweg 5 (Landbouwschuur)</strong><span class="link-desc">84 m² WOZ | Bodemstigma WBD</span></div>
+                            <div><strong>Platteweg 5 (Landbouwschuur)</strong><span class="link-desc">84 m² WOZ | WBD-aantekening</span></div>
                             <span>→</span>
                         </div>
                         <div class="link-item" onclick="laadPlattewegDossier('7')">
-                            <div><strong>Platteweg 7 (Wagenhuis)</strong><span class="link-desc">Rechtbank BRE 24/5455 & Omgevingswet</span></div>
+                            <div><strong>Platteweg 7 (Wagenhuis)</strong><span class="link-desc">Kadastraal onderdeel E 1552</span></div>
                             <span>→</span>
                         </div>
                     </div>
@@ -351,33 +402,49 @@
                 </div>
             </div>
 
-            <!-- TAB 3: Systeemlinks -->
+            <!-- TAB 3: Alle Intacte Systeemlinks -->
             <div id="linksTab" class="tab-content">
                 <div class="link-list">
                     <a href="index.html" target="_blank" class="link-item">
-                        <div><strong>🗺️ OGC Kaartviewer</strong><span class="link-desc">EPSG:28992 RD New</span></div>
+                        <div><strong>🗺️ OGC Kaartviewer</strong><span class="link-desc">Percelen & bebouwing (EPSG:28992).</span></div>
                         <span>→</span>
                     </a>
                     <a href="pdok.html" target="_blank" class="link-item">
-                        <div><strong>🛰️ PDOK Directe Viewer</strong><span class="link-desc">Brk-kadastrale-kaart streaming</span></div>
+                        <div><strong>🛰️ PDOK Directe Viewer</strong><span class="link-desc">Brk-kadastrale-kaart streaming.</span></div>
+                        <span>→</span>
+                    </a>
+                    <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" target="_blank" class="link-item">
+                        <div><strong>🌀 Clean Viewports v158</strong><span class="link-desc">3D geodetische viewport matrix.</span></div>
+                        <span>→</span>
+                    </a>
+                    <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" target="_blank" class="link-item">
+                        <div><strong>⏳ Tijdscapsule</strong><span class="link-desc">Historische archiefomgeving.</span></div>
                         <span>→</span>
                     </a>
                     <a href="swagger.html" target="_blank" class="link-item">
-                        <div><strong>📜 API Swagger Documentatie</strong><span class="link-desc">OpenAPI serverless endpoints</span></div>
+                        <div><strong>📜 API Swagger Docs</strong><span class="link-desc">OpenAPI serverless endpoints.</span></div>
                         <span>→</span>
                     </a>
-                    <a href="https://www.zeeuwsarchief.nl/zoekgids/burgerlijke-stand/#online-raadplegen" target="_blank" rel="noopener noreferrer" class="link-item">
-                        <div><strong>📜 Zeeuws Archief Zoekgids ↗</strong><span class="link-desc">Burgerlijke stand raadplegen</span></div>
+                    <a href="https://kadatawebservice.kadaster.nl/kadastercheck/docs/index/index.html" target="_blank" rel="noopener noreferrer" class="link-item">
+                        <div><strong>🏢 KadasterCheck API ↗</strong><span class="link-desc">Bouwjaar & monumentenstatus.</span></div>
+                        <span>→</span>
+                    </a>
+                    <a href="klantcontact/index.html" target="_blank" class="link-item">
+                        <div><strong>📱 Klantcontact Client</strong><span class="link-desc">Mobiele en P2P-sessies.</span></div>
+                        <span>→</span>
+                    </a>
+                    <a href="klantcontact/verzend.html" target="_blank" class="link-item">
+                        <div><strong>✉️ Verzendportaal</strong><span class="link-desc">Logboekexport en e-mail.</span></div>
                         <span>→</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- VP-2: Dossier- en Kadasterweergave (2/3 Breedte) -->
+        <!-- VP-2: Gekoppelde Weergave (2/3 Breedte) -->
         <div class="viewport-box" id="vp2">
             <div class="viewport-header">
-                <span class="viewport-title">VP-2: DOSSIER PLATTEWEG 3-5-7 & KADASTER</span>
+                <span class="viewport-title">VP-2: DOSSIER & GEOMETRIE KAART KOPPELING</span>
                 <div class="viewport-controls">
                     <button class="ctrl-btn" onclick="toggleFullscreen('vp2')">⛶</button>
                 </div>
@@ -386,13 +453,13 @@
             <div class="pdf-controls">
                 <button class="action-btn" onclick="document.getElementById('fileInput').click()">Bladeren...</button>
                 <input type="file" id="fileInput" accept="application/pdf" style="display: none;" onchange="handleFileSelect(event)">
-                <div class="file-display" id="fileStatus">Platteweg_3_5_7_Dossier.json</div>
+                <div class="file-display" id="fileStatus">Platteweg_Complex_Gekoppeld.json</div>
                 <button class="load-zaak-btn" onclick="loadZaak()">Laad Zaak 1504573</button>
             </div>
 
             <div class="pdf-viewer-container">
                 <div class="pdf-viewer-canvas" id="pdfCanvas">
-                    <!-- Standaard inladen bij openen: Platteweg dossier -->
+                    <!-- Gekoppelde weergave wordt direct ingeladen -->
                 </div>
             </div>
         </div>
@@ -403,7 +470,6 @@
         let loadedFeatures = [];
         let selectedFeatureId = null;
 
-        // Laad standaard Platteweg dossier bij opstarten
         window.onload = function() {
             laadPlattewegDossier('3');
         };
@@ -421,24 +487,21 @@
         }
 
         function laadPlattewegDossier(nummer) {
+            document.getElementById('fileStatus').textContent = `Platteweg_${nummer}_Dossier_Geomap.json`;
             const canvasContainer = document.getElementById('pdfCanvas');
-            document.getElementById('fileStatus').textContent = `Platteweg_${nummer}_Dossier.json`;
 
             canvasContainer.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; text-align: left; overflow-y: auto; padding: 4px;">
+                <div class="viewer-split">
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px;">🏠 Platteweg ${nummer} (Scherpenisse) - Dossiergegevens</div>
-                        <div class="prop-row"><span class="prop-key">Kadastraal Perceel:</span><span class="prop-val">E 1552 (historisch E 108)</span></div>
-                        <div class="prop-row"><span class="prop-key">Complex Onderdeel:</span><span class="prop-val">${nummer === '3' ? 'Woonhuis (Bouwjaar 1926)' : nummer === '5' ? 'Landbouwschuur (84 m² WOZ)' : 'Wagenhuis'}</span></div>
-                        <div class="prop-row"><span class="prop-key">Bodemstatus (Omgevingswet):</span><span class="prop-val" style="color: #ffb300;">WBD-aantekening (Historische bodemverontreiniging)</span></div>
-                        <div class="prop-row"><span class="prop-key">Bestuursrechtelijke Zaak:</span><span class="prop-val">Rechtbank Zeeland-West-Brabant (BRE 24/5455)</span></div>
-                        <div class="prop-row"><span class="prop-key">NWWI-taxatie (Schone grond):</span><span class="prop-val">€ 280.000,-</span></div>
-                        <div class="prop-row"><span class="prop-key">Reële Marktwaarde (Bodemstigma):</span><span class="prop-val" style="color: var(--accent-cyan);">€ 44.575,- tot € 141.500,-</span></div>
-                        <div class="prop-row"><span class="prop-key">Nalatenschap / Notariaat:</span><span class="prop-val">Nalatenschap Quaak (Conflicten erfgenamen)</span></div>
+                        <div style="font-weight: bold; color: var(--accent); font-size: 12px; margin-bottom: 4px;">🏠 Platteweg ${nummer} (Scherpenisse)</div>
+                        <div class="prop-row"><span class="prop-key">Kadastraal Perceel:</span><span class="prop-val">E 1552 (hist. E 108)</span></div>
+                        <div class="prop-row"><span class="prop-key">Complex Deel:</span><span class="prop-val">${nummer === '3' ? 'Woonhuis (1926)' : nummer === '5' ? 'Landbouwschuur (84 m²)' : 'Wagenhuis'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Bodemstatus:</span><span class="prop-val" style="color: #ffb300;">WBD-aantekening</span></div>
+                        <div class="prop-row"><span class="prop-key">Gemeente:</span><span class="prop-val">Tholen</span></div>
                     </div>
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 12px; margin-bottom: 4px;">🗺️ Kadastrale Kaart Omgeving (EPSG:28992)</div>
-                        <canvas id="mapPreview" width="400" height="240"></canvas>
+                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 12px; margin-bottom: 4px;">🗺️ Kadastrale Kaart Omgeving</div>
+                        <canvas id="mapPreview" width="300" height="260"></canvas>
                     </div>
                 </div>
             `;
@@ -498,19 +561,18 @@
             
             const canvasContainer = document.getElementById('pdfCanvas');
             canvasContainer.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; text-align: left; overflow-y: auto; padding: 4px;">
+                <div class="viewer-split">
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 6px;">📋 Perceel Schema 2020-12 (Platteweg Complex)</div>
-                        <div class="prop-row"><span class="prop-key">id (UUID):</span><span class="prop-val" style="font-size: 9px;">${p.id || f.id || '-'}</span></div>
-                        <div class="prop-row"><span class="prop-key">identificatie_lokaal_id:</span><span class="prop-val">${p.identificatie_lokaal_id || '-'}</span></div>
-                        <div class="prop-row"><span class="prop-key">kadastrale_gemeente_waarde:</span><span class="prop-val">${p.kadastrale_gemeente_waarde || 'Scherpenisse'}</span></div>
-                        <div class="prop-row"><span class="prop-key">sectie & perceelnummer:</span><span class="prop-val">Sectie ${p.sectie || 'E'} nr. ${p.perceelnummer || '1552'}</span></div>
-                        <div class="prop-row"><span class="prop-key">kadastrale_grootte_waarde:</span><span class="prop-val">${p.kadastrale_grootte_waarde ? p.kadastrale_grootte_waarde + ' m²' : 'Complex E 1552 / E 108'}</span></div>
-                        <div class="prop-row"><span class="prop-key">status_historie_waarde:</span><span class="prop-val">${p.status_historie_waarde || 'Geldig'}</span></div>
+                        <div style="font-weight: bold; color: var(--accent); font-size: 12px; margin-bottom: 4px;">📋 Perceel Schema 2020-12</div>
+                        <div class="prop-row"><span class="prop-key">Gemeente:</span><span class="prop-val">${p.kadastrale_gemeente_waarde || 'Scherpenisse'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Sectie & Perceel:</span><span class="prop-val">Sectie ${p.sectie || 'E'} nr. ${p.perceelnummer || '1552'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Kadastrale Grootte:</span><span class="prop-val">${p.kadastrale_grootte_waarde ? p.kadastrale_grootte_waarde + ' m²' : 'Complex E 1552 / E 108'}</span></div>
+                        <div class="prop-row"><span class="prop-key">UUID (id):</span><span class="prop-val" style="font-size: 9px;">${p.id || f.id || '-'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Status:</span><span class="prop-val">${p.status_historie_waarde || 'Geldig'}</span></div>
                     </div>
                     <div class="schema-card">
-                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 12px; margin-bottom: 4px;">🗺️ Kadastrale Kaart Weergave (EPSG:28992)</div>
-                        <canvas id="mapPreview" width="400" height="240"></canvas>
+                        <div style="font-weight: bold; color: var(--accent-amber); font-size: 12px; margin-bottom: 4px;">🗺️ Kadastrale Kaart Weergave</div>
+                        <canvas id="mapPreview" width="300" height="260"></canvas>
                     </div>
                 </div>
             `;
