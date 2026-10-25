@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Kadastrale Kaart Canvas (RD-coördinaten)</title>
+    <style>
+        body { background: #1a1a1a; color: #fff; font-family: monospace; }
+        canvas { border: 1px solid #444; background: #000; }
+    </style>
+</head>
+<body>
+    <canvas id="mapCanvas" width="800" height="600"></canvas>
+    <script>
+        fetch('percelen_export.json')
+            .then(res => res.json())
+            .then(data => drawPolygons(data));
+
+        function drawPolygons(data) {
+            const canvas = document.getElementById('mapCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            data.forEach(p => {
+                p.coordinates[0].forEach(coord => {
+                    if (coord[0] < minX) minX = coord[0];
+                    if (coord[0] > maxX) maxX = coord[0];
+                    if (coord[1] < minY) minY = coord[1];
+                    if (coord[1] > maxY) maxY = coord[1];
+                });
+            });
+
+            const scaleX = canvas.width / (maxX - minX);
+            const scaleY = canvas.height / (maxY - minY);
+            const scale = Math.min(scaleX, scaleY) * 0.9; 
+            const offsetX = (canvas.width - (maxX - minX) * scale) / 2;
+            const offsetY = (canvas.height - (maxY - minY) * scale) / 2;
+
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+
+            data.forEach(p => {
+                ctx.beginPath();
+                const coords = p.coordinates[0];
+                for (let i = 0; i < coords.length; i++) {
+                    const cx = (coords[i][0] - minX) * scale + offsetX;
+                    const cy = canvas.height - ((coords[i][1] - minY) * scale + offsetY);
+                    if (i === 0) ctx.moveTo(cx, cy);
+                    else ctx.lineTo(cx, cy);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                
+                const startCoord = coords[0];
+                const textX = (startCoord[0] - minX) * scale + offsetX;
+                const textY = canvas.height - ((startCoord[1] - minY) * scale + offsetY);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(p.id, textX, textY);
+            });
+        }
+    </script>
+</body>
+</html>
