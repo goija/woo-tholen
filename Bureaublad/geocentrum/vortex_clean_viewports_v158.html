@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="donker">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VORTEX OS v158.1 - Woo-Reader & Clean Viewports</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        :root[data-theme="donker"] { --bg: #060a12; --panel: #0f172a; --text: #38bdf8; --border: #1e293b; --accent: #00e5ff; }
+        :root[data-theme="helder"] { --bg: #ffffff; --panel: #f1f5f9; --text: #0f172a; --border: #cbd5e1; --accent: #0284c7; }
+        :root[data-theme="daglicht"] { --bg: #f8fafc; --panel: #e2e8f0; --text: #1e293b; --border: #94a3b8; --accent: #ea580c; }
+        :root[data-theme="nachtlicht"] { --bg: #1a0000; --panel: #330000; --text: #ff4d4d; --border: #660000; --accent: #ff0000; }
+        
+        body { background: var(--bg); color: var(--text); font-family: monospace; padding: 20px; transition: all 0.3s; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .viewport { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
+        input, button { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 8px; font-family: monospace; margin-top: 5px; }
+        button { cursor: pointer; font-weight: bold; }
+        button:hover { background: var(--accent); color: #000; }
+        canvas { width: 100%; border: 1px solid var(--border); margin-top: 15px; background: #fff; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="viewport" style="margin-bottom: 20px;">
+        <button onclick="document.documentElement.setAttribute('data-theme', 'helder')">☀️ Helder</button>
+        <button onclick="document.documentElement.setAttribute('data-theme', 'donker')">🌙 Donker</button>
+        <button onclick="document.documentElement.setAttribute('data-theme', 'daglicht')">🌤️ Daglicht</button>
+        <button onclick="document.documentElement.setAttribute('data-theme', 'nachtlicht')">🔴 Nachtlicht</button>
+    </div>
+
+    <div class="grid">
+        <div class="viewport">
+            <h2>VP-1: Google Dork Woo-Search</h2>
+            <input type="text" id="dorkQuery" value="site:tholen.nl filetype:pdf woo" style="width: 70%;">
+            <button onclick="searchDork()">Zoek (Google)</button>
+            <p>Zoek direct naar openbare Woo-verzoeken, besluiten en kadastrale mutaties.</p>
+        </div>
+
+        <div class="viewport">
+            <h2>VP-2: PDF Woo-Reader (PDF.js)</h2>
+            <input type="file" id="pdfUpload" accept="application/pdf">
+            <button onclick="loadPredefined('1504573')" style="background:var(--accent); color:#000;">Laad Zaak 1504573 (Scherpenisse)</button>
+            <canvas id="pdfCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 1. Google Dork Search
+        function searchDork() {
+            const query = document.getElementById('dorkQuery').value;
+            window.open('https://www.google.com/search?q=' + encodeURIComponent(query), '_blank');
+        }
+
+        // 2. PDF.js Setup
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        // Handmatige Upload
+        document.getElementById('pdfUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileReader = new FileReader();
+                fileReader.onload = function() {
+                    renderPDF(new Uint8Array(this.result));
+                };
+                fileReader.readAsArrayBuffer(file);
+            }
+        });
+
+        // 3. Backend Koppeling: Voorgeladen Dossier Fetcher
+        function loadPredefined(zaak) {
+            // Pas dit pad aan naar de werkelijke locatie van je Woo-dossiers in de repository
+            const pdfUrl = `./woo_dossiers/zaak_${zaak}.pdf`;
+            
+            console.log(`Verbinden met backend pad: ${pdfUrl}`);
+            
+            fetch(pdfUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Bestand niet gevonden (HTTP ${response.status})`);
+                    return response.arrayBuffer();
+                })
+                .then(data => {
+                    renderPDF(new Uint8Array(data));
+                })
+                .catch(err => {
+                    alert(`Fout bij het ophalen van dossier ${zaak} vanaf de backend:\n${err.message}\n\nZorg dat het bestand bestaat op pad: ${pdfUrl}`);
+                });
+        }
+
+        // 4. PDF Rendering Engine
+        function renderPDF(data) {
+            pdfjsLib.getDocument(data).promise.then(pdf => {
+                pdf.getPage(1).then(page => {
+                    const scale = 1.5;
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.getElementById('pdfCanvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    page.render({ canvasContext: context, viewport: viewport });
+                });
+            }).catch(err => {
+                console.error("PDF Render Fout:", err);
+                alert("Bestand kon niet verwerkt worden als geldige PDF.");
+            });
+        }
+    </script>
+</body>
+</html>
