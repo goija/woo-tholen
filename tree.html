@@ -6,14 +6,17 @@
     <title>WOO-THOLEN // VORTEX OS VIEWPORT MATRIX (tree.html)</title>
     <style>
         :root {
-            --bg-body: #e4e9f0;
-            --container-bg: #eef2f7;
-            --border-color: #cbd5e1;
-            --panel-bg: #f8fafc;
-            --card-border: #94a3b8;
-            --text-main: #1e293b;
-            --text-dim: #64748b;
+            --bg-body: #070a0f;
+            --container-bg: #0d131c;
+            --border-color: #24344d;
+            --panel-bg: #131c29;
+            --card-border: #334155;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --accent-cyan: #00e5ff;
+            --accent-amber: #ffb300;
             --accent-orange: #ea580c;
+            --accent-green: #00e676;
             --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
         }
 
@@ -35,20 +38,26 @@
             min-height: 100vh;
         }
 
-        /* Bovenste configuratie / thema balk */
         .top-control-bar {
             background-color: var(--container-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 12px 16px;
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             align-items: center;
+            justify-content: space-between;
         }
 
-        /* Knoppen stijl */
+        .theme-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .theme-btn {
-            background: #ffffff;
+            background: var(--panel-bg);
             border: 1px solid var(--card-border);
             padding: 6px 12px;
             border-radius: 4px;
@@ -59,10 +68,9 @@
             align-items: center;
             gap: 6px;
             color: var(--text-main);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .theme-btn:hover {
-            background: #f1f5f9;
+            border-color: var(--accent-cyan);
         }
         .dot {
             width: 8px;
@@ -75,7 +83,6 @@
         .dot-sun { background: #eab308; }
         .dot-red { background: #dc2626; }
 
-        /* Hoofdgrid met twee viewports (VP-1 en VP-2) */
         .viewport-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -89,7 +96,6 @@
             }
         }
 
-        /* Viewport container box */
         .viewport-box {
             background-color: var(--container-bg);
             border: 1px solid var(--border-color);
@@ -98,84 +104,134 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .viewport-box.expanded {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            z-index: 1000;
+            max-width: none !important;
+            height: calc(100vh - 32px);
+        }
+
+        .viewport-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 8px;
         }
 
         .viewport-title {
             font-weight: 700;
-            font-size: 14px;
-            color: var(--text-main);
+            font-size: 13px;
+            color: var(--accent-cyan);
             letter-spacing: -0.2px;
         }
 
-        /* VP-1 Inhoud */
-        .search-row {
+        .viewport-controls {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .dork-input {
-            flex: 1;
-            background: #ffffff;
+        .ctrl-btn {
+            background: var(--panel-bg);
             border: 1px solid var(--card-border);
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            font-size: 12px;
             color: var(--text-main);
-        }
-
-        .action-btn {
-            background: #ffffff;
-            border: 1px solid var(--card-border);
-            padding: 8px 14px;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text-main);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            white-space: nowrap;
-        }
-        .action-btn:hover {
-            background: #f1f5f9;
-        }
-
-        .helper-text {
-            color: var(--text-dim);
+            padding: 2px 8px;
+            border-radius: 3px;
             font-size: 11px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+        }
+        .ctrl-btn:hover {
+            border-color: var(--accent-amber);
+            color: var(--accent-amber);
+        }
+
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .link-item {
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .link-item:hover {
+            border-color: var(--accent-cyan);
+            transform: translateX(2px);
+        }
+        .link-desc {
+            color: var(--text-dim);
+            font-size: 10px;
+            display: block;
             margin-top: 2px;
         }
 
-        /* VP-2 Inhoud */
         .pdf-controls {
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .file-display {
             flex: 1;
-            background: #ffffff;
+            background: var(--panel-bg);
             border: 1px solid var(--card-border);
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 4px;
             font-family: var(--font-mono);
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-dim);
+            min-width: 140px;
+        }
+
+        .action-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+        .action-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
         }
 
         .load-zaak-btn {
             background: var(--accent-orange);
             color: #ffffff;
             border: 1px solid #c2410c;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 4px;
             font-family: var(--font-mono);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             white-space: nowrap;
         }
         .load-zaak-btn:hover {
@@ -183,50 +239,39 @@
         }
 
         .pdf-viewer-canvas {
-            background: #ffffff;
+            background: #000000;
             border: 1px solid var(--card-border);
             border-radius: 4px;
             flex: 1;
-            min-height: 420px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 12px;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Bovenste knoppenbalk (Thema's) -->
     <div class="top-control-bar">
-        <button class="theme-btn"><span class="dot dot-yellow"></span> Helder</button>
-        <button class="theme-btn"><span class="dot dot-amber"></span> Donker</button>
-        <button class="theme-btn"><span class="dot dot-sun"></span> Daglicht</button>
-        <button class="theme-btn"><span class="dot dot-red"></span> Nachtlicht</button>
+        <div class="theme-buttons">
+            <button class="theme-btn" onclick="setTheme('helder')"><span class="dot dot-yellow"></span> Helder</button>
+            <button class="theme-btn" onclick="setTheme('donker')"><span class="dot dot-amber"></span> Donker</button>
+            <button class="theme-btn" onclick="setTheme('daglicht')"><span class="dot dot-sun"></span> Daglicht</button>
+            <button class="theme-btn" onclick="setTheme('nachtlicht')"><span class="dot dot-red"></span> Nachtlicht</button>
+        </div>
+        <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE (VERCEL DEPLOYED)</div>
     </div>
 
-    <!-- Twee Viewport Secties -->
     <div class="viewport-grid">
         
-        <!-- VP-1: Google Dork Woo-Search -->
-        <div class="viewport-box">
-            <div class="viewport-title">VP-1: Google Dork Woo-Search</div>
-            <div class="search-row">
-                <input type="text" class="dork-input" value="site:tholen.nl filetype:pdf woo">
-                <button class="action-btn">Zoek (Google)</button>
-            </div>
-            <div class="helper-text">Zoek direct naar openbare Woo-verzoeken, besluiten en kadastrale mutaties.</div>
-        </div>
-
-        <!-- VP-2: PDF Woo-Reader (PDF.js) -->
-        <div class="viewport-box">
-            <div class="viewport-title">VP-2: PDF Woo-Reader (PDF.js)</div>
-            <div class="pdf-controls">
-                <button class="action-btn">Bladeren...</button>
-                <div class="file-display">Geen bestand...geselecteerd.</div>
-                <button class="load-zaak-btn">Laad Zaak 1504573 (Scherpenisse)</button>
-            </div>
-            <div class="pdf-viewer-canvas"></div>
-        </div>
-
-    </div>
-
-</body>
-</html>
+        <!-- VP-1: Navigatie & Alle Systeemlinks -->
+        <div class="viewport-box" id="vp1">
+            <div class="viewport-header">
+                <span class="viewport-title">VP-1: VORTEX OS NAVIGATIE & ALLE LINKS</span>
+                <div class="viewport-controls">
+                    <button class="ctrl-btn" onclick="adjustSize('vp1', -1)">-</button>
+                    <button class="ctrl-btn" onclick="adjustSize('vp1', 1)">+</button>
