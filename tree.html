@@ -30,7 +30,7 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: var(--font-mono);
-            font-size: 13px;
+            font-size: 12px;
             padding: 16px;
             display: flex;
             flex-direction: column;
@@ -62,22 +62,15 @@
             padding: 6px 12px;
             border-radius: 4px;
             font-family: var(--font-mono);
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
             color: var(--text-main);
         }
-        .theme-btn:hover {
-            border-color: var(--accent-cyan);
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
+        .theme-btn:hover { border-color: var(--accent-cyan); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         .dot-yellow { background: #f59e0b; }
         .dot-amber { background: #d97706; }
         .dot-sun { background: #eab308; }
@@ -93,9 +86,7 @@
         }
 
         @media (max-width: 1024px) {
-            .viewport-grid {
-                grid-template-columns: 1fr;
-            }
+            .viewport-grid { grid-template-columns: 1fr; }
         }
 
         .viewport-box {
@@ -106,18 +97,14 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            min-height: 550px;
+            min-height: 600px;
             position: relative;
         }
 
         .viewport-box.expanded {
             position: fixed !important;
-            top: 16px !important;
-            left: 16px !important;
-            right: 16px !important;
-            bottom: 16px !important;
-            width: calc(100vw - 32px) !important;
-            height: calc(100vh - 32px) !important;
+            top: 16px !important; left: 16px !important; right: 16px !important; bottom: 16px !important;
+            width: calc(100vw - 32px) !important; height: calc(100vh - 32px) !important;
             z-index: 1000;
         }
 
@@ -131,14 +118,8 @@
 
         .viewport-title {
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--accent-cyan);
-            letter-spacing: -0.2px;
-        }
-
-        .viewport-controls {
-            display: flex;
-            gap: 6px;
         }
 
         .ctrl-btn {
@@ -151,52 +132,111 @@
             cursor: pointer;
             font-family: var(--font-mono);
         }
-        .ctrl-btn:hover {
-            border-color: var(--accent-amber);
-            color: var(--accent-amber);
+        .ctrl-btn:hover { border-color: var(--accent-amber); color: var(--accent-amber); }
+
+        /* Zoektabs / Navigatie binnen VP-1 */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+        .tab-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-dim);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+        }
+        .tab-btn.active {
+            background: var(--bg-0);
+            color: var(--accent);
+            border-color: var(--accent);
+            font-weight: bold;
         }
 
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 220px);
+            padding-right: 2px;
+        }
+        .tab-content.active { display: flex; }
+
+        /* Google Dork & Zoekmodule stijlen */
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .search-row {
+            display: flex;
+            gap: 6px;
+        }
+        input[type="text"] {
+            flex: 1;
+            background: var(--bg-0);
+            color: var(--accent);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            font-family: var(--font-mono);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .action-btn {
+            background: var(--bg-0);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 6px 12px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .action-btn:hover { background: var(--accent); color: var(--bg-0); }
+        .helper-text { color: var(--text-dim); font-size: 10px; line-height: 1.3; }
+
+        /* Link lijst stijlen */
         .link-list {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            overflow-y: auto;
-            padding-right: 4px;
-            flex: 1;
-            max-height: calc(100vh - 200px);
         }
-
         .link-item {
             background: var(--panel-bg);
             border: 1px solid var(--card-border);
             border-radius: 4px;
-            padding: 8px 12px;
+            padding: 8px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             text-decoration: none;
             color: var(--text-main);
-            font-size: 12px;
+            font-size: 11px;
             transition: all 0.2s;
         }
-        .link-item:hover {
-            border-color: var(--accent-cyan);
-            transform: translateX(2px);
-        }
-        .link-desc {
-            color: var(--text-dim);
-            font-size: 10px;
-            display: block;
-            margin-top: 2px;
-        }
+        .link-item:hover { border-color: var(--accent-cyan); transform: translateX(2px); }
+        .link-desc { color: var(--text-dim); font-size: 9px; display: block; margin-top: 2px; }
 
+        /* PDF Viewer Container (VP-2) */
         .pdf-controls {
             display: flex;
             gap: 8px;
             align-items: center;
             flex-wrap: wrap;
         }
-
         .file-display {
             flex: 1;
             background: var(--panel-bg);
@@ -211,24 +251,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
-        .action-btn {
-            background: var(--panel-bg);
-            border: 1px solid var(--card-border);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text-main);
-            white-space: nowrap;
-        }
-        .action-btn:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
         .load-zaak-btn {
             background: var(--accent-orange);
             color: #ffffff;
@@ -241,11 +263,8 @@
             cursor: pointer;
             white-space: nowrap;
         }
-        .load-zaak-btn:hover {
-            background: #c2410c;
-        }
+        .load-zaak-btn:hover { background: #c2410c; }
 
-        /* 2/3 PDF Viewer Container */
         .pdf-viewer-container {
             background: #000000;
             border: 1px solid var(--card-border);
@@ -254,28 +273,26 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            min-height: 480px;
+            min-height: 500px;
         }
-
         .pdf-viewer-canvas {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-dim);
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
             padding: 20px;
             width: 100%;
             height: 100%;
         }
+        iframe.pdf-frame { width: 100%; height: 100%; border: none; background: #ffffff; }
 
-        iframe.pdf-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #ffffff;
-        }
+        /* Kadaster Schema Resultaten */
+        .prop-row { display: flex; justify-content: space-between; font-size: 10px; padding: 3px 0; border-bottom: 1px solid rgba(36,52,77,0.4); }
+        .prop-key { color: var(--text-dim); }
+        .prop-val { color: var(--text-main); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -294,79 +311,120 @@
     <!-- 1/3 (VP-1) en 2/3 (VP-2) Grid -->
     <div class="viewport-grid">
         
-        <!-- VP-1: Navigatie & Alle Systeemlinks (1/3 Breedte) -->
+        <!-- VP-1: Navigatie, Google Dorks, Archief & Kadaster (1/3 Breedte) -->
         <div class="viewport-box" id="vp1">
             <div class="viewport-header">
-                <span class="viewport-title">VP-1: VORTEX OS LINKS</span>
+                <span class="viewport-title">VP-1: ZOEKEN, ARCHIEVEN & LINKS</span>
                 <div class="viewport-controls">
                     <button class="ctrl-btn" onclick="toggleFullscreen('vp1')">⛶</button>
                 </div>
             </div>
+
+            <!-- Tabblad Selectie -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('dorkTab', this)">🔍 Google Dork</button>
+                <button class="tab-btn" onclick="switchTab('kadasterTab', this)">🏛️ Kadaster OGC</button>
+                <button class="tab-btn" onclick="switchTab('linksTab', this)">📂 Systeemlinks</button>
+            </div>
             
-            <div class="link-list">
-                <a href="index.html" class="link-item">
-                    <div>
-                        <strong>🗺️ OGC Kaartviewer</strong>
-                        <span class="link-desc">Percelen & bebouwing (EPSG:28992).</span>
+            <!-- TAB 1: Google Dork & Archief Zoekmodule -->
+            <div id="dorkTab" class="tab-content active">
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent);">🌐 Tholen.nl & WOO Zoeker</span>
+                    <div class="search-row">
+                        <input type="text" id="queryTholen" value="site:tholen.nl filetype:pdf woo">
+                        <button class="action-btn" onclick="zoekGoogle('queryTholen')">Zoek</button>
                     </div>
-                    <span>→</span>
-                </a>
+                    <span class="helper-text">Zoek direct naar openbare Woo-verzoeken, besluiten en kadastrale mutaties.</span>
+                </div>
 
-                <a href="pdok.html" class="link-item">
-                    <div>
-                        <strong>🛰️ PDOK Viewer</strong>
-                        <span class="link-desc">Brk-kadastrale-kaart streaming.</span>
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent);">📜 Zeeuws Archief & Notarieel</span>
+                    <div class="search-row">
+                        <input type="text" id="queryZeeuwseArchief" value="Scherpenisse Platteweg keuringsrapport">
+                        <button class="action-btn" onclick="zoekZeeuwsArchief()">Zoek Archief</button>
                     </div>
-                    <span>→</span>
-                </a>
+                    <span class="helper-text">Doorzoek aktes, kadastrale leggers en archiefstukken uit Zeeland.</span>
+                </div>
 
-                <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" class="link-item">
-                    <div>
-                        <strong>🌀 Clean Viewports v158</strong>
-                        <span class="link-desc">3D geodetische viewport matrix.</span>
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent);">📰 Delpher Online Kranten</span>
+                    <div class="search-row">
+                        <input type="text" id="queryDelpher" value="Scherpenisse Reimerswaal">
+                        <button class="action-btn" onclick="zoekDelpher()">Zoek Kranten</button>
                     </div>
-                    <span>→</span>
-                </a>
+                    <span class="helper-text">Historische krantenartikelen, advertenties en kadastrale bekendmakingen.</span>
+                </div>
+            </div>
 
-                <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="link-item">
-                    <div>
-                        <strong>⏳ Tijdscapsule</strong>
-                        <span class="link-desc">Historische archiefomgeving.</span>
+            <!-- TAB 2: Kadaster Live OGC Opvraag -->
+            <div id="kadasterTab" class="tab-content">
+                <div class="search-group">
+                    <span style="font-weight: bold; color: var(--accent);">📍 PDOK BRK Perceel Query</span>
+                    <div class="search-row">
+                        <input type="text" id="bboxInput" value="66000,396000,67000,397000" placeholder="minX,minY,maxX,maxY">
+                        <button class="action-btn" onclick="bevraagKadaster()">Bevraag</button>
                     </div>
-                    <span>→</span>
-                </a>
+                    <span class="helper-text" id="kadasterStatus">Klik om percelen op te halen in Scherpenisse.</span>
+                </div>
+                <div id="kadasterResultList" style="display: flex; flex-direction: column; gap: 4px; max-height: 250px; overflow-y: auto;">
+                    <span style="color: var(--text-dim); font-size: 10px;">Geen percelen geladen.</span>
+                </div>
+            </div>
 
-                <a href="swagger.html" class="link-item">
-                    <div>
-                        <strong>📜 API Swagger Docs</strong>
-                        <span class="link-desc">OpenAPI serverless endpoints.</span>
-                    </div>
-                    <span>→</span>
-                </a>
-
-                <a href="https://kadatawebservice.kadaster.nl/kadastercheck/docs/index/index.html" target="_blank" rel="noopener noreferrer" class="link-item">
-                    <div>
-                        <strong>🏢 KadasterCheck API ↗</strong>
-                        <span class="link-desc">Bouwjaar & monumentenstatus.</span>
-                    </div>
-                    <span>→</span>
-                </a>
-
-                <a href="klantcontact/index.html" class="link-item">
-                    <div>
-                        <strong>📱 Klantcontact Client</strong>
-                        <span class="link-desc">Mobiele en P2P-sessies.</span>
-                    </div>
-                    <span>→</span>
-                </a>
-
-                <a href="klantcontact/verzend.html" class="link-item">
-                    <div>
-                        <strong>✉️ Verzendportaal</strong>
-                        <span class="link-desc">E-mailkoppelingen & logboek.</span>
-                    </div>
-                    <span>→</span>
-                </a>
+            <!-- TAB 3: Systeemlinks -->
+            <div id="linksTab" class="tab-content">
+                <div class="link-list">
+                    <a href="index.html" class="link-item">
+                        <div>
+                            <strong>🗺️ OGC Kaartviewer</strong>
+                            <span class="link-desc">Percelen & bebouwing (EPSG:28992).</span>
+                        </div>
+                        <span>→</span>
+                    </a>
+                    <a href="pdok.html" class="link-item">
+                        <div>
+                            <strong>🛰️ PDOK Viewer</strong>
+                            <span class="link-desc">Brk-kadastrale-kaart streaming.</span>
+                        </div>
+                        <span>→</span>
+                    </a>
+                    <a href="Bureaublad/geocentrum/vortex_clean_viewports_v158.html" class="link-item">
+                        <div>
+                            <strong>🌀 Clean Viewports v158</strong>
+                            <span class="link-desc">3D geodetische viewport matrix.</span>
+                        </div>
+                        <span>→</span>
+                    </a>
+                    <a href="rekencentrum/tijdscapsule/tijdscapsule_index.html" class="link-item">
+                        <div>
+                            <strong>⏳ Tijdscapsule</strong>
+                            <span class="link-desc">Historische archiefomgeving.</span>
+                        </div>
+                        <span>→</span>
+                    </a>
+                    <a href="swagger.html" class="link-item">
+                        <div>
+                            <strong>📜 API Swagger Docs</strong>
+                            <span class="link-desc">OpenAPI serverless endpoints.</span>
+                        </div>
+                        <span>→</span>
+                    </a>
+                    <a href="https://kadatawebservice.kadaster.nl/kadastercheck/docs/index/index.html" target="_blank" rel="noopener noreferrer" class="link-item">
+                        <div>
+                            <strong>🏢 KadasterCheck API ↗</strong>
+                            <span class="link-desc">Bouwjaar & monumentenstatus.</span>
+                        </div>
+                        <span>→</span>
+                    </a>
+                    <a href="klantcontact/index.html" class="link-item">
+                        <div>
+                            <strong>📱 Klantcontact Client</strong>
+                            <span class="link-desc">Mobiele en P2P-sessies.</span>
+                        </div>
+                        <span>→</span>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -388,7 +446,7 @@
 
             <div class="pdf-viewer-container">
                 <div class="pdf-viewer-canvas" id="pdfCanvas">
-                    [ PDF Reader Gereed — Selecteer een lokaal PDF-bestand of laad Zaak 1504573 om te lezen ]
+                    [ PDF Reader Gereed — Selecteer een lokaal PDF-bestand, voer een zoekopdracht uit of laad Zaak 1504573 ]
                 </div>
             </div>
         </div>
@@ -401,22 +459,92 @@
             el.classList.toggle('expanded');
         }
 
-        // Lokaal PDF bestand inlezen en renderen in leesbaar formaat
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // Zoekfuncties
+        function zoekGoogle(inputId) {
+            const val = document.getElementById(inputId).value;
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(val)}`, '_blank');
+        }
+
+        function zoekZeeuwsArchief() {
+            const val = document.getElementById('queryZeeuwseArchief').value;
+            window.open(`https://www.zeeuwsarchief.nl/zoeken/?q=${encodeURIComponent(val)}`, '_blank');
+        }
+
+        function zoekDelpher() {
+            const val = document.getElementById('queryDelpher').value;
+            window.open(`https://www.delpher.nl/nl/kranten/resultaten?query=${encodeURIComponent(val)}`, '_blank');
+        }
+
+        // Kadaster Live Bevraging
+        async function bevraagKadaster() {
+            const bbox = document.getElementById('bboxInput').value;
+            const statusEl = document.getElementById('kadasterStatus');
+            const listEl = document.getElementById('kadasterResultList');
+            statusEl.textContent = 'Percelen ophalen...';
+            listEl.innerHTML = '';
+
+            const url = `https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/collections/perceel/items?bbox=${bbox}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/28992&limit=30&f=json`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const features = data.features || [];
+                statusEl.textContent = `${features.length} percelen gevonden. Klik voor details.`;
+
+                features.forEach(f => {
+                    const p = f.properties || {};
+                    const label = `Sectie ${p.sectie || '?'}, Perceel ${p.perceelnummer || '?'}`;
+                    const item = document.createElement('div');
+                    item.className = 'link-item';
+                    item.style.cursor = 'pointer';
+                    item.innerHTML = `<div><strong>${label}</strong><span class="link-desc">${p.kadastrale_gemeente_waarde || ''} (${p.kadastrale_grootte_waarde || 0} m²)</span></div><span>→</span>`;
+                    item.onclick = () => toonKadasterSchema(p);
+                    listEl.appendChild(item);
+                });
+            } catch (err) {
+                statusEl.textContent = 'Fout bij ophalen van PDOK data.';
+            }
+        }
+
+        function toonKadasterSchema(p) {
+            const canvas = document.getElementById('pdfCanvas');
+            canvas.innerHTML = `
+                <div style="text-align: left; width: 100%; height: 100%; padding: 20px; font-family: monospace; color: #e2e8f0; background: #070a0f; overflow-y: auto;">
+                    <h3 style="color: #00e5ff; font-size: 14px; margin-bottom: 4px;">📋 Perceel Schema 2020-12</h3>
+                    <p style="color: #94a3b8; font-size: 11px;">UUID: ${p.id || '-'}</p>
+                    <hr style="border-color: #24344d; margin: 10px 0;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <div class="prop-row"><span class="prop-key">Gemeente:</span><span class="prop-val">${p.kadastrale_gemeente_waarde || '-'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Sectie & Perceel:</span><span class="prop-val">Sectie ${p.sectie || '-'} nr. ${p.perceelnummer || '-'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Kadastrale Grootte:</span><span class="prop-val">${p.kadastrale_grootte_waarde ? p.kadastrale_grootte_waarde + ' m²' : '-'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Lokaal ID:</span><span class="prop-val">${p.identificatie_lokaal_id || '-'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Status Historie:</span><span class="prop-val">${p.status_historie_waarde || '-'}</span></div>
+                        <div class="prop-row"><span class="prop-key">Begin Geldigheid:</span><span class="prop-val">${p.begin_geldigheid || '-'}</span></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('fileStatus').textContent = `Perceel_${p.sectie}_${p.perceelnummer}.json`;
+        }
+
+        // PDF bestanden en zaak laden
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
                 document.getElementById('fileStatus').textContent = file.name;
                 const fileURL = URL.createObjectURL(file);
-                document.getElementById('pdfCanvas').innerHTML = `
-                    <iframe src="${fileURL}" class="pdf-frame"></iframe>
-                `;
+                document.getElementById('pdfCanvas').innerHTML = `<iframe src="${fileURL}" class="pdf-frame"></iframe>`;
             }
         }
 
-        // Zaak 1504573 (Scherpenisse) laden en presenteren
         function loadZaak() {
             document.getElementById('fileStatus').textContent = 'zaak_1504573_scherpenisse.pdf';
-            // Voor demonstratie / leesbaarheid laden we een gestructureerde weergave van het dossier
             document.getElementById('pdfCanvas').innerHTML = `
                 <div style="text-align: left; width: 100%; height: 100%; padding: 24px; font-family: monospace; color: #e2e8f0; background: #070a0f; overflow-y: auto;">
                     <h3 style="color: #00e5ff; font-size: 15px; margin-bottom: 6px;">📄 DOSSIER INFORMATIE: Zaak 1504573</h3>
@@ -426,8 +554,7 @@
                         <strong style="color: #ffb300;">[STATUS: WOO-VERZOEK GEACCEPTEERD]</strong>
                         <p style="margin-top: 6px; font-size: 12px; line-height: 1.5;">Inventarisatie van openbare besluiten, kadastrale mutaties en historische keuringsrapporten uit 1926 met betrekking tot perceel E 1552 / E 108.</p>
                     </div>
-                    <p style="color: #00e676; font-size: 12px; margin-bottom: 8px;">✓ Document volledig ontsloten en leesbaar in VP-2 buffer.</p>
-                    <p style="color: #94a3b8; font-size: 11px;">Gebruik de knop 'Bladeren...' hierboven om een eigen PDF-bestand toe te voegen en direct te bekijken.</p>
+                    <p style="color: #00e676; font-size: 12px;">✓ Document volledig ontsloten en leesbaar in VP-2 buffer.</p>
                 </div>
             `;
         }
@@ -460,6 +587,5 @@
             }
         }
     </script>
-
 </body>
 </html>
