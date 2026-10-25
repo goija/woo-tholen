@@ -302,7 +302,7 @@
             <button class="theme-btn" onclick="setTheme('daglicht')"><span class="dot dot-sun"></span> Daglicht</button>
             <button class="theme-btn" onclick="setTheme('nachtlicht')"><span class="dot dot-red"></span> Nachtlicht</button>
         </div>
-        <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE (ADRESZOEKEN ACTIEF)</div>
+        <div style="font-size: 11px; color: var(--accent-green);">● SYSTEM ONLINE (ADRESZOEKEN GECORRIGEERD)</div>
     </div>
 
     <!-- 1/3 (VP-1) en 2/3 (VP-2) Grid -->
@@ -338,7 +338,7 @@
                 </div>
             </div>
 
-            <!-- TAB 2: Werkend Adreszoeken (Locatieserver) -->
+            <!-- TAB 2: Gecorrigeerd Adreszoeken -->
             <div id="searchTab" class="tab-content">
                 <div class="search-group">
                     <span style="font-weight: bold; color: var(--accent);">🏙️ Zoek op Plaatsnaam / Adres</span>
@@ -508,7 +508,7 @@
             statusEl.textContent = `Zoeken naar ${query}...`;
             adresList.innerHTML = '';
             
-            const url = `https://api.pdok.nl/bzk/locatieserver/v3/suggest?q=${encodeURIComponent(query)}&rows=10`;
+            const url = `https://api.pdok.nl/bzk/locatieserver/v3/search?q=${encodeURIComponent(query)}&rows=10`;
             try {
                 const res = await fetch(url);
                 const data = await res.json();
@@ -519,28 +519,16 @@
                     const item = document.createElement('div');
                     item.className = 'link-item';
                     item.innerHTML = `<div><strong>${doc.weergavenaam}</strong><span class="link-desc">Type: ${doc.type}</span></div><span>→</span>`;
-                    item.onclick = () => laadAdresDetails(doc.id);
+                    item.onclick = () => toonAdresDetails(doc);
                     adresList.appendChild(item);
                 });
 
                 if(docs.length > 0) {
-                    laadAdresDetails(docs[0].id);
+                    toonAdresDetails(docs[0]);
                 }
             } catch (err) {
                 statusEl.textContent = 'Fout bij adres zoeken.';
             }
-        }
-
-        async function laadAdresDetails(id) {
-            const url = `https://api.pdok.nl/bzk/locatieserver/v3/lookup?id=${id}`;
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                const doc = data.response?.docs?.[0];
-                if(doc) {
-                    toonAdresDetails(doc);
-                }
-            } catch(e) {}
         }
 
         function toonAdresDetails(doc) {
