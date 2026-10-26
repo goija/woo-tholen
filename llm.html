@@ -717,4 +717,101 @@ async function runSolidRAG() {
 </body>
 </html>`,
 
-            kadaster: `<!
+            kadaster: `<!DOCTYPE html>
+<html lang="nl" prefix="geo: http://www.w3.org/2003/01/geo/wgs84_pos#">
+<head>
+<meta charset="UTF-8">
+<style>
+    body { background:#070b0e; color:#e2e8f0; font-family:'Courier New',monospace; padding:16px; margin:0; }
+    h2 { color:#10b981; font-size:15px; margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:14px; }
+    th, td { border:1px solid #1e2d38; padding:8px; text-align:left; }
+    th { background:#0e161c; color:#f59e0b; }
+</style>
+</head>
+<body>
+    <h2>📐 Solid Kadastraal Dossier: Scherpenisse (E 108 → E 1552)</h2>
+    <table>
+        <tr><th>Veld</th><th>Gevalideerde Waarde in Solid Pod</th></tr>
+        <tr><td>Objectlocatie</td><td>Platteweg 3-5-7, Scherpenisse (Tholen)</td></tr>
+        <tr><td>Perceelketen</td><td>Sectie E 108 → Sectie E 1552 / E 1551</td></tr>
+        <tr><td>WGS84 Coördinaten</td><td>51.5471° N, 4.0934° E</td></tr>
+        <tr><td>Mechanische Integratie</td><td>A. Ott Compensatie Polaire Planimeter (Model Nr. 573)</td></tr>
+        <tr><td>Optische Correctie</td><td>Saemundsson atmosferische refractiemodule</td></tr>
+    </table>
+</body>
+</html>`
+        };
+
+        // =====================================================================
+        // 3. SNIPPET INJECTORS VOOR DE BOVENSTE KNOPPENBALK
+        // =====================================================================
+        function injectSnippet(type) {
+            const snippets = {
+                rdfa: `\n<!-- Solid RDFa Linked Data Header -->\n<div vocab="http://schema.org/" typeof="Dataset" style="border:1px solid #10b981; padding:8px; margin:8px 0; font-size:11px; color:#10b981;">\n  <b>Solid WebID Eigenaar:</b> <span property="creator">R. Goijarts (card.ttl#me)</span> | <b>Licentie:</b> <span property="license">CC BY</span>\n</div>\n`,
+                grid60: `\n<!-- 60° Geodetisch SVG Rooster -->\n<svg viewBox="0 0 240 90" style="width:100%; max-height:95px; background:#040709; border:1px solid #1e2d38; margin:8px 0;">\n  <line x1="0" y1="45" x2="240" y2="45" stroke="#1e2d38" stroke-dasharray="3,3"/>\n  <line x1="40" y1="90" x2="140" y2="0" stroke="#10b981" stroke-width="1"/>\n  <line x1="100" y1="90" x2="200" y2="0" stroke="#f59e0b" stroke-width="1"/>\n  <circle cx="120" cy="45" r="4" fill="#10b981"/>\n  <text x="128" y="42" fill="#e2e8f0" font-size="9" font-family="monospace">Platteweg 3-5-7 (60° Vector)</text>\n</svg>\n`,
+                ott573: `\n<!-- A. Ott Planimeter (Nr. 573) Tabel -->\n<table style="width:100%; border-collapse:collapse; font-size:11px; margin:8px 0; border:1px solid #1e2d38;">\n  <tr style="background:#0e161c; color:#f59e0b;"><th style="padding:6px; border:1px solid #1e2d38;">Instrument</th><th style="padding:6px; border:1px solid #1e2d38;">Kalibratie & Nonius</th></tr>\n  <tr><td style="padding:6px; border:1px solid #1e2d38;">A. Ott Polar Planimeter Nr. 573</td><td style="padding:6px; border:1px solid #1e2d38;">Nonius-compensatie geverifieerd op perceel E 1552</td></tr>\n</table>\n`,
+                wac: `\n<!-- Solid WAC (.acl) Verificatie Badge -->\n<div style="border-left:3px solid #06b6d4; background:#091319; padding:6px 10px; margin:8px 0; font-size:11px; color:#67e8f9;">\n  <b>🔐 Solid WAC (.acl):</b> acl:Read, acl:Write, acl:Control toegekend aan <code>&lt;card.ttl#me&gt;</code>\n</div>\n`,
+                otp: `\n<!-- FinalCrypt OTP Watermerk -->\n<div style="border:1px dashed #ef4444; background:rgba(239,68,68,0.08); padding:6px 10px; margin:8px 0; font-size:11px; color:#fca5a5;">\n  🛡️ <b>AT-REST BEVEILIGING:</b> FinalCrypt One-Time Pad (OTP) &amp; DTLS 1.3 (RFC 9147 / RFC 9846)\n</div>\n`
+            };
+
+            const block = snippets[type] || '';
+            const bodyCloseIndex = editor.value.lastIndexOf('</body>');
+            if (bodyCloseIndex !== -1) {
+                editor.value = editor.value.slice(0, bodyCloseIndex) + block + editor.value.slice(bodyCloseIndex);
+            } else {
+                editor.value += block;
+            }
+            updateSandboxViewer();
+        }
+
+        // =====================================================================
+        // 4. VIEWER, SPLIT-MODE & VIEWPORT FUNCTIES
+        // =====================================================================
+        function updateSandboxViewer() {
+            viewer.srcdoc = editor.value;
+        }
+
+        function setViewMode(mode) {
+            workspaceGrid.classList.remove('mode-editor', 'mode-viewer');
+            ['split', 'editor', 'viewer'].forEach(m => {
+                document.getElementById('mode-' + m).classList.toggle('active', m === mode);
+            });
+            if (mode === 'editor') workspaceGrid.classList.add('mode-editor');
+            if (mode === 'viewer') workspaceGrid.classList.add('mode-viewer');
+        }
+
+        function setViewport(size) {
+            viewer.style.width = size;
+            vpIndicator.textContent = size + ' Viewport';
+            ['390px', '768px', '100%'].forEach(s => {
+                document.getElementById('vp-' + s).classList.toggle('active', s === size);
+            });
+        }
+
+        function loadTemplate(name) {
+            editor.value = TEMPLATES[name];
+            ['rag', 'warmenhoven', 'kadaster'].forEach(t => {
+                document.getElementById('tpl-' + t).classList.toggle('active', t === name);
+            });
+            updateSandboxViewer();
+        }
+
+        function downloadHTMLFile() {
+            const blob = new Blob([editor.value], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'solid-pod-llm-studio.html';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        // Live bijwerken zodra je typt in de HTML/RDFa Editor
+        editor.addEventListener('input', updateSandboxViewer);
+
+        // Initialisatie bij laden
+        loadTemplate('rag');
+        checkHostOllama();
+    </script>
+</body>
+</html>
