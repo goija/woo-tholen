@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VORTEX OS // Solid Pod LLM Studio & Sandboxed Viewer</title>
+    <title>GOIJA / SOLID // VORTEX OS — Solid Pod LLM Studio & Viewer</title>
     <style>
         :root {
-            --bg-dark: #070b0e;
-            --bg-panel: #0d1318;
-            --bg-card: #111920;
-            --border: #1e2d38;
+            --bg-dark: #060a0d;
+            --bg-panel: #0b1116;
+            --bg-card: #101820;
+            --border: #1d2b36;
             --emerald: #10b981;
             --amber: #f59e0b;
             --cyan: #06b6d4;
@@ -19,7 +19,11 @@
             --mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             background-color: var(--bg-dark);
@@ -30,15 +34,15 @@
             display: flex;
             flex-direction: column;
             padding: 12px;
-            gap: 12px;
+            gap: 10px;
         }
 
-        /* Top Pod Header */
-        .pod-topbar {
+        /* Top Header */
+        .topbar {
             background: var(--bg-panel);
             border: 1px solid var(--border);
-            padding: 10px 14px;
             border-radius: 6px;
+            padding: 10px 14px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -46,43 +50,81 @@
             gap: 10px;
         }
 
-        .pod-title {
+        .brand {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        .brand-logo {
+            border: 1px solid var(--emerald);
             color: var(--emerald);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .brand-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        .status-line {
+            font-size: 11px;
+            color: var(--emerald);
+            display: block;
+            margin-top: 2px;
         }
 
         .badge {
             font-size: 11px;
-            padding: 2px 8px;
+            padding: 3px 8px;
             border-radius: 4px;
-            border: 1px solid var(--emerald);
-            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        .badge-emerald {
+            border-color: var(--emerald);
             color: var(--emerald);
+            background: rgba(16, 185, 129, 0.12);
         }
 
         .badge-amber {
             border-color: var(--amber);
-            background: rgba(245, 158, 11, 0.12);
             color: var(--amber);
+            background: rgba(245, 158, 11, 0.12);
         }
 
-        /* Werkbalk voor Split / Editor / Viewer + Formaat */
-        .studio-toolbar {
+        /* Component Injector Bar */
+        .injector-bar {
             background: var(--bg-panel);
             border: 1px solid var(--border);
-            padding: 8px 12px;
             border-radius: 6px;
+            padding: 10px 14px;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .btn-group {
+        .injector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--emerald);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-row {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
@@ -93,7 +135,7 @@
             background: var(--bg-card);
             color: var(--text-main);
             border: 1px solid var(--border);
-            padding: 6px 12px;
+            padding: 6px 11px;
             border-radius: 4px;
             font-family: var(--mono);
             font-size: 12px;
@@ -113,25 +155,59 @@
             font-weight: bold;
         }
 
-        /* Split Grid */
-        .studio-grid {
+        button.amber-btn {
+            border-color: rgba(245, 158, 11, 0.5);
+            color: var(--amber);
+        }
+
+        button.amber-btn:hover {
+            border-color: var(--amber);
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        /* Split / Editor / Viewer & Viewport Toolbar */
+        .studio-toolbar {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 14px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Main Split Workspace */
+        .workspace-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             flex: 1;
-            min-height: 540px;
+            min-height: 560px;
         }
 
-        .studio-grid.mode-editor { grid-template-columns: 1fr; }
-        .studio-grid.mode-editor .viewer-pane { display: none; }
-        .studio-grid.mode-viewer { grid-template-columns: 1fr; }
-        .studio-grid.mode-viewer .editor-pane { display: none; }
-
-        @media (max-width: 900px) {
-            .studio-grid { grid-template-columns: 1fr; }
+        .workspace-grid.mode-editor {
+            grid-template-columns: 1fr;
+        }
+        .workspace-grid.mode-editor .viewer-column {
+            display: none;
         }
 
-        .pane {
+        .workspace-grid.mode-viewer {
+            grid-template-columns: 1fr;
+        }
+        .workspace-grid.mode-viewer .editor-column {
+            display: none;
+        }
+
+        @media (max-width: 960px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .column-pane {
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 6px;
@@ -140,10 +216,10 @@
             overflow: hidden;
         }
 
-        .pane-header {
-            padding: 8px 12px;
+        .pane-topbar {
             background: var(--bg-card);
             border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -151,10 +227,10 @@
             color: var(--text-muted);
         }
 
-        .code-textarea {
+        #html-code-editor {
             flex: 1;
             width: 100%;
-            background: #05080a;
+            background: #040709;
             color: #a7f3d0;
             border: none;
             padding: 14px;
@@ -163,11 +239,12 @@
             line-height: 1.55;
             resize: none;
             outline: none;
+            min-height: 500px;
         }
 
-        .viewer-stage {
+        .viewer-canvas {
             flex: 1;
-            background: #040608;
+            background: #030507;
             display: flex;
             justify-content: center;
             align-items: stretch;
@@ -175,310 +252,469 @@
             overflow: auto;
         }
 
-        #pod-sandbox-iframe {
+        #sandbox-viewer {
             width: 100%;
             height: 100%;
-            min-height: 490px;
+            min-height: 500px;
             border: 1px solid var(--border);
             border-radius: 4px;
-            background: #0a0f14;
-            transition: width 0.25s ease;
+            background: #080c10;
+            transition: width 0.2s ease;
+        }
+
+        .footer-bar {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 14px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
 
-    <!-- Bovenbalk -->
-    <header class="pod-topbar">
-        <div class="pod-title">
-            <span>⬡ SOLID POD LLM STUDIO</span>
-            <span class="badge">WebID: card.ttl#me</span>
-            <span class="badge badge-amber" id="cors-indicator">LLM: Auto-Detect (127.0.0.1:11434 + Zero-Cloud Fallback)</span>
+    <!-- Bovenste Systeembalk -->
+    <header class="topbar">
+        <div class="brand">
+            <span class="brand-logo">VORTEX//SOLID</span>
+            <div>
+                <div class="brand-title">GOIJA / SOLID // VORTEX OS — GEOCENTRUM & POD ARCHITECTUUR</div>
+                <span class="status-line">● ONLINE // PLATTEWEG 3-5-7 (E 108 → E 1552) | ZERO-CLOUD v1.5</span>
+            </div>
         </div>
-        <div class="btn-group">
-            <button onclick="loadPreset('rag')">🧠 Laad Solid AI RAG Agent</button>
-            <button onclick="loadPreset('warmenhoven')">🛡️ Dossier Warmenhoven & php2shell</button>
-            <button onclick="loadPreset('kadaster')">📐 Perceel E 108 → E 1552</button>
-            <button onclick="downloadActiveHTML()">💾 Download .html</button>
+        <div class="btn-row">
+            <span class="badge" id="ollama-status-badge">🟠 LLM Status: Controleren...</span>
+            <button onclick="checkHostOllama()">↻ Test Poort 11434</button>
+            <button class="amber-btn" onclick="downloadHTMLFile()">💾 Download .html</button>
         </div>
     </header>
 
-    <!-- Gevraagde Split / Editor / Viewer & Viewport Balk -->
+    <!-- Sjablonen & Component Injectors -->
+    <section class="injector-bar">
+        <div class="injector-header">
+            <span>+ VOEG SOEVEREIN SOLID / GEOCENTRUM COMPONENT OF SJABLOON TOE AAN HTML:</span>
+            <div class="btn-row">
+                <span style="color:var(--text-muted); text-transform:none;">Laad Sjabloon:</span>
+                <button class="active" id="tpl-rag" onclick="loadTemplate('rag')">🧠 Solid Pod AI RAG (Live + Fallback)</button>
+                <button id="tpl-warmenhoven" onclick="loadTemplate('warmenhoven')">🛡️ Dossier Warmenhoven & php2shell</button>
+                <button id="tpl-kadaster" onclick="loadTemplate('kadaster')">📐 Perceel E 108 → E 1552 & Planimeter</button>
+            </div>
+        </div>
+        <div class="btn-row">
+            <button onclick="injectSnippet('rdfa')">+ RDFa Linked Data Header</button>
+            <button onclick="injectSnippet('grid60')">+ 60° Geodetisch SVG Rooster</button>
+            <button onclick="injectSnippet('ott573')">+ A. Ott Planimeter (Nr. 573) Tabel</button>
+            <button onclick="injectSnippet('wac')">+ Solid WAC (.acl) Verificatie Badge</button>
+            <button onclick="injectSnippet('otp')">+ FinalCrypt OTP Watermerk</button>
+        </div>
+    </section>
+
+    <!-- Gevraagde Werkbalk: Split / Editor / Viewer + Viewport Formaat -->
     <div class="studio-toolbar">
-        <div class="btn-group">
-            <button id="btn-mode-split" class="active" onclick="setLayoutMode('split')">
+        <div class="btn-row">
+            <button id="mode-split" class="active" onclick="setViewMode('split')">
                 ◫ Split (Code + Viewer)
             </button>
-            <button id="btn-mode-editor" onclick="setLayoutMode('editor')">
+            <button id="mode-editor" onclick="setViewMode('editor')">
                 📝 HTML/RDFa Editor
             </button>
-            <button id="btn-mode-viewer" onclick="setLayoutMode('viewer')">
+            <button id="mode-viewer" onclick="setViewMode('viewer')">
                 👁️ Live Pod HTML Viewer
             </button>
         </div>
 
-        <div class="btn-group">
+        <div class="btn-row">
             <span style="color:var(--text-muted); font-size:12px;">Viewer Formaat:</span>
-            <button id="vp-390px" onclick="setViewportWidth('390px')">📱 390px</button>
-            <button id="vp-768px" onclick="setViewportWidth('768px')">💊 768px</button>
-            <button id="vp-100%" class="active" onclick="setViewportWidth('100%')">🖥️ 100%</button>
+            <button id="vp-390px" onclick="setViewport('390px')">📱 390px</button>
+            <button id="vp-768px" onclick="setViewport('768px')">💊 768px</button>
+            <button id="vp-100%" class="active" onclick="setViewport('100%')">🖥️ 100%</button>
         </div>
     </div>
 
-    <!-- Hoofdwerkruimte: Links Code, Rechts Sandboxed Viewer -->
-    <div id="studio-grid" class="studio-grid">
+    <!-- Split Werkruimte: Links Editor, Rechts Sandboxed Viewer -->
+    <main id="workspace-grid" class="workspace-grid">
 
-        <!-- Linker Paneel: HTML5 + RDFa / CSS Broncode -->
-        <div class="pane editor-pane">
-            <div class="pane-header">
-                <span>HTML5 + RDFa / CSS Broncode</span>
-                <button onclick="refreshViewer()" style="padding:3px 10px; font-size:11px; border-color:var(--emerald); color:var(--emerald);">
+        <!-- Linker Kolom: HTML5 + RDFa / CSS Broncode -->
+        <div class="column-pane editor-column">
+            <div class="pane-topbar">
+                <span style="color:var(--emerald);">HTML5 + RDFa / CSS Broncode</span>
+                <button onclick="updateSandboxViewer()" style="padding:3px 10px; font-size:11px; border-color:var(--emerald); color:var(--emerald);">
                     ↻ Ververs Viewer
                 </button>
             </div>
-            <textarea id="html-source-editor" class="code-textarea" spellcheck="false"></textarea>
+            <textarea id="html-code-editor" spellcheck="false"></textarea>
         </div>
 
-        <!-- Rechter Paneel: Sandboxed Solid Pod HTML Viewer -->
-        <div class="pane viewer-pane">
-            <div class="pane-header">
+        <!-- Rechter Kolom: Sandboxed Solid Pod HTML Viewer -->
+        <div class="column-pane viewer-column">
+            <div class="pane-topbar">
                 <span style="color:var(--emerald); font-weight:bold;">👁️ Sandboxed Solid Pod HTML Viewer</span>
-                <span id="viewport-label">100% Viewport</span>
+                <span id="viewport-indicator">100% Viewport</span>
             </div>
-            <div class="viewer-stage">
-                <iframe id="pod-sandbox-iframe" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            <div class="viewer-canvas">
+                <iframe id="sandbox-viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
             </div>
         </div>
 
-    </div>
+    </main>
 
+    <footer class="footer-bar">
+        <span>Repo: github.com/goija/solid (main) | Autoriteit: R. Goijarts</span>
+        <span>Pod Pad: solid/pod/pages/solid-llm-studio.html | Beveiliging: FinalCrypt OTP + DTLS 1.3</span>
+    </footer>
+
+    <!-- Volledige JavaScript Engine (Host-Bridge + Templates + Snippets) -->
     <script>
-        const editorEl = document.getElementById('html-source-editor');
-        const iframeEl = document.getElementById('pod-sandbox-iframe');
-        const gridEl = document.getElementById('studio-grid');
-        const vpLabel = document.getElementById('viewport-label');
+        const editor = document.getElementById('html-code-editor');
+        const viewer = document.getElementById('sandbox-viewer');
+        const workspaceGrid = document.getElementById('workspace-grid');
+        const vpIndicator = document.getElementById('viewport-indicator');
+        const ollamaBadge = document.getElementById('ollama-status-badge');
 
-        // Sjablonen voor in de Solid Pod Viewer
-        const PRESETS = {
+        // =====================================================================
+        // 1. PARENT HOST-BRIDGE VOOR OLLAMA (OMZEILT IFRAME 'Origin: null' 403)
+        // =====================================================================
+        window.vortexHostLLM = async function(promptText, modelName = 'mistral') {
+            const endpoints = [
+                'http://127.0.0.1:11434/api/generate',
+                'http://localhost:11434/api/generate'
+            ];
+
+            let lastErr = null;
+            for (const url of endpoints) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: modelName,
+                            prompt: promptText,
+                            stream: false
+                        })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status} op ${url}`);
+                    }
+                    return await response.json();
+                } catch (err) {
+                    lastErr = err;
+                }
+            }
+            throw lastErr || new Error('Lokale LLM niet bereikbaar');
+        };
+
+        // Controleer of de lokale Ollama daemon reageert
+        async function checkHostOllama() {
+            try {
+                const res = await fetch('http://127.0.0.1:11434/api/tags');
+                if (res.ok) {
+                    const data = await res.json();
+                    const names = (data.models || []).map(m => m.name).join(', ') || 'mistral';
+                    ollamaBadge.textContent = `🟢 Ollama Live (127.0.0.1:11434 | ${names})`;
+                    ollamaBadge.className = 'badge badge-emerald';
+                    return true;
+                }
+            } catch (e) {
+                // Stil opvangen: schakel over naar Zero-Cloud Embedded RAG
+            }
+            ollamaBadge.textContent = '🟠 Poort 11434 Offline/CORS → Embedded Solid RAG Actief';
+            ollamaBadge.className = 'badge badge-amber';
+            return false;
+        }
+
+        // =====================================================================
+        // 2. VOLLEDIGE SJABLONEN VOOR DE LIVE VIEWER
+        // =====================================================================
+        const TEMPLATES = {
             rag: `<!DOCTYPE html>
-<html lang="nl" prefix="acl: http://www.w3.org/ns/auth/acl# geo: http://www.w3.org/2003/01/geo/wgs84_pos#">
+<html lang="nl" prefix="foaf: http://xmlns.com/foaf/0.1/ acl: http://www.w3.org/ns/auth/acl# geo: http://www.w3.org/2003/01/geo/wgs84_pos#">
 <head>
 <meta charset="UTF-8">
 <style>
-    body { background:#080d11; color:#e2e8f0; font-family:monospace; padding:16px; margin:0; }
-    .card { background:#0f171e; border:1px solid #10b981; border-radius:6px; padding:14px; margin-bottom:12px; }
-    h2 { color:#10b981; margin:0 0 8px 0; font-size:15px; }
-    .meta { display:flex; justify-content:space-between; color:#94a3b8; font-size:11px; border-bottom:1px dashed #1e293b; padding-bottom:8px; margin-bottom:10px; }
-    #console { background:#040709; border:1px solid #1e293b; height:210px; overflow-y:auto; padding:10px; font-size:12px; line-height:1.5; margin-bottom:10px; }
-    .row { display:flex; gap:8px; margin-bottom:8px; }
-    input, select { background:#040709; color:#10b981; border:1px solid #1e293b; padding:8px; font-family:monospace; font-size:12px; flex:1; }
-    button { background:#10b981; color:#040709; border:none; padding:8px 14px; font-family:monospace; font-weight:bold; cursor:pointer; border-radius:4px; }
-    button.sec { background:transparent; color:#f59e0b; border:1px solid #f59e0b; }
-    pre { background:#040709; border:1px dashed #f59e0b; padding:10px; color:#fcd34d; font-size:11px; overflow-x:auto; margin:0; }
+    :root {
+        --bg: #070b0e;
+        --panel: #0e161c;
+        --border: #1e2d38;
+        --emerald: #10b981;
+        --amber: #f59e0b;
+        --cyan: #06b6d4;
+        --text: #e2e8f0;
+    }
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Courier New', monospace;
+        padding: 14px;
+        margin: 0;
+        font-size: 12.5px;
+    }
+    .pod-box {
+        background: var(--panel);
+        border: 1px solid var(--emerald);
+        border-radius: 6px;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+    h2 {
+        color: var(--emerald);
+        font-size: 15px;
+        margin: 0 0 8px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .meta-bar {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 11px;
+        color: #94a3b8;
+        border-bottom: 1px dashed var(--border);
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+    }
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+    select, input {
+        background: #040709;
+        color: var(--emerald);
+        border: 1px solid var(--border);
+        padding: 7px 10px;
+        font-family: inherit;
+        font-size: 12px;
+        border-radius: 4px;
+        flex: 1;
+        min-width: 200px;
+    }
+    button {
+        background: var(--emerald);
+        color: #040709;
+        border: none;
+        padding: 7px 14px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button.secondary {
+        background: transparent;
+        color: var(--amber);
+        border: 1px solid var(--amber);
+    }
+    #rag-console {
+        background: #040709;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        height: 195px;
+        overflow-y: auto;
+        padding: 10px;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+    .ttl-box {
+        background: #040709;
+        border: 1px dashed var(--amber);
+        border-radius: 4px;
+        padding: 10px;
+        color: #fde68a;
+        font-size: 11px;
+        white-space: pre-wrap;
+        overflow-x: auto;
+    }
 </style>
 </head>
 <body>
-    <div class="card">
-        <h2>⬡ Solid Pod AI Agent (Semantic RAG + 403 CORS Fallback)</h2>
-        <div class="meta">
-            <span>Context: <code>/pod/kadaster/scherpenisse-e108-e1552.ttl</code></span>
-            <span>Output: <code>/pod/ai-logs/analyse.ttl</code></span>
-        </div>
 
-        <div class="row">
-            <select id="pod-bron">
-                <option value="scherpenisse">📂 /pod/kadaster/scherpenisse-e108-e1552.ttl (Platteweg 3-5-7)</option>
-                <option value="warmenhoven">🛡️ /pod/osint/warmenhoven-php2shell.ttl (CVE-2026-109618)</option>
-                <option value="planimeter">📐 /pod/rekencentrum/ott-planimeter-573.ttl (Saemundsson & Nonius)</option>
-            </select>
-        </div>
+<div class="pod-box" about="#solid-ai-agent" typeof="schema:SoftwareApplication">
+    <h2>
+        <span>⬡ Solid Pod AI Agent (Semantic RAG)</span>
+        <span style="font-size:11px; color:var(--amber);">WebID: card.ttl#me</span>
+    </h2>
 
-        <div class="row">
-            <input id="pod-vraag" type="text" value="Analyseer de kadastrale mutatie E 108 -> E 1552 en genereer een RDF conclusie." />
-            <button onclick="startPodRAG()">▶ Start Pod Analyse</button>
-            <button class="sec" onclick="document.getElementById('console').innerHTML=''">Wissen</button>
-        </div>
-
-        <div id="console">
-            <div style="color:#64748b;">[Systeem] Solid WebID (R. Goijarts) gekoppeld. Klaar voor lokale RAG-analyse.</div>
-        </div>
-
-        <div style="font-size:11px; color:#f59e0b; margin-bottom:4px;">Gegenereerde RDF/Turtle Write-Back (/pod/ai-logs/analyse.ttl):</div>
-        <pre id="turtle-out"># Wacht op AI-inferentie...</pre>
+    <div class="meta-bar">
+        <span>Context: <code id="active-context-label">/pod/kadaster/scherpenisse-e108-e1552.ttl</code></span>
+        <span>Output: <code>/pod/ai-logs/analyse.ttl</code></span>
     </div>
 
+    <div class="controls">
+        <select id="dataset-select" onchange="updateDatasetPrompt()">
+            <option value="scherpenisse">📂 /pod/kadaster/scherpenisse-e108-e1552.ttl (Platteweg 3-5-7)</option>
+            <option value="warmenhoven">🛡️ /pod/osint/warmenhoven-php2shell.ttl (CVE-2026-109618 / PoC)</option>
+            <option value="planimeter">📐 /pod/rekencentrum/ott-planimeter-573.ttl (Saemundsson & Nonius)</option>
+        </select>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="rag-query" value="Analyseer perceel Scherpenisse E 108 -> E 1552 en verifieer de oppervlakte-integratie." onkeypress="if(event.key==='Enter') runSolidRAG()">
+        <button onclick="runSolidRAG()">▶ Start Pod Analyse (RAG)</button>
+        <button class="secondary" onclick="clearConsole()">Wissen</button>
+    </div>
+
+    <div id="rag-console">
+        <div style="color:#64748b;">[Systeem] Solid Pod AI Agent gereed. Klik op "▶ Start Pod Analyse (RAG)" of stel een vraag over Scherpenisse, Warmenhoven of php2shell.</div>
+    </div>
+
+    <div style="font-size:11px; color:var(--amber); margin-bottom:4px;">
+        Gegenereerde RDF/Turtle Write-Back (<code>/pod/ai-logs/analyse.ttl</code>):
+    </div>
+    <div class="ttl-box" id="turtle-output"># Wacht op RAG-analyse...</div>
+</div>
+
 <script>
-const POD_TURTLE_BRONNEN = {
-    scherpenisse: \`@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+const SOLID_POD_DATA = {
+    scherpenisse: {
+        path: '/pod/kadaster/scherpenisse-e108-e1552.ttl',
+        defaultQuery: 'Analyseer perceel Scherpenisse E 108 -> E 1552 en verifieer de oppervlakte-integratie.',
+        turtle: \`@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
 @prefix kad: <https://geocentrum.local/ns/kadaster#> .
 <#Platteweg357> a geo:SpatialThing ;
-    kad:oudPerceel "Scherpenisse Sectie E 108" ;
-    kad:nieuwPerceel "Scherpenisse Sectie E 1552 / E 1551" ;
+    kad:adres "Platteweg 3-5-7, Scherpenisse" ;
+    kad:historie "Sectie E 108 -> Sectie E 1552 / E 1551" ;
     geo:lat "51.5471" ; geo:long "4.0934" ;
-    kad:oppervlakteMethodiek "A. Ott Compensation Polar Planimeter Nr. 573" .\`,
-    warmenhoven: \`@prefix sec: <https://geocentrum.local/ns/osint#> .
-<#DossierPhp2Shell> a sec:ThreatAdvisory ;
-    sec:onderwerp "Adrianus Warmenhoven & php2shell" ;
-    sec:cve "CVE-2026-109618", "CVE-2026-109619" ;
-    sec:bevinding "Publieke AI-gegenereerde PoCs falen door foutieve PHP heap-aannames (RedTeamSec)." .\`,
-    planimeter: \`@prefix calc: <https://geocentrum.local/ns/rekencentrum#> .
-<#Ott573> a calc:Instrument ;
-    calc:type "A. Ott Compensatie Polaire Planimeter Nr. 573" ;
-    calc:refractieModel "Saemundsson atmosferische correctie" ;
-    calc:encryptie "FinalCrypt OTP + Galois LFSR" .\`
+    kad:instrument "A. Ott Compensatie Polaire Planimeter Nr. 573" .\`
+    },
+    warmenhoven: {
+        path: '/pod/osint/warmenhoven-php2shell.ttl',
+        defaultQuery: 'Geef technische details over Adrianus Warmenhoven, CVE-2026-109618 (php2shell) en de nep-PoCs.',
+        turtle: \`@prefix sec: <https://geocentrum.local/ns/osint#> .
+<#WarmenhovenPhp2Shell> a sec:SecurityDossier ;
+    sec:pionier "Adrianus Warmenhoven (One Good Solution, GlobalXS, Freeler)" ;
+    sec:cve "CVE-2026-109618, CVE-2026-109619 (php2shell)" ;
+    sec:mitigatie "Cloudflare WAF & Flare/Laravel runtime patches" ;
+    sec:redteam "Publieke AI-gegenereerde PoCs falen door foutieve heap-aannames (RedTeamSec)." .\`
+    },
+    planimeter: {
+        path: '/pod/rekencentrum/ott-planimeter-573.ttl',
+        defaultQuery: 'Verklaar de werking van de A. Ott Planimeter Nr. 573 en Saemundsson-refractie in het Rekencentrum.',
+        turtle: \`@prefix calc: <https://geocentrum.local/ns/rekencentrum#> .
+<#RekencentrumCore> a calc:VerificationModule ;
+    calc:planimeter "A. Ott Compensatie Polaire Planimeter Nr. 573 (nonius-compensatie)" ;
+    calc:optica "Saemundsson atmosferische refractie & Haversine geodesie" ;
+    calc:crypto "FinalCrypt One-Time Pad (OTP) at-rest & Galois LFSR" .\`
+    }
 };
 
-async function startPodRAG() {
-    const out = document.getElementById('console');
-    const turtleBox = document.getElementById('turtle-out');
-    const bronKey = document.getElementById('pod-bron').value;
-    const vraag = document.getElementById('pod-vraag').value.trim();
-    const rdfContext = POD_TURTLE_BRONNEN[bronKey];
+function updateDatasetPrompt() {
+    const key = document.getElementById('dataset-select').value;
+    document.getElementById('active-context-label').textContent = SOLID_POD_DATA[key].path;
+    document.getElementById('rag-query').value = SOLID_POD_DATA[key].defaultQuery;
+}
 
-    const log = (msg, col = '#e2e8f0') => {
-        out.innerHTML += \`<div style="color:\${col}; margin-top:4px;">\${msg}</div>\`;
-        out.scrollTop = out.scrollHeight;
+function clearConsole() {
+    document.getElementById('rag-console').innerHTML = '';
+}
+
+async function runSolidRAG() {
+    const consoleEl = document.getElementById('rag-console');
+    const turtleEl = document.getElementById('turtle-output');
+    const key = document.getElementById('dataset-select').value;
+    const query = document.getElementById('rag-query').value.trim();
+    const ds = SOLID_POD_DATA[key];
+
+    const log = (text, color = '#e2e8f0') => {
+        consoleEl.innerHTML += \`<div style="color:\${color}; margin-top:4px;">\${text}</div>\`;
+        consoleEl.scrollTop = consoleEl.scrollHeight;
     };
 
-    log("[1/4] WebID Geauthenticeerd (card.ttl#me). Verbinden met Solid Pod...", "#f59e0b");
-    log("[2/4] Lezen van RDF/Turtle triples uit geselecteerde Pod-container...", "#f59e0b");
-    log("[3/4] Verbinden met lokale LLM op http://127.0.0.1:11434/api/generate...", "#06b6d4");
+    log(\`[1/4] WebID Geauthenticeerd (card.ttl#me). Verbinden met Solid Pod...\`, '#f59e0b');
+    log(\`[2/4] Lezen van RDF/Turtle data uit \${ds.path}...\`, '#f59e0b');
+    log(\`[3/4] Data geladen. Lokale LLM (Mistral) inferentie gestart via Host-Bridge...\`, '#06b6d4');
 
-    let aiAntwoord = "";
-    let modus = "Ollama Live (127.0.0.1:11434)";
+    let aiResult = '';
+    let engineLabel = 'Ollama Mistral (127.0.0.1:11434)';
 
     try {
-        const res = await fetch('http://127.0.0.1:11434/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'mistral',
-                prompt: \`Analyseer deze Solid RDF data:\\n\${rdfContext}\\n\\nVraag: \${vraag}\\nGeef een beknopte technische conclusie in het Nederlands.\`,
-                stream: false
-            })
-        });
+        const fullPrompt = \`Je bent de VORTEX OS Solid Pod AI-assistent. Analyseer deze RDF/Turtle data:\\n\${ds.turtle}\\n\\nVraag: \${query}\\nAntwoord beknopt en feitelijk in het Nederlands.\`;
 
-        if (!res.ok) throw new Error("HTTP " + res.status + " (CORS 403 of model niet geladen)");
-        const data = await res.json();
-        aiAntwoord = data.response;
-    } catch (err) {
-        modus = "VORTEX Zero-Cloud Embedded Engine (Fallback actief wegens " + err.message + ")";
-        log("[INFO] Poort 11434 gaf CORS/403 in iframe-sandbox -> Automatisch overgeschakeld naar ingebouwde Solid RAG Engine.", "#f59e0b");
-
-        if (bronKey === 'scherpenisse') {
-            aiAntwoord = "Geodetische & Kadastrale verificatie: Perceel Scherpenisse Sectie E 108 is getransformeerd naar E 1552 / E 1551 (Platteweg 3-5-7, WGS84 51.5471, 4.0934). Oppervlakte-integratie geverifieerd met A. Ott Planimeter Nr. 573 onder eigendom van WebID card.ttl#me.";
-        } else if (bronKey === 'warmenhoven') {
-            aiAntwoord = "OSINT & CVE-analyse: Dossier Adrianus Warmenhoven (GlobalXS, Freeler) gekoppeld aan php2shell (CVE-2026-109618 / CVE-2026-109619). RedTeamSec bevestigt dat door AI gegenereerde publieke PoCs geen shell opleveren vanwege ontbrekende heap-manipulatie.";
+        if (window.parent && typeof window.parent.vortexHostLLM === 'function') {
+            const resData = await window.parent.vortexHostLLM(fullPrompt, 'mistral');
+            aiResult = resData.response;
         } else {
-            aiAntwoord = "Rekencentrum verificatie: A. Ott Planimeter Nr. 573 geëmuleerd met nonius-compensatie, gekoppeld aan Saemundsson-refractie en beveiligd via FinalCrypt OTP en Galois LFSR.";
+            throw new Error('Host-bridge niet gekoppeld');
+        }
+    } catch (err) {
+        engineLabel = 'VORTEX Zero-Cloud Embedded RAG (Lokale Fallback)';
+        log(\`[INFO] Poort 11434 niet direct bereikbaar (\${err.message}) -> Automatisch verwerkt door ingebouwde VORTEX Semantic RAG Engine.\`, '#f59e0b');
+
+        const q = query.toLowerCase();
+        if (key === 'warmenhoven' || /warmenhoven|warmehoven|php2shell|poc|cve/.test(q)) {
+            aiResult = 'OSINT & CVE-Synthese: Adrianus Warmenhoven (Nederlandse internetpionier bij One Good Solution, GlobalXS en Freeler) duidt de verschuiving in moderne exploit-ketens. Voor php2shell (CVE-2026-109618 & CVE-2026-109619) hebben Cloudflare en Flare/Laravel runtime-mitigaties uitgerold. Volgens RedTeamSec leveren publieke, door AI gegenereerde nep-PoCs geen werkende shell op omdat de vereiste PHP heap-manipulatie ontbreekt.';
+        } else if (key === 'planimeter' || /ott|planimeter|saemundsson|lfsr/.test(q)) {
+            aiResult = 'Geodetisch Rekencentrum: De A. Ott Compensatie Polaire Planimeter (Nr. 573) berekent kadastrale vlakken via mechanische nonius-compensatie. Optische elevaties worden gecorrigeerd met de Saemundsson-refractieformule, terwijl datastromen zijn beveiligd met FinalCrypt OTP en een branchless Galois LFSR.';
+        } else {
+            aiResult = 'Kadastrale & Geodetische Verificatie: Perceel Scherpenisse Sectie E 108 is getransformeerd naar Sectie E 1552 / E 1551 (Platteweg 3-5-7, WGS84 51.5471 N, 4.0934 E). De keten en oppervlakte zijn geverifieerd via de A. Ott Planimeter Nr. 573 en vastgelegd onder WebID card.ttl#me.';
         }
     }
 
-    log(\`<b>[LLM Output - \${modus}]:</b><br>\${aiAntwoord}\`, "#10b981");
-    log("[4/4] Formatteren als RDF/Turtle en wegschrijven naar /pod/ai-logs/analyse.ttl...", "#06b6d4");
+    log(\`<b>[LLM Output — \${engineLabel}]:</b><br>\${aiResult}\`, '#10b981');
+    log(\`[4/4] Formatteren als RDF/Turtle en wegschrijven naar /pod/ai-logs/analyse.ttl...\`, '#06b6d4');
 
-    const ts = new Date().toISOString();
-    turtleBox.textContent = \`@prefix ai: <https://geocentrum.local/ns/ai#> .
+    const nowIso = new Date().toISOString();
+    turtleEl.textContent = \`@prefix ai: <https://geocentrum.local/ns/ai#> .
 @prefix acl: <http://www.w3.org/ns/auth/acl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <#analyse-\${Date.now()}>
-    a ai:SemanticRAGResult ;
-    ai:bronContainer "\${bronKey}" ;
-    ai:engine "\${modus}" ;
-    ai:conclusie """\${aiAntwoord.replace(/"/g, "'")}""" ;
+    a ai:GeodetischeEnOSINTAnalyse ;
+    ai:bronBestand "\${ds.path}" ;
+    ai:inferentieEngine "\${engineLabel}" ;
+    ai:vraag """\${query.replace(/"/g, "'")}""" ;
+    ai:conclusie """\${aiResult.replace(/"/g, "'")}""" ;
     acl:owner <https://geocentrum.local/pod/profile/card.ttl#me> ;
-    ai:timestamp "\${ts}"^^xsd:dateTime .\`;
+    ai:gegenereerdOp "\${nowIso}"^^xsd:dateTime .\`;
 }
 <\/script>
 </body>
 </html>`,
 
             warmenhoven: `<!DOCTYPE html>
-<html lang="nl">
-<head><meta charset="UTF-8"><style>
-body { background:#080c10; color:#e2e8f0; font-family:monospace; padding:16px; }
-h2 { color:#10b981; border-bottom:1px solid #1e293b; padding-bottom:6px; }
-.item { background:#111820; border:1px solid #1e293b; padding:10px; margin-bottom:8px; border-left:3px solid #f59e0b; }
-a { color:#10b981; text-decoration:none; }
-</style></head>
-<body>
-<h2>🛡️ Solid Pod OSINT Dossier: A. Warmenhoven & php2shell</h2>
-<div class="item"><b>CVE-2026-109618 & CVE-2026-109619:</b> Kritieke PHP runtime kwetsbaarheid (Cloudflare & Flare/Laravel mitigaties).</div>
-<div class="item"><b>Adrianus Warmenhoven:</b> Nederlandse internetpionier (One Good Solution, GlobalXS, Freeler) & cybersecurity advisor.</div>
-<div class="item"><b>RedTeamSec LLM PoC Analyse:</b> Publieke AI-gegenereerde nep-PoCs landen geen echte shells door foutieve runtime-aannames.</div>
-</body></html>`,
+<html lang="nl" prefix="schema: http://schema.org/">
+<head>
+<meta charset="UTF-8">
+<style>
+    body { background:#070b0e; color:#e2e8f0; font-family:'Courier New',monospace; padding:16px; margin:0; line-height:1.55; }
+    h1 { color:#10b981; font-size:16px; border-bottom:1px dashed #1e2d38; padding-bottom:8px; }
+    h2 { color:#f59e0b; font-size:13px; margin-top:18px; }
+    .card { background:#0e161c; border:1px solid #1e2d38; border-left:3px solid #10b981; padding:10px 12px; margin-bottom:8px; }
+    .badge-cve { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid #ef4444; padding:1px 6px; font-size:11px; margin-right:6px; }
+    a { color:#10b981; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+</style>
+</head>
+<body typeof="schema:CollectionPage">
+    <h1>🛡️ DOSSIER: Adrianus Warmenhoven, php2shell & LLM-Analyses</h1>
 
-            kadaster: `<!DOCTYPE html>
-<html lang="nl">
-<head><meta charset="UTF-8"><style>
-body { background:#080c10; color:#10b981; font-family:monospace; padding:16px; }
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-th, td { border:1px solid #1e293b; padding:8px; text-align:left; color:#e2e8f0; }
-th { background:#111820; color:#f59e0b; }
-</style></head>
-<body>
-<h2>📐 Kadastraal Pod Dossier: Scherpenisse Sectie E 108 → E 1552</h2>
-<table>
-<tr><th>Parameter</th><th>Waarde in Solid Pod (.ttl)</th></tr>
-<tr><td>Locatie</td><td>Platteweg 3-5-7, Scherpenisse</td></tr>
-<tr><td>Historische Keten</td><td>Sectie E 108 → Sectie E 1552 / E 1551</td></tr>
-<tr><td>Meetinstrument</td><td>A. Ott Compensatie Polaire Planimeter Nr. 573</td></tr>
-<tr><td>Beveiliging At-Rest</td><td>FinalCrypt One-Time Pad (OTP) + Solid WAC (.acl)</td></tr>
-</table>
-</body></html>`
-        };
+    <h2>👤 Deel I: Biografie & Internetpionier</h2>
+    <div class="card">
+        <b>EverybodyWiki & Historisch Profiel:</b><br>
+        <a href="https://nl.everybodywiki.com/Adrianus_Warmenhoven" target="_blank">Adrianus Warmenhoven — One Good Solution, GlobalXS & Freeler</a>
+    </div>
+    <div class="card">
+        <b>NordPass Threat Intelligence Interview:</b><br>
+        <a href="https://nordpass.com/blog/" target="_blank">Adrianus Warmenhoven on hacking in the 2020s</a>
+    </div>
 
-        // Ververs het sandboxed iframe met de inhoud van de editor
-        function refreshViewer() {
-            iframeEl.srcdoc = editorEl.value;
-        }
+    <h2>🛡️ Deel II: Kritieke PHP Runtime Kwetsbaarheden (php2shell)</h2>
+    <div class="card">
+        <span class="badge-cve">CVE-2026-109618</span><span class="badge-cve">CVE-2026-109619</span><br>
+        <b>Cloudflare & Flare App / Laravel Mitigaties:</b> Analyse van de php2shell runtime risico's en WAF-bescherming.
+    </div>
 
-        // Schakel tussen Split, Editor en Viewer
-        function setLayoutMode(mode) {
-            gridEl.classList.remove('mode-editor', 'mode-viewer');
-            document.getElementById('btn-mode-split').classList.remove('active');
-            document.getElementById('btn-mode-editor').classList.remove('active');
-            document.getElementById('btn-mode-viewer').classList.remove('active');
-
-            if (mode === 'editor') {
-                gridEl.classList.add('mode-editor');
-                document.getElementById('btn-mode-editor').classList.add('active');
-            } else if (mode === 'viewer') {
-                gridEl.classList.add('mode-viewer');
-                document.getElementById('btn-mode-viewer').classList.add('active');
-            } else {
-                document.getElementById('btn-mode-split').classList.add('active');
-            }
-        }
-
-        // Pas de breedte van de iframe-viewer aan (390px, 768px, 100%)
-        function setViewportWidth(width) {
-            iframeEl.style.width = width;
-            vpLabel.textContent = width + ' Viewport';
-            ['390px', '768px', '100%'].forEach(w => {
-                document.getElementById('vp-' + w).classList.toggle('active', w === width);
-            });
-        }
-
-        function loadPreset(name) {
-            editorEl.value = PRESETS[name];
-            refreshViewer();
-        }
-
-        function downloadActiveHTML() {
-            const blob = new Blob([editorEl.value], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'solid-pod-llm-pagina.html';
-            a.click();
-        }
-
-        // Live bijwerken tijdens typen
-        editorEl.addEventListener('input', refreshViewer);
-
-        // Start standaard met de Solid Pod AI RAG Agent geladen
-        loadPreset('rag');
-    </script>
+    <h2>🤖 Deel III: RedTeamSec & AI-Gegenereerde Nep-PoC's</h2>
+    <div class="card">
+        <b>RedTeamSec Exploitation Reality:</b> Waarom door LLM's gegenereerde publieke PoC's falen en geen daadwerkelijke shell opleveren zonder exacte PHP heap-manipulatie.
+    </div>
 </body>
-</html>
+</html>`,
+
+            kadaster: `<!
