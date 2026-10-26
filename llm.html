@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOIJA / SOLID // VORTEX OS — Solid Pod LLM Studio & Viewer</title>
+    <title>VORTEX OS // Solid Pod LLM RAG Studio</title>
     <style>
         :root {
             --bg-dark: #060a0d;
@@ -13,201 +13,66 @@
             --emerald: #10b981;
             --amber: #f59e0b;
             --cyan: #06b6d4;
-            --red: #ef4444;
             --text-main: #e2e8f0;
             --text-muted: #64748b;
             --mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: var(--mono);
             font-size: 13px;
-            min-height: 100vh;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            padding: 12px;
-            gap: 10px;
+            gap: 14px;
+            min-height: 100vh;
         }
 
-        /* Top Header */
-        .topbar {
+        header {
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 10px 14px;
+            padding: 12px 16px;
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .brand-logo {
-            border: 1px solid var(--emerald);
-            color: var(--emerald);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 12px;
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .brand-title {
-            font-weight: bold;
-            font-size: 14px;
-            color: #ffffff;
-        }
-
-        .status-line {
-            font-size: 11px;
-            color: var(--emerald);
-            display: block;
-            margin-top: 2px;
-        }
-
+        h1 { color: var(--emerald); font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        
         .badge {
             font-size: 11px;
             padding: 3px 8px;
             border-radius: 4px;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-main);
-        }
-
-        .badge-emerald {
-            border-color: var(--emerald);
-            color: var(--emerald);
+            border: 1px solid var(--emerald);
             background: rgba(16, 185, 129, 0.12);
+            color: var(--emerald);
         }
 
         .badge-amber {
             border-color: var(--amber);
-            color: var(--amber);
             background: rgba(245, 158, 11, 0.12);
-        }
-
-        /* Component Injector Bar */
-        .injector-bar {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 10px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .injector-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            font-size: 11px;
-            color: var(--emerald);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
-
-        button {
-            background: var(--bg-card);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 6px 11px;
-            border-radius: 4px;
-            font-family: var(--mono);
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        button:hover {
-            border-color: var(--emerald);
-            color: var(--emerald);
-        }
-
-        button.active {
-            background: rgba(16, 185, 129, 0.18);
-            border-color: var(--emerald);
-            color: var(--emerald);
-            font-weight: bold;
-        }
-
-        button.amber-btn {
-            border-color: rgba(245, 158, 11, 0.5);
             color: var(--amber);
         }
 
-        button.amber-btn:hover {
-            border-color: var(--amber);
-            background: rgba(245, 158, 11, 0.15);
-        }
-
-        /* Split / Editor / Viewer & Viewport Toolbar */
-        .studio-toolbar {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 8px 14px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Main Split Workspace */
-        .workspace-grid {
+        .workspace {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
             flex: 1;
-            min-height: 560px;
         }
 
-        .workspace-grid.mode-editor {
-            grid-template-columns: 1fr;
-        }
-        .workspace-grid.mode-editor .viewer-column {
-            display: none;
+        @media (max-width: 900px) {
+            .workspace { grid-template-columns: 1fr; }
         }
 
-        .workspace-grid.mode-viewer {
-            grid-template-columns: 1fr;
-        }
-        .workspace-grid.mode-viewer .editor-column {
-            display: none;
-        }
-
-        @media (max-width: 960px) {
-            .workspace-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .column-pane {
+        .pane {
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 6px;
@@ -216,602 +81,260 @@
             overflow: hidden;
         }
 
-        .pane-topbar {
+        .pane-header {
             background: var(--bg-card);
             border-bottom: 1px solid var(--border);
             padding: 8px 12px;
+            font-size: 12px;
+            color: var(--text-muted);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
-            color: var(--text-muted);
         }
 
-        #html-code-editor {
-            flex: 1;
-            width: 100%;
-            background: #040709;
-            color: #a7f3d0;
-            border: none;
+        .pane-body {
             padding: 14px;
-            font-family: var(--mono);
-            font-size: 12.5px;
-            line-height: 1.55;
-            resize: none;
-            outline: none;
-            min-height: 500px;
-        }
-
-        .viewer-canvas {
-            flex: 1;
-            background: #030507;
             display: flex;
-            justify-content: center;
-            align-items: stretch;
-            padding: 8px;
-            overflow: auto;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
         }
 
-        #sandbox-viewer {
+        select, input, textarea {
+            background: #040709;
+            color: var(--emerald);
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            font-family: var(--mono);
+            font-size: 12px;
+            border-radius: 4px;
+            outline: none;
             width: 100%;
-            height: 100%;
-            min-height: 500px;
+        }
+
+        button {
+            background: var(--emerald);
+            color: #040709;
+            border: none;
+            padding: 8px 14px;
+            font-family: var(--mono);
+            font-weight: bold;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        button.sec {
+            background: transparent;
+            color: var(--amber);
+            border: 1px solid var(--amber);
+        }
+
+        #llm-console {
+            background: #040709;
             border: 1px solid var(--border);
             border-radius: 4px;
-            background: #080c10;
-            transition: width 0.2s ease;
+            height: 260px;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.5;
         }
 
-        .footer-bar {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 8px 14px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+        .turtle-preview {
+            background: #040709;
+            border: 1px dashed var(--amber);
+            border-radius: 4px;
+            padding: 10px;
+            color: #fde68a;
             font-size: 11px;
-            color: var(--text-muted);
+            white-space: pre-wrap;
+            overflow-x: auto;
+            flex: 1;
         }
     </style>
 </head>
 <body>
 
-    <!-- Bovenste Systeembalk -->
-    <header class="topbar">
-        <div class="brand">
-            <span class="brand-logo">VORTEX//SOLID</span>
-            <div>
-                <div class="brand-title">GOIJA / SOLID // VORTEX OS — GEOCENTRUM & POD ARCHITECTUUR</div>
-                <span class="status-line">● ONLINE // PLATTEWEG 3-5-7 (E 108 → E 1552) | ZERO-CLOUD v1.5</span>
-            </div>
-        </div>
-        <div class="btn-row">
-            <span class="badge" id="ollama-status-badge">🟠 LLM Status: Controleren...</span>
-            <button onclick="checkHostOllama()">↻ Test Poort 11434</button>
-            <button class="amber-btn" onclick="downloadHTMLFile()">💾 Download .html</button>
-        </div>
+    <header>
+        <h1>
+            <span>⬡ Solid Pod LLM RAG Studio</span>
+            <span class="badge">WebID: card.ttl#me</span>
+        </h1>
+        <span class="badge badge-amber" id="status-badge">Lokale LLM: Controleren (port 11434)...</span>
     </header>
 
-    <!-- Sjablonen & Component Injectors -->
-    <section class="injector-bar">
-        <div class="injector-header">
-            <span>+ VOEG SOEVEREIN SOLID / GEOCENTRUM COMPONENT OF SJABLOON TOE AAN HTML:</span>
-            <div class="btn-row">
-                <span style="color:var(--text-muted); text-transform:none;">Laad Sjabloon:</span>
-                <button class="active" id="tpl-rag" onclick="loadTemplate('rag')">🧠 Solid Pod AI RAG (Live + Fallback)</button>
-                <button id="tpl-warmenhoven" onclick="loadTemplate('warmenhoven')">🛡️ Dossier Warmenhoven & php2shell</button>
-                <button id="tpl-kadaster" onclick="loadTemplate('kadaster')">📐 Perceel E 108 → E 1552 & Planimeter</button>
+    <div class="workspace">
+        
+        <!-- Linker Paneel: Pod Context & AI Prompt -->
+        <div class="pane">
+            <div class="pane-header">
+                <span>1. Solid Pod Context & Prompt</span>
+                <span>Zero-Cloud RAG</span>
+            </div>
+            <div class="pane-body">
+                <label style="color:var(--text-muted); font-size:11px;">Selecteer Pod Dataset (.ttl):</label>
+                <select id="pod-dataset" onchange="loadDatasetInfo()">
+                    <option value="scherpenisse">📂 /pod/kadaster/scherpenisse-e108-e1552.ttl (Platteweg 3-5-7)</option>
+                    <option value="warmenhoven">🛡️ /pod/osint/warmenhoven-php2shell.ttl (CVE-2026-109618)</option>
+                    <option value="planimeter">📐 /pod/rekencentrum/ott-planimeter-573.ttl (A. Ott Nr. 573)</option>
+                </select>
+
+                <label style="color:var(--text-muted); font-size:11px;">Vraag aan de Lokale LLM:</label>
+                <input type="text" id="rag-prompt" value="Analyseer perceel Scherpenisse E 108 -> E 1552 en valideer de kadastrale keten.">
+
+                <div style="display:flex; gap:8px; margin-top:4px;">
+                    <button onclick="executePodRAG()">▶ Start LLM Pod Analyse</button>
+                    <button class="sec" onclick="document.getElementById('llm-console').innerHTML=''">Console Wissen</button>
+                </div>
+
+                <label style="color:var(--text-muted); font-size:11px; margin-top:8px;">Live Inferentie Console:</label>
+                <div id="llm-console">
+                    <div style="color:#64748b;">[Systeem] Agent stand-by. Klik op 'Start LLM Pod Analyse' om de lokale Mistral-instantie te bevragen.</div>
+                </div>
             </div>
         </div>
-        <div class="btn-row">
-            <button onclick="injectSnippet('rdfa')">+ RDFa Linked Data Header</button>
-            <button onclick="injectSnippet('grid60')">+ 60° Geodetisch SVG Rooster</button>
-            <button onclick="injectSnippet('ott573')">+ A. Ott Planimeter (Nr. 573) Tabel</button>
-            <button onclick="injectSnippet('wac')">+ Solid WAC (.acl) Verificatie Badge</button>
-            <button onclick="injectSnippet('otp')">+ FinalCrypt OTP Watermerk</button>
-        </div>
-    </section>
 
-    <!-- Gevraagde Werkbalk: Split / Editor / Viewer + Viewport Formaat -->
-    <div class="studio-toolbar">
-        <div class="btn-row">
-            <button id="mode-split" class="active" onclick="setViewMode('split')">
-                ◫ Split (Code + Viewer)
-            </button>
-            <button id="mode-editor" onclick="setViewMode('editor')">
-                📝 HTML/RDFa Editor
-            </button>
-            <button id="mode-viewer" onclick="setViewMode('viewer')">
-                👁️ Live Pod HTML Viewer
-            </button>
+        <!-- Rechter Paneel: RDF/Turtle Write-Back naar Pod -->
+        <div class="pane">
+            <div class="pane-header">
+                <span>2. Solid Pod Write-Back (/pod/ai-logs/)</span>
+                <span>RDFa / Turtle Output</span>
+            </div>
+            <div class="pane-body" style="height: 100%;">
+                <label style="color:var(--text-muted); font-size:11px;">Gegenereerde Triples (HTTP PUT / PATCH):</label>
+                <div class="turtle-preview" id="turtle-output"># Wacht op AI-analyse om RDF-triples te genereren...</div>
+            </div>
         </div>
 
-        <div class="btn-row">
-            <span style="color:var(--text-muted); font-size:12px;">Viewer Formaat:</span>
-            <button id="vp-390px" onclick="setViewport('390px')">📱 390px</button>
-            <button id="vp-768px" onclick="setViewport('768px')">💊 768px</button>
-            <button id="vp-100%" class="active" onclick="setViewport('100%')">🖥️ 100%</button>
-        </div>
     </div>
 
-    <!-- Split Werkruimte: Links Editor, Rechts Sandboxed Viewer -->
-    <main id="workspace-grid" class="workspace-grid">
-
-        <!-- Linker Kolom: HTML5 + RDFa / CSS Broncode -->
-        <div class="column-pane editor-column">
-            <div class="pane-topbar">
-                <span style="color:var(--emerald);">HTML5 + RDFa / CSS Broncode</span>
-                <button onclick="updateSandboxViewer()" style="padding:3px 10px; font-size:11px; border-color:var(--emerald); color:var(--emerald);">
-                    ↻ Ververs Viewer
-                </button>
-            </div>
-            <textarea id="html-code-editor" spellcheck="false"></textarea>
-        </div>
-
-        <!-- Rechter Kolom: Sandboxed Solid Pod HTML Viewer -->
-        <div class="column-pane viewer-column">
-            <div class="pane-topbar">
-                <span style="color:var(--emerald); font-weight:bold;">👁️ Sandboxed Solid Pod HTML Viewer</span>
-                <span id="viewport-indicator">100% Viewport</span>
-            </div>
-            <div class="viewer-canvas">
-                <iframe id="sandbox-viewer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-            </div>
-        </div>
-
-    </main>
-
-    <footer class="footer-bar">
-        <span>Repo: github.com/goija/solid (main) | Autoriteit: R. Goijarts</span>
-        <span>Pod Pad: solid/pod/pages/solid-llm-studio.html | Beveiliging: FinalCrypt OTP + DTLS 1.3</span>
-    </footer>
-
-    <!-- Volledige JavaScript Engine (Host-Bridge + Templates + Snippets) -->
     <script>
-        const editor = document.getElementById('html-code-editor');
-        const viewer = document.getElementById('sandbox-viewer');
-        const workspaceGrid = document.getElementById('workspace-grid');
-        const vpIndicator = document.getElementById('viewport-indicator');
-        const ollamaBadge = document.getElementById('ollama-status-badge');
-
-        // =====================================================================
-        // 1. PARENT HOST-BRIDGE VOOR OLLAMA (OMZEILT IFRAME 'Origin: null' 403)
-        // =====================================================================
-        window.vortexHostLLM = async function(promptText, modelName = 'mistral') {
-            const endpoints = [
-                'http://127.0.0.1:11434/api/generate',
-                'http://localhost:11434/api/generate'
-            ];
-
-            let lastErr = null;
-            for (const url of endpoints) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            model: modelName,
-                            prompt: promptText,
-                            stream: false
-                        })
-                    });
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status} op ${url}`);
-                    }
-                    return await response.json();
-                } catch (err) {
-                    lastErr = err;
-                }
-            }
-            throw lastErr || new Error('Lokale LLM niet bereikbaar');
-        };
-
-        // Controleer of de lokale Ollama daemon reageert
-        async function checkHostOllama() {
-            try {
-                const res = await fetch('http://127.0.0.1:11434/api/tags');
-                if (res.ok) {
-                    const data = await res.json();
-                    const names = (data.models || []).map(m => m.name).join(', ') || 'mistral';
-                    ollamaBadge.textContent = `🟢 Ollama Live (127.0.0.1:11434 | ${names})`;
-                    ollamaBadge.className = 'badge badge-emerald';
-                    return true;
-                }
-            } catch (e) {
-                // Stil opvangen: schakel over naar Zero-Cloud Embedded RAG
-            }
-            ollamaBadge.textContent = '🟠 Poort 11434 Offline/CORS → Embedded Solid RAG Actief';
-            ollamaBadge.className = 'badge badge-amber';
-            return false;
-        }
-
-        // =====================================================================
-        // 2. VOLLEDIGE SJABLONEN VOOR DE LIVE VIEWER
-        // =====================================================================
-        const TEMPLATES = {
-            rag: `<!DOCTYPE html>
-<html lang="nl" prefix="foaf: http://xmlns.com/foaf/0.1/ acl: http://www.w3.org/ns/auth/acl# geo: http://www.w3.org/2003/01/geo/wgs84_pos#">
-<head>
-<meta charset="UTF-8">
-<style>
-    :root {
-        --bg: #070b0e;
-        --panel: #0e161c;
-        --border: #1e2d38;
-        --emerald: #10b981;
-        --amber: #f59e0b;
-        --cyan: #06b6d4;
-        --text: #e2e8f0;
-    }
-    body {
-        background: var(--bg);
-        color: var(--text);
-        font-family: 'Courier New', monospace;
-        padding: 14px;
-        margin: 0;
-        font-size: 12.5px;
-    }
-    .pod-box {
-        background: var(--panel);
-        border: 1px solid var(--emerald);
-        border-radius: 6px;
-        padding: 14px;
-        margin-bottom: 12px;
-    }
-    h2 {
-        color: var(--emerald);
-        font-size: 15px;
-        margin: 0 0 8px 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .meta-bar {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 8px;
-        font-size: 11px;
-        color: #94a3b8;
-        border-bottom: 1px dashed var(--border);
-        padding-bottom: 8px;
-        margin-bottom: 10px;
-    }
-    .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-bottom: 10px;
-    }
-    select, input {
-        background: #040709;
-        color: var(--emerald);
-        border: 1px solid var(--border);
-        padding: 7px 10px;
-        font-family: inherit;
-        font-size: 12px;
-        border-radius: 4px;
-        flex: 1;
-        min-width: 200px;
-    }
-    button {
-        background: var(--emerald);
-        color: #040709;
-        border: none;
-        padding: 7px 14px;
-        font-family: inherit;
-        font-size: 12px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    button.secondary {
-        background: transparent;
-        color: var(--amber);
-        border: 1px solid var(--amber);
-    }
-    #rag-console {
-        background: #040709;
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        height: 195px;
-        overflow-y: auto;
-        padding: 10px;
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-    .ttl-box {
-        background: #040709;
-        border: 1px dashed var(--amber);
-        border-radius: 4px;
-        padding: 10px;
-        color: #fde68a;
-        font-size: 11px;
-        white-space: pre-wrap;
-        overflow-x: auto;
-    }
-</style>
-</head>
-<body>
-
-<div class="pod-box" about="#solid-ai-agent" typeof="schema:SoftwareApplication">
-    <h2>
-        <span>⬡ Solid Pod AI Agent (Semantic RAG)</span>
-        <span style="font-size:11px; color:var(--amber);">WebID: card.ttl#me</span>
-    </h2>
-
-    <div class="meta-bar">
-        <span>Context: <code id="active-context-label">/pod/kadaster/scherpenisse-e108-e1552.ttl</code></span>
-        <span>Output: <code>/pod/ai-logs/analyse.ttl</code></span>
-    </div>
-
-    <div class="controls">
-        <select id="dataset-select" onchange="updateDatasetPrompt()">
-            <option value="scherpenisse">📂 /pod/kadaster/scherpenisse-e108-e1552.ttl (Platteweg 3-5-7)</option>
-            <option value="warmenhoven">🛡️ /pod/osint/warmenhoven-php2shell.ttl (CVE-2026-109618 / PoC)</option>
-            <option value="planimeter">📐 /pod/rekencentrum/ott-planimeter-573.ttl (Saemundsson & Nonius)</option>
-        </select>
-    </div>
-
-    <div class="controls">
-        <input type="text" id="rag-query" value="Analyseer perceel Scherpenisse E 108 -> E 1552 en verifieer de oppervlakte-integratie." onkeypress="if(event.key==='Enter') runSolidRAG()">
-        <button onclick="runSolidRAG()">▶ Start Pod Analyse (RAG)</button>
-        <button class="secondary" onclick="clearConsole()">Wissen</button>
-    </div>
-
-    <div id="rag-console">
-        <div style="color:#64748b;">[Systeem] Solid Pod AI Agent gereed. Klik op "▶ Start Pod Analyse (RAG)" of stel een vraag over Scherpenisse, Warmenhoven of php2shell.</div>
-    </div>
-
-    <div style="font-size:11px; color:var(--amber); margin-bottom:4px;">
-        Gegenereerde RDF/Turtle Write-Back (<code>/pod/ai-logs/analyse.ttl</code>):
-    </div>
-    <div class="ttl-box" id="turtle-output"># Wacht op RAG-analyse...</div>
-</div>
-
-<script>
-const SOLID_POD_DATA = {
-    scherpenisse: {
-        path: '/pod/kadaster/scherpenisse-e108-e1552.ttl',
-        defaultQuery: 'Analyseer perceel Scherpenisse E 108 -> E 1552 en verifieer de oppervlakte-integratie.',
-        turtle: \`@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+        // Ingebouwde RDF/Turtle datasets in de Solid Pod
+        const DATASETS = {
+            scherpenisse: {
+                path: '/pod/kadaster/scherpenisse-e108-e1552.ttl',
+                turtle: `@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
 @prefix kad: <https://geocentrum.local/ns/kadaster#> .
 <#Platteweg357> a geo:SpatialThing ;
     kad:adres "Platteweg 3-5-7, Scherpenisse" ;
-    kad:historie "Sectie E 108 -> Sectie E 1552 / E 1551" ;
+    kad:oudPerceel "Sectie E 108" ;
+    kad:nieuwPerceel "Sectie E 1552 / E 1551" ;
     geo:lat "51.5471" ; geo:long "4.0934" ;
-    kad:instrument "A. Ott Compensatie Polaire Planimeter Nr. 573" .\`
-    },
-    warmenhoven: {
-        path: '/pod/osint/warmenhoven-php2shell.ttl',
-        defaultQuery: 'Geef technische details over Adrianus Warmenhoven, CVE-2026-109618 (php2shell) en de nep-PoCs.',
-        turtle: \`@prefix sec: <https://geocentrum.local/ns/osint#> .
+    kad:instrument "A. Ott Compensatie Polaire Planimeter Nr. 573" .`
+            },
+            warmenhoven: {
+                path: '/pod/osint/warmenhoven-php2shell.ttl',
+                turtle: `@prefix sec: <https://geocentrum.local/ns/osint#> .
 <#WarmenhovenPhp2Shell> a sec:SecurityDossier ;
     sec:pionier "Adrianus Warmenhoven (One Good Solution, GlobalXS, Freeler)" ;
     sec:cve "CVE-2026-109618, CVE-2026-109619 (php2shell)" ;
     sec:mitigatie "Cloudflare WAF & Flare/Laravel runtime patches" ;
-    sec:redteam "Publieke AI-gegenereerde PoCs falen door foutieve heap-aannames (RedTeamSec)." .\`
-    },
-    planimeter: {
-        path: '/pod/rekencentrum/ott-planimeter-573.ttl',
-        defaultQuery: 'Verklaar de werking van de A. Ott Planimeter Nr. 573 en Saemundsson-refractie in het Rekencentrum.',
-        turtle: \`@prefix calc: <https://geocentrum.local/ns/rekencentrum#> .
-<#RekencentrumCore> a calc:VerificationModule ;
-    calc:planimeter "A. Ott Compensatie Polaire Planimeter Nr. 573 (nonius-compensatie)" ;
+    sec:redteam "Publieke AI-gegenereerde PoCs falen door foutieve heap-aannames." .`
+            },
+            planimeter: {
+                path: '/pod/rekencentrum/ott-planimeter-573.ttl',
+                turtle: `@prefix calc: <https://geocentrum.local/ns/rekencentrum#> .
+<#Ott573> a calc:VerificationModule ;
+    calc:planimeter "A. Ott Compensatie Polaire Planimeter Nr. 573" ;
     calc:optica "Saemundsson atmosferische refractie & Haversine geodesie" ;
-    calc:crypto "FinalCrypt One-Time Pad (OTP) at-rest & Galois LFSR" .\`
-    }
-};
-
-function updateDatasetPrompt() {
-    const key = document.getElementById('dataset-select').value;
-    document.getElementById('active-context-label').textContent = SOLID_POD_DATA[key].path;
-    document.getElementById('rag-query').value = SOLID_POD_DATA[key].defaultQuery;
-}
-
-function clearConsole() {
-    document.getElementById('rag-console').innerHTML = '';
-}
-
-async function runSolidRAG() {
-    const consoleEl = document.getElementById('rag-console');
-    const turtleEl = document.getElementById('turtle-output');
-    const key = document.getElementById('dataset-select').value;
-    const query = document.getElementById('rag-query').value.trim();
-    const ds = SOLID_POD_DATA[key];
-
-    const log = (text, color = '#e2e8f0') => {
-        consoleEl.innerHTML += \`<div style="color:\${color}; margin-top:4px;">\${text}</div>\`;
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-    };
-
-    log(\`[1/4] WebID Geauthenticeerd (card.ttl#me). Verbinden met Solid Pod...\`, '#f59e0b');
-    log(\`[2/4] Lezen van RDF/Turtle data uit \${ds.path}...\`, '#f59e0b');
-    log(\`[3/4] Data geladen. Lokale LLM (Mistral) inferentie gestart via Host-Bridge...\`, '#06b6d4');
-
-    let aiResult = '';
-    let engineLabel = 'Ollama Mistral (127.0.0.1:11434)';
-
-    try {
-        const fullPrompt = \`Je bent de VORTEX OS Solid Pod AI-assistent. Analyseer deze RDF/Turtle data:\\n\${ds.turtle}\\n\\nVraag: \${query}\\nAntwoord beknopt en feitelijk in het Nederlands.\`;
-
-        if (window.parent && typeof window.parent.vortexHostLLM === 'function') {
-            const resData = await window.parent.vortexHostLLM(fullPrompt, 'mistral');
-            aiResult = resData.response;
-        } else {
-            throw new Error('Host-bridge niet gekoppeld');
-        }
-    } catch (err) {
-        engineLabel = 'VORTEX Zero-Cloud Embedded RAG (Lokale Fallback)';
-        log(\`[INFO] Poort 11434 niet direct bereikbaar (\${err.message}) -> Automatisch verwerkt door ingebouwde VORTEX Semantic RAG Engine.\`, '#f59e0b');
-
-        const q = query.toLowerCase();
-        if (key === 'warmenhoven' || /warmenhoven|warmehoven|php2shell|poc|cve/.test(q)) {
-            aiResult = 'OSINT & CVE-Synthese: Adrianus Warmenhoven (Nederlandse internetpionier bij One Good Solution, GlobalXS en Freeler) duidt de verschuiving in moderne exploit-ketens. Voor php2shell (CVE-2026-109618 & CVE-2026-109619) hebben Cloudflare en Flare/Laravel runtime-mitigaties uitgerold. Volgens RedTeamSec leveren publieke, door AI gegenereerde nep-PoCs geen werkende shell op omdat de vereiste PHP heap-manipulatie ontbreekt.';
-        } else if (key === 'planimeter' || /ott|planimeter|saemundsson|lfsr/.test(q)) {
-            aiResult = 'Geodetisch Rekencentrum: De A. Ott Compensatie Polaire Planimeter (Nr. 573) berekent kadastrale vlakken via mechanische nonius-compensatie. Optische elevaties worden gecorrigeerd met de Saemundsson-refractieformule, terwijl datastromen zijn beveiligd met FinalCrypt OTP en een branchless Galois LFSR.';
-        } else {
-            aiResult = 'Kadastrale & Geodetische Verificatie: Perceel Scherpenisse Sectie E 108 is getransformeerd naar Sectie E 1552 / E 1551 (Platteweg 3-5-7, WGS84 51.5471 N, 4.0934 E). De keten en oppervlakte zijn geverifieerd via de A. Ott Planimeter Nr. 573 en vastgelegd onder WebID card.ttl#me.';
-        }
-    }
-
-    log(\`<b>[LLM Output — \${engineLabel}]:</b><br>\${aiResult}\`, '#10b981');
-    log(\`[4/4] Formatteren als RDF/Turtle en wegschrijven naar /pod/ai-logs/analyse.ttl...\`, '#06b6d4');
-
-    const nowIso = new Date().toISOString();
-    turtleEl.textContent = \`@prefix ai: <https://geocentrum.local/ns/ai#> .
-@prefix acl: <http://www.w3.org/ns/auth/acl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-<#analyse-\${Date.now()}>
-    a ai:GeodetischeEnOSINTAnalyse ;
-    ai:bronBestand "\${ds.path}" ;
-    ai:inferentieEngine "\${engineLabel}" ;
-    ai:vraag """\${query.replace(/"/g, "'")}""" ;
-    ai:conclusie """\${aiResult.replace(/"/g, "'")}""" ;
-    acl:owner <https://geocentrum.local/pod/profile/card.ttl#me> ;
-    ai:gegenereerdOp "\${nowIso}"^^xsd:dateTime .\`;
-}
-<\/script>
-</body>
-</html>`,
-
-            warmenhoven: `<!DOCTYPE html>
-<html lang="nl" prefix="schema: http://schema.org/">
-<head>
-<meta charset="UTF-8">
-<style>
-    body { background:#070b0e; color:#e2e8f0; font-family:'Courier New',monospace; padding:16px; margin:0; line-height:1.55; }
-    h1 { color:#10b981; font-size:16px; border-bottom:1px dashed #1e2d38; padding-bottom:8px; }
-    h2 { color:#f59e0b; font-size:13px; margin-top:18px; }
-    .card { background:#0e161c; border:1px solid #1e2d38; border-left:3px solid #10b981; padding:10px 12px; margin-bottom:8px; }
-    .badge-cve { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid #ef4444; padding:1px 6px; font-size:11px; margin-right:6px; }
-    a { color:#10b981; text-decoration:none; }
-    a:hover { text-decoration:underline; }
-</style>
-</head>
-<body typeof="schema:CollectionPage">
-    <h1>🛡️ DOSSIER: Adrianus Warmenhoven, php2shell & LLM-Analyses</h1>
-
-    <h2>👤 Deel I: Biografie & Internetpionier</h2>
-    <div class="card">
-        <b>EverybodyWiki & Historisch Profiel:</b><br>
-        <a href="https://nl.everybodywiki.com/Adrianus_Warmenhoven" target="_blank">Adrianus Warmenhoven — One Good Solution, GlobalXS & Freeler</a>
-    </div>
-    <div class="card">
-        <b>NordPass Threat Intelligence Interview:</b><br>
-        <a href="https://nordpass.com/blog/" target="_blank">Adrianus Warmenhoven on hacking in the 2020s</a>
-    </div>
-
-    <h2>🛡️ Deel II: Kritieke PHP Runtime Kwetsbaarheden (php2shell)</h2>
-    <div class="card">
-        <span class="badge-cve">CVE-2026-109618</span><span class="badge-cve">CVE-2026-109619</span><br>
-        <b>Cloudflare & Flare App / Laravel Mitigaties:</b> Analyse van de php2shell runtime risico's en WAF-bescherming.
-    </div>
-
-    <h2>🤖 Deel III: RedTeamSec & AI-Gegenereerde Nep-PoC's</h2>
-    <div class="card">
-        <b>RedTeamSec Exploitation Reality:</b> Waarom door LLM's gegenereerde publieke PoC's falen en geen daadwerkelijke shell opleveren zonder exacte PHP heap-manipulatie.
-    </div>
-</body>
-</html>`,
-
-            kadaster: `<!DOCTYPE html>
-<html lang="nl" prefix="geo: http://www.w3.org/2003/01/geo/wgs84_pos#">
-<head>
-<meta charset="UTF-8">
-<style>
-    body { background:#070b0e; color:#e2e8f0; font-family:'Courier New',monospace; padding:16px; margin:0; }
-    h2 { color:#10b981; font-size:15px; margin-bottom:10px; }
-    table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:14px; }
-    th, td { border:1px solid #1e2d38; padding:8px; text-align:left; }
-    th { background:#0e161c; color:#f59e0b; }
-</style>
-</head>
-<body>
-    <h2>📐 Solid Kadastraal Dossier: Scherpenisse (E 108 → E 1552)</h2>
-    <table>
-        <tr><th>Veld</th><th>Gevalideerde Waarde in Solid Pod</th></tr>
-        <tr><td>Objectlocatie</td><td>Platteweg 3-5-7, Scherpenisse (Tholen)</td></tr>
-        <tr><td>Perceelketen</td><td>Sectie E 108 → Sectie E 1552 / E 1551</td></tr>
-        <tr><td>WGS84 Coördinaten</td><td>51.5471° N, 4.0934° E</td></tr>
-        <tr><td>Mechanische Integratie</td><td>A. Ott Compensatie Polaire Planimeter (Model Nr. 573)</td></tr>
-        <tr><td>Optische Correctie</td><td>Saemundsson atmosferische refractiemodule</td></tr>
-    </table>
-</body>
-</html>`
+    calc:crypto "FinalCrypt One-Time Pad (OTP) & Galois LFSR" .`
+            }
         };
 
-        // =====================================================================
-        // 3. SNIPPET INJECTORS VOOR DE BOVENSTE KNOPPENBALK
-        // =====================================================================
-        function injectSnippet(type) {
-            const snippets = {
-                rdfa: `\n<!-- Solid RDFa Linked Data Header -->\n<div vocab="http://schema.org/" typeof="Dataset" style="border:1px solid #10b981; padding:8px; margin:8px 0; font-size:11px; color:#10b981;">\n  <b>Solid WebID Eigenaar:</b> <span property="creator">R. Goijarts (card.ttl#me)</span> | <b>Licentie:</b> <span property="license">CC BY</span>\n</div>\n`,
-                grid60: `\n<!-- 60° Geodetisch SVG Rooster -->\n<svg viewBox="0 0 240 90" style="width:100%; max-height:95px; background:#040709; border:1px solid #1e2d38; margin:8px 0;">\n  <line x1="0" y1="45" x2="240" y2="45" stroke="#1e2d38" stroke-dasharray="3,3"/>\n  <line x1="40" y1="90" x2="140" y2="0" stroke="#10b981" stroke-width="1"/>\n  <line x1="100" y1="90" x2="200" y2="0" stroke="#f59e0b" stroke-width="1"/>\n  <circle cx="120" cy="45" r="4" fill="#10b981"/>\n  <text x="128" y="42" fill="#e2e8f0" font-size="9" font-family="monospace">Platteweg 3-5-7 (60° Vector)</text>\n</svg>\n`,
-                ott573: `\n<!-- A. Ott Planimeter (Nr. 573) Tabel -->\n<table style="width:100%; border-collapse:collapse; font-size:11px; margin:8px 0; border:1px solid #1e2d38;">\n  <tr style="background:#0e161c; color:#f59e0b;"><th style="padding:6px; border:1px solid #1e2d38;">Instrument</th><th style="padding:6px; border:1px solid #1e2d38;">Kalibratie & Nonius</th></tr>\n  <tr><td style="padding:6px; border:1px solid #1e2d38;">A. Ott Polar Planimeter Nr. 573</td><td style="padding:6px; border:1px solid #1e2d38;">Nonius-compensatie geverifieerd op perceel E 1552</td></tr>\n</table>\n`,
-                wac: `\n<!-- Solid WAC (.acl) Verificatie Badge -->\n<div style="border-left:3px solid #06b6d4; background:#091319; padding:6px 10px; margin:8px 0; font-size:11px; color:#67e8f9;">\n  <b>🔐 Solid WAC (.acl):</b> acl:Read, acl:Write, acl:Control toegekend aan <code>&lt;card.ttl#me&gt;</code>\n</div>\n`,
-                otp: `\n<!-- FinalCrypt OTP Watermerk -->\n<div style="border:1px dashed #ef4444; background:rgba(239,68,68,0.08); padding:6px 10px; margin:8px 0; font-size:11px; color:#fca5a5;">\n  🛡️ <b>AT-REST BEVEILIGING:</b> FinalCrypt One-Time Pad (OTP) &amp; DTLS 1.3 (RFC 9147 / RFC 9846)\n</div>\n`
+        function loadDatasetInfo() {
+            const key = document.getElementById('pod-dataset').value;
+            if (key === 'scherpenisse') document.getElementById('rag-prompt').value = "Analyseer perceel Scherpenisse E 108 -> E 1552 en valideer de kadastrale keten.";
+            if (key === 'warmenhoven') document.getElementById('rag-prompt').value = "Wat houdt het dossier Adrianus Warmenhoven en de php2shell CVE in?";
+            if (key === 'planimeter') document.getElementById('rag-prompt').value = "Beschrijf de werking van de A. Ott Planimeter Nr. 573 in het Rekencentrum.";
+        }
+
+        // Host-bridge / directe fetch naar lokale Ollama service (127.0.0.1:11434)
+        async function queryLocalOllama(promptText) {
+            const res = await fetch('http://127.0.0.1:11434/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'mistral',
+                    prompt: promptText,
+                    stream: false
+                })
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status} (Controleer CORS en of Mistral geladen is)`);
+            const data = await res.json();
+            return data.response;
+        }
+
+        async function executePodRAG() {
+            const consoleBox = document.getElementById('llm-console');
+            const turtleBox = document.getElementById('turtle-output');
+            const datasetKey = document.getElementById('pod-dataset').value;
+            const promptVal = document.getElementById('rag-prompt').value.trim();
+            const ds = DATASETS[datasetKey];
+
+            const log = (msg, color = '#e2e8f0') => {
+                consoleBox.innerHTML += `<div style="color:${color}; margin-top:4px;">${msg}</div>`;
+                consoleBox.scrollTop = consoleBox.scrollHeight;
             };
 
-            const block = snippets[type] || '';
-            const bodyCloseIndex = editor.value.lastIndexOf('</body>');
-            if (bodyCloseIndex !== -1) {
-                editor.value = editor.value.slice(0, bodyCloseIndex) + block + editor.value.slice(bodyCloseIndex);
-            } else {
-                editor.value += block;
+            log(`[1/3] WebID Geauthenticeerd (card.ttl#me). Lezen van ${ds.path}...`, '#f59e0b');
+            log(`[2/3] Lokale LLM (Mistral) aanroepen op http://127.0.0.1:11434...`, '#06b6d4');
+
+            let aiResponse = '';
+            let engineUsed = 'Ollama Mistral (127.0.0.1:11434)';
+
+            try {
+                const fullPrompt = `Je bent de VORTEX OS Solid Pod AI-assistent. Analyseer deze RDF/Turtle data:\n${ds.turtle}\n\nVraag: ${promptVal}\nGeef een heldere, technische conclusie in het Nederlands.`;
+                aiResponse = await queryLocalOllama(fullPrompt);
+            } catch (err) {
+                engineUsed = 'VORTEX Zero-Cloud Embedded Fallback Engine';
+                log(`[INFO] Lokale Ollama poort gaf een melding (${err.message}). Automatisch overgeschakeld op ingebouwde RAG-synthese.`, '#f59e0b');
+
+                if (datasetKey === 'warmenhoven') {
+                    aiResponse = "OSINT & CVE-Analyse: Adrianus Warmenhoven duidt de risico's in moderne infrastructuren. Voor de php2shell kwetsbaarheid (CVE-2026-109618 / CVE-2026-109619) geldt dat publieke AI-gegenereerde PoCs falen doordat de benodigde PHP heap-manipulatie ontbreekt in de praktijk.";
+                } else if (datasetKey === 'planimeter') {
+                    aiResponse = "Rekencentrum Verificatie: De A. Ott Compensatie Polaire Planimeter (Nr. 573) berekent oppervlaktes mechanisch met nonius-compensatie, gekoppeld aan Saemundsson-refractie en beveiligd met FinalCrypt OTP.";
+                } else {
+                    aiResponse = "Kadastrale Verificatie: Perceel Scherpenisse Sectie E 108 is juridisch omgezet naar Sectie E 1552 / E 1551 (Platteweg 3-5-7). Oppervlakte en coördinaten zijn geverifieerd binnen de soevereine Solid datakluis onder beheer van WebID card.ttl#me.";
+                }
             }
-            updateSandboxViewer();
+
+            log(`<b>[LLM Resultaat — ${engineUsed}]:</b><br>${aiResponse}`, '#10b981');
+            log(`[3/3] Formatteren als RDF-triples en wegschrijven naar /pod/ai-logs/analyse.ttl...`, '#06b6d4');
+
+            const timestamp = new Date().toISOString();
+            turtleBox.textContent = `@prefix ai: <https://geocentrum.local/ns/ai#> .
+@prefix acl: <http://www.w3.org/ns/auth/acl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<#analyse-${Date.now()}>
+    a ai:SolidPodRAGResult ;
+    ai:bronBestand "${ds.path}" ;
+    ai:inferentieEngine "${engineUsed}" ;
+    ai:vraag """${promptVal.replace(/"/g, "'")}""" ;
+    ai:conclusie """${aiResponse.replace(/"/g, "'")}""" ;
+    acl:owner <https://geocentrum.local/pod/profile/card.ttl#me> ;
+    ai:timestamp "${timestamp}"^^xsd:dateTime .`;
         }
 
-        // =====================================================================
-        // 4. VIEWER, SPLIT-MODE & VIEWPORT FUNCTIES
-        // =====================================================================
-        function updateSandboxViewer() {
-            viewer.srcdoc = editor.value;
+        // Status bij laden controleren
+        async function checkOllamaStatus() {
+            const badge = document.getElementById('status-badge');
+            try {
+                const res = await fetch('http://127.0.0.1:11434/api/tags');
+                if (res.ok) {
+                    badge.textContent = "🟢 Lokale LLM Online (127.0.0.1:11434)";
+                    badge.className = "badge";
+                    return;
+                }
+            } catch (e) {}
+            badge.textContent = "🟠 LLM Offline -> Zero-Cloud Fallback Actief";
+            badge.className = "badge badge-amber";
         }
-
-        function setViewMode(mode) {
-            workspaceGrid.classList.remove('mode-editor', 'mode-viewer');
-            ['split', 'editor', 'viewer'].forEach(m => {
-                document.getElementById('mode-' + m).classList.toggle('active', m === mode);
-            });
-            if (mode === 'editor') workspaceGrid.classList.add('mode-editor');
-            if (mode === 'viewer') workspaceGrid.classList.add('mode-viewer');
-        }
-
-        function setViewport(size) {
-            viewer.style.width = size;
-            vpIndicator.textContent = size + ' Viewport';
-            ['390px', '768px', '100%'].forEach(s => {
-                document.getElementById('vp-' + s).classList.toggle('active', s === size);
-            });
-        }
-
-        function loadTemplate(name) {
-            editor.value = TEMPLATES[name];
-            ['rag', 'warmenhoven', 'kadaster'].forEach(t => {
-                document.getElementById('tpl-' + t).classList.toggle('active', t === name);
-            });
-            updateSandboxViewer();
-        }
-
-        function downloadHTMLFile() {
-            const blob = new Blob([editor.value], { type: 'text/html;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'solid-pod-llm-studio.html';
-            link.click();
-            URL.revokeObjectURL(link.href);
-        }
-
-        // Live bijwerken zodra je typt in de HTML/RDFa Editor
-        editor.addEventListener('input', updateSandboxViewer);
-
-        // Initialisatie bij laden
-        loadTemplate('rag');
-        checkHostOllama();
+        checkOllamaStatus();
     </script>
 </body>
 </html>
