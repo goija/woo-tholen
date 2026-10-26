@@ -1,21 +1,507 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <title>Rust API Test</title>
-    <style>body { background: #1a1a1a; color: #00ff00; font-family: monospace; padding: 20px; }</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDOK BRK API Tester</title>
+<style>
+  :root {
+    --purple: #6d4aff;
+    --purple-dark: #5836d6;
+    --bg: #f4f2fb;
+    --surface: #ffffff;
+    --border: #ddd8ee;
+    --text: #1f1b33;
+    --muted: #6f6a8a;
+    --green: #1a9e63;
+    --red: #d64545;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.35rem; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  h1 .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--purple); display: inline-block; }
+  .sub { color: var(--muted); font-size: .85rem; margin-bottom: 18px; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .panel h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 12px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  label { font-size: .75rem; color: var(--muted); display: block; margin-bottom: 3px; }
+  input, select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .9rem;
+    background: #faf9ff;
+    color: var(--text);
+  }
+  input:focus, select:focus { outline: 2px solid var(--purple); outline-offset: -1px; }
+  button {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: var(--purple-dark); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.secondary { background: #eeeaff; color: var(--purple-dark); }
+  button.secondary:hover { background: #e0d9ff; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+  .urlbox {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    align-items: stretch;
+  }
+  .urlbox input {
+    font-family: ui-monospace, monospace;
+    font-size: .75rem;
+    background: #2a2640;
+    color: #c9f3b8;
+    border: none;
+    flex: 1;
+  }
+  .status { font-size: .85rem; margin-top: 10px; min-height: 1.2em; }
+  .status.ok { color: var(--green); }
+  .status.err { color: var(--red); }
+  .status.busy { color: var(--muted); }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .tab.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .tabpage { display: none; }
+  .tabpage.active { display: block; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--border);
+    color: var(--muted);
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tr.rowitem { cursor: pointer; }
+  tr.rowitem:hover { background: #f4f0ff; }
+  tr.selected { background: #e9e2ff; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; }
+  td.diff-ok { color: var(--green); }
+  td.diff-warn { color: var(--red); }
+
+  .scroll { overflow-x: auto; }
+  #mapwrap { position: relative; }
+  svg#map { width: 100%; height: 420px; background: #eef0f6; border-radius: 8px; display: block; }
+  .poly { fill: var(--purple); fill-opacity: .18; stroke: var(--purple); stroke-width: 1.2; cursor: pointer; transition: fill-opacity .15s; }
+  .poly:hover, .poly.hl { fill-opacity: .55; }
+  .plabel {
+    font-size: 11px; font-weight: 700; fill: #1f1b33;
+    text-anchor: middle; pointer-events: none;
+    paint-order: stroke; stroke: #fff; stroke-width: 3px;
+  }
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #1f1b33;
+    color: #fff;
+    font-size: .75rem;
+    padding: 8px 10px;
+    border-radius: 8px;
+    display: none;
+    z-index: 5;
+    max-width: 240px;
+    line-height: 1.45;
+  }
+  pre#raw {
+    background: #2a2640;
+    color: #e8e4ff;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: .72rem;
+    overflow: auto;
+    max-height: 500px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .empty { color: var(--muted); font-size: .85rem; padding: 12px 0; }
+  .meta { font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
+  .hint { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+</style>
 </head>
 <body>
-    <h3>BBOX Test</h3>
-    <button onclick="testAPI()">Test API Route</button>
-    <pre id="output">Klik op test...</pre>
-    <script>
-        function testAPI() {
-            fetch('/api/percelen?bbox=66000,396000,67000,397000')
-                .then(r => r.text())
-                .then(t => document.getElementById('output').innerText = t.substring(0, 1000) + '\n\n... (data ingekort)')
-                .catch(e => document.getElementById('output').innerText = "Fout: " + e);
-        }
-    </script>
+
+<h1><span class="dot"></span>PDOK BRK API Tester</h1>
+<div class="sub">Kadastrale Kaart (BRK) · OGC API Features · <code>api.pdok.nl/kadaster/brk-kadastrale-kaart</code></div>
+
+<div class="panel">
+  <h2>Query</h2>
+  <div class="grid">
+    <div>
+      <label for="coll">Collection</label>
+      <select id="coll">
+        <option value="perceel" selected>perceel</option>
+        <option value="appartementsrecht">appartementsrecht</option>
+        <option value="kadastralegemeente">kadastralegemeente</option>
+        <option value="perceelnummeraanduiding">perceelnummeraanduiding</option>
+      </select>
+    </div>
+    <div><label for="minx">BBox min X</label><input id="minx" type="number" value="66000"></div>
+    <div><label for="miny">BBox min Y</label><input id="miny" type="number" value="396000"></div>
+    <div><label for="maxx">BBox max X</label><input id="maxx" type="number" value="67000"></div>
+    <div><label for="maxy">BBox max Y</label><input id="maxy" type="number" value="397000"></div>
+    <div><label for="limit">Limit</label><input id="limit" type="number" value="5" min="1" max="100"></div>
+  </div>
+  <div class="actions">
+    <button id="go">Verstuur ▶</button>
+    <button id="prev" class="secondary" disabled>◀ Vorige pagina</button>
+    <button id="next" class="secondary" disabled>Volgende pagina ▶</button>
+    <span class="hint">CRS: EPSG:28992 (RD New)</span>
+  </div>
+  <div class="urlbox">
+    <input id="url" readonly>
+    <button id="copy" class="secondary" title="Kopieer URL">⧉</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<div class="panel">
+  <div class="tabs">
+    <div class="tab active" data-tab="res">Resultaten</div>
+    <div class="tab" data-tab="map">Kaart</div>
+    <div class="tab" data-tab="raw">Ruwe JSON</div>
+  </div>
+
+  <div class="tabpage active" id="page-res">
+    <div class="meta" id="meta"></div>
+    <div class="scroll"><table id="tbl" style="display:none">
+      <thead><tr>
+        <th>Perceel</th><th>Sectie</th><th>Gemeente</th>
+        <th style="text-align:right">Registr. (m²)</th>
+        <th style="text-align:right">Berekend (m²)</th>
+        <th style="text-align:right">Δ</th>
+        <th> Geldig sinds</th><th>Status</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+    <div class="empty" id="empty-res">Nog geen data — druk op “Verstuur”.</div>
+  </div>
+
+  <div class="tabpage" id="page-map">
+    <div id="mapwrap">
+      <svg id="map" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="tooltip"></div>
+    </div>
+    <div class="hint">Percelen worden in RD-coördinaten getekend; viewBox past zich aan de resultaten aan.</div>
+  </div>
+
+  <div class="tabpage" id="page-raw">
+    <pre id="raw">// nog geen respons…</pre>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const BASE = "https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/collections/";
+  const CRS = encodeURIComponent("http://www.opengis.net/def/crs/EPSG/0/28992");
+
+  const $ = (id) => document.getElementById(id);
+  let lastData = null;
+  let cursors = { prev: null, next: null };
+
+  // ---------- URL ----------
+  function buildUrl(cursor) {
+    const c = $("coll").value.trim() || "perceel";
+    const parts = [$("minx").value, $("miny").value, $("maxx").value, $("maxy").value];
+    const bbox = encodeURIComponent(parts.join(","));
+    const lim = Math.max(1, Math.min(100, parseInt($("limit").value, 10) || 5));
+    let u = BASE + c + "/items?bbox=" + bbox +
+            "&bbox-crs=" + CRS + "&crs=" + CRS + "&limit=" + lim + "&f=json";
+    if (cursor) u += "&cursor=" + encodeURIComponent(cursor);
+    return u;
+  }
+
+  function refreshUrl() { $("url").value = buildUrl(); }
+  ["coll","minx","miny","maxx","maxy","limit"].forEach(id => $(id).addEventListener("input", refreshUrl));
+
+  $("copy").addEventListener("click", () => {
+    navigator.clipboard.writeText($("url").value).then(() => {
+      setStatus("URL gekopieerd naar klembord.", "ok");
+    }).catch(() => {
+      $("url").select(); document.execCommand("copy");
+    });
+  });
+
+  function setStatus(msg, cls) {
+    const s = $("status");
+    s.textContent = msg;
+    s.className = "status " + (cls || "");
+  }
+
+  // ---------- Fetch ----------
+  async function run(cursor) {
+    const url = buildUrl(cursor);
+    $("url").value = url;
+    setStatus("Bezig met laden…", "busy");
+    try {
+      const res = await fetch(url, { headers: { "Accept": "application/geo+json" } });
+      if (!res.ok) {
+        let detail = "";
+        try { detail = (await res.text()).slice(0, 300); } catch (e) {}
+        throw new Error("HTTP " + res.status + " " + res.statusText + (detail ? " — " + detail : ""));
+      }
+      const json = await res.json();
+      lastData = json;
+      cursors.prev = linkCursor(json, "prev");
+      cursors.next = linkCursor(json, "next");
+      $("prev").disabled = !cursors.prev;
+      $("next").disabled = !cursors.next;
+      render(json);
+      setStatus("OK — " + (json.numberReturned ?? (json.features ? json.features.length : "?")) +
+               " features opgehaald.", "ok");
+    } catch (err) {
+      setStatus("Fout: " + err.message +
+        (err instanceof TypeError ? " (netwerk/CORS? PDOK staat cross-origin requests normaal gesproken toe.)" : ""), "err");
+    }
+  }
+
+  function linkCursor(json, rel) {
+    const l = (json.links || []).find(x => x.rel === rel);
+    if (!l || !l.href) return null;
+    try { return new URL(l.href).searchParams.get("cursor"); } catch (e) { return null; }
+  }
+
+  // ---------- Geometrie helpers ----------
+  function ringsOf(geom) {
+    if (!geom) return [];
+    if (geom.type === "Polygon") return geom.coordinates;
+    if (geom.type === "MultiPolygon") return geom.coordinates.flat();
+    return [];
+  }
+
+  function ringArea(pts) {
+    // shoelace, absolute waarde (m², coords zijn meters)
+    let a = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      a += pts[i][0] * pts[i + 1][1] - pts[i + 1][0] * pts[i][1];
+    }
+    return Math.abs(a) / 2;
+  }
+
+  function featureGeomArea(f) {
+    // som van buitenringen, gat-oppervlaktes aftrekken per polygon
+    const polys = f.geometry && f.geometry.type === "MultiPolygon"
+      ? f.geometry.coordinates
+      : f.geometry && f.geometry.type === "Polygon" ? [f.geometry.coordinates] : [];
+    let total = 0;
+    for (const poly of polys) {
+      for (let i = 0; i < poly.length; i++) {
+        total += (i === 0 ? 1 : -1) * ringArea(poly[i]);
+      }
+    }
+    return total;
+  }
+
+  function centroidOf(f) {
+    const rs = ringsOf(f.geometry).filter(r => r.length > 2);
+    if (!rs.length) return null;
+    const r = rs[0]; // buitenring
+    let a = 0, cx = 0, cy = 0;
+    for (let i = 0; i < r.length - 1; i++) {
+      const c = r[i][0] * r[i + 1][1] - r[i + 1][0] * r[i][1];
+      a += c; cx += (r[i][0] + r[i + 1][0]) * c; cy += (r[i][1] + r[i + 1][1]) * c;
+    }
+    if (Math.abs(a) < 1e-9) return [r[0][0], r[0][1]];
+    a *= 0.5;
+    return [cx / (6 * a), cy / (6 * a)];
+  }
+
+  // ---------- Render ----------
+  function render(json) {
+    const feats = json.features || [];
+    $("raw").textContent = JSON.stringify(json, null, 2);
+
+    const n = json.numberReturned ?? feats.length;
+    let ts = json.timeStamp ? " · moment: " + json.timeStamp : "";
+    $("meta").textContent = n + " feature(s) geretourneerd" + ts +
+      (cursors.next ? " — er zijn meer pagina's beschikbaar." : "");
+
+    const tbody = $("tbody");
+    tbody.innerHTML = "";
+    const tbl = $("tbl"), emp = $("empty-res");
+
+    if (!feats.length) {
+      tbl.style.display = "none"; emp.style.display = ""; 
+      emp.textContent = "Geen features in deze bbox.";
+      drawMap([]);
+      return;
+    }
+    tbl.style.display = ""; emp.style.display = "none";
+
+    feats.forEach((f, idx) => {
+      const p = f.properties || {};
+      const reg = p.kadastrale_grootte_waarde != null ? Number(p.kadastrale_grootte_waarde) : null;
+      const calc = featureGeomArea(f);
+      let dTxt = "—", dCls = "";
+      if (reg != null && calc > 0) {
+        const d = ((calc - reg) / reg) * 100;
+        dTxt = (d >= 0 ? "+" : "") + d.toFixed(1) + "%";
+        dCls = Math.abs(d) < 2 ? "diff-ok" : "diff-warn";
+      }
+      const tr = document.createElement("tr");
+      tr.className = "rowitem"; tr.dataset.idx = idx;
+      tr.innerHTML =
+        "<td><b>" + (p.perceelnummer ?? "—") + "</b></td>" +
+        "<td>" + (p.sectie ?? "—") + "</td>" +
+        "<td>" + (p.kadastrale_gemeente_waarde ?? "—") + "</td>" +
+        '<td class="num">' + (reg != null ? reg.toLocaleString("nl-NL") : "—") + "</td>" +
+        '<td class="num">' + (calc > 0 ? Math.round(calc).toLocaleString("nl-NL") : "—") + "</td>" +
+        '<td class="num ' + dCls + '">' + dTxt + "</td>" +
+        "<td>" + (p.begin_geldigheid ? p.begin_geldigheid.slice(0, 10) : "—") + "</td>" +
+        "<td>" + (p.status_historie_waarde ?? "—") + "</td>";
+      tr.addEventListener("mouseover", () => hl(idx, true));
+      tr.addEventListener("mouseout", () => hl(idx, false));
+      tr.addEventListener("click", () => showOnMap(idx));
+      tbody.appendChild(tr);
+    });
+
+    drawMap(feats);
+  }
+
+  function hl(idx, on) {
+    const el = document.querySelector('svg#map path[data-idx="' + idx + '"]');
+    if (el) el.classList.toggle("hl", on);
+    const tr = document.querySelector('tr[data-idx="' + idx + '"]');
+    if (tr) tr.classList.toggle("selected", on);
+  }
+
+  function showOnMap(idx) {
+    switchTab("map");
+    hl(idx, true);
+    setTimeout(() => hl(idx, false), 1200);
+  }
+
+  // ---------- Kaart ----------
+  function drawMap(feats) {
+    const svg = $("map"), tip = $("tooltip");
+    svg.innerHTML = "";
+    if (!feats.length) {
+      const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      t.setAttribute("x", "50%"); t.setAttribute("y", "50%");
+      t.setAttribute("text-anchor", "middle"); t.setAttribute("fill", "#888");
+      t.setAttribute("font-size", "13");
+      t.textContent = "Geen geometrie om te tekenen";
+      svg.appendChild(t);
+      return;
+    }
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    feats.forEach(f => ringsOf(f.geometry).forEach(r => r.forEach(([x, y]) => {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    })));
+    const pad = 40, w = 900, h = 420;
+    const spanX = Math.max(maxX - minX, 1), spanY = Math.max(maxY - minY, 1);
+    const s = Math.min((w - 2 * pad) / spanX, (h - 2 * pad) / spanY);
+    const ox = pad + ((w - 2 * pad) - spanX * s) / 2;
+    const oy = pad + ((h - 2 * pad) - spanY * s) / 2;
+    const tx = (x) => ox + (x - minX) * s;
+    const ty = (y) => h - (oy + (y - minY) * s); // Y-as omkeren
+
+    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+
+    feats.forEach((f, idx) => {
+      const p = f.properties || {};
+      ringsOf(f.geometry).forEach(r => {
+        if (r.length < 3) return;
+        const d = r.map(([x, y], i) => (i ? "L" : "M") + tx(x).toFixed(1) + "," + ty(y).toFixed(1)).join("") + "Z";
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", d);
+        path.setAttribute("class", "poly");
+        path.dataset.idx = idx;
+
+        path.addEventListener("mousemove", (e) => {
+          const rect = svg.getBoundingClientRect();
+          tip.style.display = "block";
+          tip.style.left = Math.min(e.clientX - rect.left + 14, rect.width - 250) + "px";
+          tip.style.top = (e.clientY - rect.top + 14) + "px";
+          tip.innerHTML =
+            "<b>Perceel " + (p.perceelnummer ?? "?") + " · sectie " + (p.sectie ?? "?") + "</b><br>" +
+            (p.kadastrale_gemeente_waarde ?? "") + "<br>" +
+            (p.kadastrale_grootte_waarde != null ? p.kadastrale_grootte_waarde.toLocaleString("nl-NL") + " m² (registratie)<br>" : "") +
+            "<span style='opacity:.65'>ID " + (p.identificatie_lokaal_id ?? f.id) + "</span>";
+        });
+        path.addEventListener("mouseleave", () => { tip.style.display = "none"; });
+        svg.appendChild(path);
+      });
+
+      const c = centroidOf(f);
+      if (c) {
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", tx(c[0])); label.setAttribute("y", ty(c[1]));
+        label.setAttribute("class", "plabel");
+        label.textContent = (p.sectie ?? "") + " " + (p.perceelnummer ?? "?");
+        svg.appendChild(label);
+      }
+    });
+  }
+
+  // ---------- Tabs ----------
+  function switchTab(name) {
+    document.querySelectorAll(".tab").forEach(t =>
+      t.classList.toggle("active", t.dataset.tab === name));
+    document.querySelectorAll(".tabpage").forEach(p =>
+      p.classList.toggle("active", p.id === "page-" + name));
+  }
+  document.querySelectorAll(".tab").forEach(t =>
+    t.addEventListener("click", () => switchTab(t.dataset.tab)));
+
+  // ---------- Init ----------
+  $("go").addEventListener("click", () => run());
+  $("next").addEventListener("click", () => cursors.next && run(cursors.next));
+  $("prev").addEventListener("click", () => cursors.prev && run(cursors.prev));
+  refreshUrl();
+
+  // Voorbeeld laden bij start, zodat je direct iets ziet:
+  // de data uit het eerder geüploande bestand (Poortvliet, perceel 1172 t/m 1180).
+  fetch(buildUrl()).then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)))
+    .then(j => { lastData = j; cursors.prev = linkCursor(j, "prev"); cursors.next = linkCursor(j, "next");
+                 $("prev").disabled = !cursors.prev; $("next").disabled = !cursors.next;
+                 render(j); setStatus("Voorbeeldquery geladen (Poortvliet, bbox 66–67 × 396–397 km).", "ok"); })
+    .catch(() => setStatus("Klaar — druk op “Verstuur” om de query uit te voeren."));
+})();
+</script>
 </body>
 </html>
