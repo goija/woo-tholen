@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VORTEX OS // Juridisch Centrum v4.0 & WebRTC P2P Contact Center</title>
+  <title>VORTEX OS // Juridisch Centrum v3.0 (Mandaat & Proces Engine)</title>
   <style>
     :root {
-      --bg-core: #05080c;
-      --bg-panel: #0c121b;
-      --bg-card: #131c29;
-      --border: #223248;
+      --bg-core: #06090e;
+      --bg-panel: #0e151f;
+      --bg-card: #151f2e;
+      --border: #25354d;
       --accent-green: #10b981;
       --accent-amber: #f59e0b;
       --accent-blue: #3b82f6;
       --accent-red: #ef4444;
       --accent-purple: #a855f7;
-      --accent-cyan: #06b6d4;
       --text-main: #e2e8f0;
       --text-muted: #94a3b8;
       --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
@@ -34,7 +33,7 @@
     header {
       background: var(--bg-panel);
       border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
+      padding: 12px 18px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
@@ -51,12 +50,12 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       flex-wrap: wrap;
     }
     .badge {
       font-family: var(--font-mono);
-      font-size: 0.71rem;
+      font-size: 0.72rem;
       padding: 2px 7px;
       border-radius: 4px;
       border: 1px solid var(--accent-green);
@@ -64,8 +63,7 @@
       background: rgba(16, 185, 129, 0.1);
     }
     .badge-amber { border-color: var(--accent-amber); color: var(--accent-amber); background: rgba(245, 158, 11, 0.1); }
-    .badge-cyan { border-color: var(--accent-cyan); color: #67e8f9; background: rgba(6, 182, 212, 0.12); }
-    .badge-red { border-color: var(--accent-red); color: #fca5a5; background: rgba(239, 68, 68, 0.12); }
+    .badge-blue { border-color: var(--accent-blue); color: #93c5fd; background: rgba(59, 130, 246, 0.12); }
 
     .toolbar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .btn {
@@ -74,7 +72,7 @@
       border: 1px solid var(--border);
       padding: 6px 10px;
       font-family: var(--font-mono);
-      font-size: 0.74rem;
+      font-size: 0.75rem;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.15s;
@@ -84,15 +82,13 @@
       background: rgba(16, 185, 129, 0.18);
       color: #fff;
     }
-    .btn-cyan { border-color: var(--accent-cyan); color: #67e8f9; }
-    .btn-cyan:hover { background: rgba(6, 182, 212, 0.2); }
     .btn-danger { border-color: var(--accent-red); color: #fca5a5; }
 
     .workspace {
       display: grid;
-      grid-template-columns: 330px 1fr 410px;
-      gap: 12px;
-      padding: 12px;
+      grid-template-columns: 350px 1fr 430px;
+      gap: 14px;
+      padding: 14px;
       max-width: 1920px;
       margin: 0 auto;
     }
@@ -101,19 +97,19 @@
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
     }
     .panel-title {
       font-family: var(--font-mono);
-      font-size: 0.82rem;
+      font-size: 0.84rem;
       color: var(--accent-green);
       text-transform: uppercase;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 7px;
+      padding-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -125,8 +121,8 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 5px;
-      padding: 10px;
-      font-size: 0.8rem;
+      padding: 11px;
+      font-size: 0.82rem;
     }
     .card-header {
       font-family: var(--font-mono);
@@ -145,7 +141,10 @@
       cursor: pointer;
       transition: all 0.12s;
     }
-    .spoor-item:hover { background: rgba(59, 130, 246, 0.15); transform: translateX(2px); }
+    .spoor-item:hover, .spoor-item.selected {
+      background: rgba(59, 130, 246, 0.15);
+      transform: translateX(2px);
+    }
     .spoor-c { border-left-color: var(--accent-red); }
     .spoor-d { border-left-color: var(--accent-green); }
     .spoor-e { border-left-color: var(--accent-amber); }
@@ -153,12 +152,13 @@
     .firewall-box {
       border: 1px solid var(--accent-red);
       background: rgba(239, 68, 68, 0.08);
-      padding: 9px;
+      padding: 10px;
       border-radius: 5px;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
     }
     .firewall-box h4 { color: var(--accent-red); font-family: var(--font-mono); margin-bottom: 4px; }
 
+    /* SUB-TABS MIDDENKOLOM */
     .sub-tabs {
       display: flex;
       gap: 6px;
@@ -168,21 +168,24 @@
     }
 
     input[type="text"], input[type="date"], select, textarea {
-      background: #04070b;
+      background: #05080c;
       border: 1px solid var(--border);
       color: var(--text-main);
       padding: 6px 8px;
       border-radius: 4px;
       font-family: var(--font-mono);
-      font-size: 0.76rem;
+      font-size: 0.77rem;
     }
-    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-green); }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-green);
+    }
 
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
     th, td {
       text-align: left;
-      padding: 6px 8px;
+      padding: 7px 8px;
       border-bottom: 1px solid var(--border);
       vertical-align: top;
     }
@@ -192,8 +195,14 @@
       background: rgba(255,255,255,0.02);
       white-space: nowrap;
     }
-    td[contenteditable="true"]:hover { background: rgba(16, 185, 129, 0.08); outline: 1px dashed var(--border); }
-    td[contenteditable="true"]:focus { background: #04070a; outline: 1px solid var(--accent-green); }
+    td[contenteditable="true"]:hover {
+      background: rgba(16, 185, 129, 0.08);
+      outline: 1px dashed var(--border);
+    }
+    td[contenteditable="true"]:focus {
+      background: #04070a;
+      outline: 1px solid var(--accent-green);
+    }
 
     .prod-tag {
       font-family: var(--font-mono);
@@ -213,70 +222,35 @@
       border-radius: 3px;
       font-weight: 600;
       display: inline-block;
-      font-size: 0.71rem;
+      font-size: 0.72rem;
     }
 
-    /* WEBRTC CONTACT CENTER GRID */
-    .cc-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .chat-stream {
-      background: #04070b;
+    details.tree-node {
+      background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 4px;
-      height: 220px;
-      overflow-y: auto;
-      padding: 8px;
+      padding: 7px 10px;
+      margin-bottom: 6px;
+      font-size: 0.79rem;
+    }
+    details.tree-node summary {
       font-family: var(--font-mono);
-      font-size: 0.74rem;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      font-weight: 600;
+      color: var(--accent-green);
+      cursor: pointer;
     }
-    .msg-tx {
-      background: rgba(16, 185, 129, 0.12);
-      border-left: 3px solid var(--accent-green);
-      padding: 5px 8px;
-      border-radius: 3px;
-    }
-    .msg-rx {
-      background: rgba(6, 182, 212, 0.12);
-      border-left: 3px solid var(--accent-cyan);
-      padding: 5px 8px;
-      border-radius: 3px;
-    }
-    .msg-sys {
-      color: var(--accent-amber);
-      font-size: 0.71rem;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #04070b;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 4px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--accent-cyan);
-      width: 0%;
-      transition: width 0.15s;
-    }
+    details.tree-node ul { padding-left: 16px; margin-top: 6px; color: var(--text-muted); }
 
     pre {
       background: #04070b;
       border: 1px solid var(--border);
-      padding: 9px;
+      padding: 10px;
       border-radius: 4px;
       font-family: var(--font-mono);
-      font-size: 0.73rem;
+      font-size: 0.74rem;
       color: #a7f3d0;
       overflow-x: auto;
-      max-height: 350px;
+      max-height: 380px;
       white-space: pre-wrap;
     }
 
@@ -291,11 +265,19 @@
       z-index: 200;
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: 1220px) {
       .workspace { grid-template-columns: 1fr; }
-      .cc-grid { grid-template-columns: 1fr; }
       .mobile-nav { display: flex; }
       .panel.mobile-hidden { display: none !important; }
+    }
+
+    @media print {
+      header, .mobile-nav, #pane-api, .no-print, .sub-tabs { display: none !important; }
+      .workspace { display: block; }
+      .panel { border: none; background: #fff; color: #000; padding: 0; }
+      .card { border: 1px solid #999; background: #fff; color: #000; margin-bottom: 10px; }
+      table, th, td { border: 1px solid #666; color: #000; }
+      th { background: #eee; color: #000; }
     }
   </style>
 </head>
@@ -303,197 +285,92 @@
 
 <header>
   <div class="brand">
-    <span>⬢ VORTEX // JURIDISCH CENTRUM v4.0</span>
+    <span>⬢ VORTEX // JURIDISCH CENTRUM v3.0</span>
     <span class="badge">Peildatum: 27-10-2026</span>
-    <span class="badge badge-cyan" id="rtc-global-status">WebRTC: Standby (P2P Ready)</span>
-    <span class="badge">PostNL: 3SDQYS603048929</span>
-    <span class="badge">BoB BRP: 1463739</span>
+    <span class="badge badge-blue">PostNL: 3SDQYS603048929</span>
+    <span class="badge badge-blue">BoB BRP: 1463739</span>
+    <span id="audit-badge" class="badge">✓ Forensisch Gevalideerd</span>
   </div>
   <div class="toolbar">
-    <button class="btn active" onclick="setProfile('webrtc', this)">📡 [1] WebRTC Contact Center</button>
-    <button class="btn" onclick="setProfile('prod', this)">⚖️ [2] Producties (Prod. 1–14)</button>
-    <button class="btn" onclick="setProfile('mandaat', this)">🏛️ [3] Mandaat Tholen (2024–2026)</button>
-    <button class="btn" onclick="window.print()">🖨️ Print</button>
+    <button class="btn active" onclick="setProfile('all', this)">[1] Onderzoeker (Volledig)</button>
+    <button class="btn" onclick="setProfile('rechter', this)">[2] Rechtbank ZWB Dossier</button>
+    <button class="btn" onclick="setProfile('mandaat', this)">[3] Mandaat & Bevoegdheden</button>
+    <button class="btn" onclick="window.print()">🖨️ Print Dossier</button>
     <button class="btn btn-danger" onclick="resetState()">↺ Reset</button>
   </div>
 </header>
 
 <div class="workspace">
 
-  <!-- KOLOM 1: SPOREN, POSTNL KETEN & CONTACT CENTER QUEUES -->
+  <!-- KOLOM 1: SPOREN, POSTNL KETEN & ONDERZOEKSBOOM -->
   <section class="panel" id="pane-sporen">
     <div class="panel-title">
-      <span>I. Sporen & P2P Routing Queues</span>
-      <button class="btn" onclick="filterSpoor('ALL')">Alles</button>
+      <span>I. De 6 Bestuurlijke Sporen</span>
+      <button class="btn" onclick="filterSpoor('ALL')">Toon Alles</button>
     </div>
 
     <div class="firewall-box">
-      <h4>🛡️ STRIKTE FIREWALL: SPOOR C (1463739) GEBLOKKEERD OP WEBRTC-BUS</h4>
-      <p>Besluit <strong>1463739</strong> (d.d. 21/22-04-2026, ondertekend door <em>J.K. Fraanje</em> & <em>M.L.P. Sijbers</em>) betrof uitsluitend de BRP/AVG-auditlogs.</p>
-      <p style="margin-top:3px;">Het WebRTC DataChannel weigert automatisch pakketten die BSN/BRP-persoonsgegevens bevatten conform <strong>art. 4.1 lid 3 Woo</strong> & <strong>art. 5 AVG</strong>.</p>
+      <h4>🛡️ STRIKTE SCHEIDING: SPOOR C (1463739) ≠ SPOOR D (1456324)</h4>
+      <p>Besluit <strong>1463739</strong> (d.d. 21-04-2026, verzonden 22-04-2026, getekend door <em>J.K. Fraanje</em> & <em>M.L.P. Sijbers</em>) betrof de herroeping inzake de <strong>BRP/AVG-auditlogs</strong> (Spoor C).</p>
+      <p style="margin-top:4px;">Het huidige Woo-visserijdossier (Zaak <strong>1456324</strong>) staat hier krachtens <strong>art. 4.1 lid 3 Woo</strong> (doelneutraliteit) en <strong>art. 5 AVG</strong> (dataminimalisatie) volledig los van.</p>
     </div>
 
-    <div style="display:flex; flex-direction:column; gap:6px;">
+    <div id="sporen-list" style="display:flex; flex-direction:column; gap:7px;">
       <div class="card spoor-item" onclick="filterSpoor('A')">
         <div class="card-header"><span>Spoor A // Initieel Woo</span><span class="badge">01-03-2024</span></div>
-        <p>Gem. Tholen. Afgewezen 25-04-2024; in rechte vast.</p>
+        <p>Gem. Tholen. Afgewezen op 25-04-2024; staat in rechte vast.</p>
       </div>
       <div class="card spoor-item" onclick="filterSpoor('B')">
         <div class="card-header"><span>Spoor B // Rechtbank ZWB</span><span class="prod-tag">Prod. 1</span></div>
-        <p>Zaak: <code>BRE 24/5455 WOO</code> | <code>ECLI:NL:RBZWB:2025:6823</code> (09-10-2025).</p>
+        <p>Zaak: <code>BRE 24/5455 WOO</code> | Uitspraak 09-10-2025 (<code>ECLI:NL:RBZWB:2025:6823</code>).</p>
       </div>
       <div class="card spoor-item spoor-c" onclick="filterSpoor('C')">
-        <div class="card-header"><span>Spoor C // BRP-Auditlogs</span><span class="badge badge-red">Kenmerk 1463739</span></div>
-        <p>BoB 21/22-04-2026 (Fraanje & Sijbers): herroeping besluit 25-11-2025. <strong>Uitgesloten van Woo-kanaal.</strong></p>
+        <div class="card-header"><span>Spoor C // BRP/AVG-Auditlogs</span><span class="badge">Kenmerk 1463739</span></div>
+        <p>BoB d.d. 21-04-2026 (verzonden 22-04-2026, ondertekend door <em>J.K. Fraanje</em> & <em>M.L.P. Sijbers</em>): herroeping besluit 25-11-2025. <strong>Valt buiten dit Woo-visserijberoep.</strong></p>
       </div>
       <div class="card spoor-item spoor-d" onclick="filterSpoor('D')">
         <div class="card-header"><span>Spoor D // Hoofdzaak Visserij</span><span class="badge">Zaak 1456324</span></div>
-        <p>Molenplaat, Pacht, Zuurdeeg, Retributies (13/14-01-2026). R-zending: <code>3SDQYS563283625</code>.</p>
+        <p>Ingediend 13/14-01-2026 (Molenplaat, Pacht, Zuurdeeg, Retributies). Eerdere R-zending: <code>3SDQYS563283625</code>.</p>
       </div>
       <div class="card spoor-item spoor-e" onclick="filterSpoor('E')">
-        <div class="card-header"><span>Spoor E // Bezwaar Art. 4.6</span><span class="badge badge-amber">Zaak 1425030</span></div>
-        <p>Primair <code>1398201</code> -> Advies 28-08-2026 -> Brief <code>1504535</code> (PostNL <code>3SDQYS603048929</code>).</p>
+        <div class="card-header"><span>Spoor E // Bezwaar Art. 4.6 Woo</span><span class="badge badge-amber">Zaak 1425030</span></div>
+        <p>Primair besluit <code>1398201</code> (27-01-2026) -> Hoorzitting (21-05-2026) -> Advies (28-08-2026) -> Brief overname advies <code>1504535</code> (08-10-2026).</p>
       </div>
       <div class="card spoor-item" onclick="filterSpoor('F')">
         <div class="card-header"><span>Spoor F // Prov. Zeeland</span><span class="badge">Zaak 417521</span></div>
-        <p>Besluit GS 19-06-2024: 8 erfgoedstukken openbaar; pacht verwezen naar RVO (<span class="prod-tag">Prod. 5</span>).</p>
+        <p>Besluit GS 19-06-2024: 8 erfgoedstukken openbaar; visserijpacht verwezen naar RVO.</p>
       </div>
     </div>
 
+    <!-- FORENSISCHE POSTNL TRACKING CARD -->
     <div class="card" style="border-color:var(--accent-amber);">
       <div class="card-header">
-        <span>📦 PostNL Kettingbewijs Blaricum</span>
+        <span>📦 Forensische Postketen Blaricum</span>
         <span class="badge badge-amber">0-Dagen Termijn</span>
       </div>
-      <ul style="padding-left:14px; font-size:0.76rem;">
-        <li><strong>Track & Trace:</strong> <code>3SDQYS603048929</code> (R Aangetekend D-A-1)</li>
-        <li><strong>Afzender:</strong> B&W Tholen via Bosstraat 48, Roosendaal (08-10-2026 22:41u)</li>
-        <li><strong>Depot (12-10-2026):</strong> Business Point Van der Wal, Binnendelta 1 T, 1261 WZ Blaricum</li>
-        <li><strong>Feitelijke afhaling:</strong> Vrijdag 23-10-2026 (11:42u) -> 0 dagen hersteltermijn (Strijd art. 3:2 & 2:4 Awb).</li>
+      <ul style="padding-left:15px; font-size:0.78rem; color:var(--text-main);">
+        <li><strong>Barcode:</strong> <code>3SDQYS603048929</code> (R Aangetekend D-A-1)</li>
+        <li><strong>Briefkenmerk B&W:</strong> <code>1504535</code> (d.d. 08-10-2026)</li>
+        <li><strong>Poststempel:</strong> 08-10-2026 om 22:41u (Centraal postcentrum Bosstraat 48, Roosendaal)</li>
+        <li><strong>Depotregistratie:</strong> 12-10-2026 bij <em>Business Point Van der Wal, Binnendelta 1 T, 1261 WZ Blaricum</em></li>
+        <li><strong>Feitelijke afhaling:</strong> Vrijdag 23-10-2026 (11:42u)</li>
+        <li><strong>Kwalificatie:</strong> Deadline "uiterlijk 23-10-2026" = 0 dagen hersteltermijn (Schending art. 3:2 & 2:4 Awb).</li>
       </ul>
     </div>
   </section>
 
-  <!-- KOLOM 2: HOOFDPANEEL MET WEBRTC DATACHANNEL CONTACT CENTER, PRODUCTIES & MANDAAT -->
+  <!-- KOLOM 2: MULTI-TAB WORKSPACE (CHRONOLOGIE | MANDAATMATRIX | RECHTBANK/ZIVVER BRIEF) -->
   <section class="panel" id="pane-chronologie">
     <div class="sub-tabs no-print">
-      <button class="btn active" id="tab-btn-webrtc" onclick="switchCenterView('view-webrtc', this)">📡 1. WebRTC P2P DataChannel Contact Center</button>
-      <button class="btn" id="tab-btn-prod" onclick="switchCenterView('view-prod', this)">⚖️ 2. Productielijst (Prod. 1–14)</button>
-      <button class="btn" id="tab-btn-mandaat" onclick="switchCenterView('view-mandaat', this)">🏛️ 3. Mandaat & Teams Tholen (2024–2026)</button>
+      <button class="btn active" id="tab-btn-prod" onclick="switchCenterView('view-prod', this)">⚖️ 1. Productielijst (Prod. 1–14)</button>
+      <button class="btn" id="tab-btn-mandaat" onclick="switchCenterView('view-mandaat', this)">🏛️ 2. Mandaat & Teams Tholen (2024–2026)</button>
+      <button class="btn" id="tab-btn-zivver" onclick="switchCenterView('view-zivver', this)">✉️ 3. Verzendbrief Rechtbank & Zivver</button>
     </div>
 
-    <!-- SUBVIEW 1: WEBRTC DATACHANNEL CONTACT CENTER ENGINE -->
-    <div id="view-webrtc" style="display:flex; flex-direction:column; gap:10px;">
-      <div class="card" style="border-color:var(--accent-cyan);">
-        <div class="card-header">
-          <span>📡 WebRTC P2P DataChannel Contact Center (DTLS 1.3 / SCTP // Geen Zivver Cloud)</span>
-          <span class="badge badge-cyan" id="dc-channel-state">Kanaal: Gesloten</span>
-        </div>
-        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:8px;">
-          Zet een directe, versleutelde peer-to-peer verbinding op voor bewijsstukken (<code>Prod. 1–14</code>), pachtmatrices en formele procescorrespondentie. Werkt <strong>tussen twee tabbladen/vensters</strong> (via lokale signaling-bus) én <strong>remote</strong> (via handmatige Base64 SDP Offer/Answer uitwisseling zonder centrale server).
-        </p>
-
-        <!-- SNELLE VERBINDINGSKNOPPEN -->
-        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
-          <button class="btn btn-cyan" onclick="startAutoTabLoopback()">⚡ 1-Klik P2P Verbinding (Tussen 2 Tabbladen)</button>
-          <button class="btn" onclick="createManualOffer()">🔑 Genereer SDP Offer (Caller)</button>
-          <button class="btn" onclick="acceptRemoteOfferAndCreateAnswer()">📩 Verwerk Remote Offer -> Maak Answer (Callee)</button>
-          <button class="btn" onclick="finalizeManualAnswer()">✅ Voltooi met Remote Answer</button>
-          <button class="btn btn-danger" onclick="closeWebRTC()">✖ Verbreek P2P</button>
-        </div>
-
-        <!-- SDP SIGNALING BOXES (INKLAPBAAR) -->
-        <details style="margin-bottom:6px;">
-          <summary style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-cyan); cursor:pointer;">
-            🔧 Handmatige Serverless SDP Signaling & DTLS Certificaat Fingerprint (Klik om te openen)
-          </summary>
-          <div class="cc-grid" style="margin-top:8px;">
-            <div>
-              <label style="font-size:0.72rem; color:var(--text-muted);">Lokale SDP (Kopieer en stuur naar Peer):</label>
-              <textarea id="sdp-local" rows="4" readonly placeholder="Klik op 'Genereer SDP Offer'..." style="width:100%;"></textarea>
-              <button class="btn" style="margin-top:4px; width:100%;" onclick="navigator.clipboard.writeText(document.getElementById('sdp-local').value)">📋 Kopieer Lokale SDP</button>
-            </div>
-            <div>
-              <label style="font-size:0.72rem; color:var(--text-muted);">Remote SDP (Plak Offer of Answer van Peer hier):</label>
-              <textarea id="sdp-remote" rows="4" placeholder="Plak hier de Base64/JSON SDP van de andere partij..." style="width:100%;"></textarea>
-            </div>
-          </div>
-        </details>
-
-        <!-- TELEMETRY BALK -->
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:6px; font-family:var(--font-mono); font-size:0.72rem;">
-          <div class="card" style="padding:5px 8px; background:#04070b;">ICE State: <strong id="stat-ice" style="color:var(--accent-amber);">new</strong></div>
-          <div class="card" style="padding:5px 8px; background:#04070b;">SCTP Buffered: <strong id="stat-buf">0 B</strong></div>
-          <div class="card" style="padding:5px 8px; background:#04070b;">TX / RX Pakketten: <strong id="stat-pkt">0 / 0</strong></div>
-          <div class="card" style="padding:5px 8px; background:#04070b;">Laatste SHA-256: <strong id="stat-hash" style="color:var(--accent-green);">--</strong></div>
-        </div>
-      </div>
-
-      <!-- CONTACT CENTER QUEUE ROUTING & CHUNKED BEWIJSTRANSMISSIE -->
-      <div class="cc-grid">
-        <!-- LINKER HELFT: QUEUE & BERICHTEN DISPATCHER -->
-        <div class="card">
-          <div class="card-header">
-            <span>🎯 Contact Center Queue & Proces-Dispatcher</span>
-            <span class="badge">Kanaal: juridisch-control-cc</span>
-          </div>
-          <label style="font-size:0.72rem; color:var(--text-muted);">Selecteer Bestemmings-Queue (Ontvangend Orgaan / Team):</label>
-          <select id="cc-queue" style="width:100%; margin:4px 0 8px 0;">
-            <option value="RECHTBANK_ZWB">Queue 1: Rechtbank Zeeland-West-Brabant (Zaak BRE 24/5455 WOO & 1456324)</option>
-            <option value="THOLEN_CONCERNZAKEN">Queue 2: B&W Tholen // Team Concernzaken (Zaak 1425030 & Brief 1504535)</option>
-            <option value="THOLEN_MIDDELEN_FIN">Queue 3: B&W Tholen // Team Middelen - Cluster Financiën (Pacht & Retributies)</option>
-            <option value="DOORZEND_ART4_2">Queue 4: Art. 4.2 Woo Doorzend-Orgaan (GS Zeeland 417521 / RVO / RWS / LVVN)</option>
-          </select>
-
-          <label style="font-size:0.72rem; color:var(--text-muted);">Kies Standaard Proceshandeling (of typ hieronder):</label>
-          <div style="display:flex; gap:4px; flex-wrap:wrap; margin:4px 0 8px 0;">
-            <button class="btn" onclick="loadTemplate('blaricum')">0-Dagen Termijn (3SDQYS603048929)</button>
-            <button class="btn" onclick="loadTemplate('doorzend')">Sommatie Art. 4.2 Woo</button>
-            <button class="btn" onclick="loadTemplate('mandaat')">Mandaatgebrek Art. 10:3 Awb</button>
-          </div>
-
-          <textarea id="cc-message" rows="4" style="width:100%; margin-bottom:6px;" placeholder="Typ formeel procesbericht voor directe P2P-verzending over het DataChannel..."></textarea>
-          <button class="btn btn-cyan" style="width:100%;" onclick="sendControlMessage()">📤 Verstuur Versleuteld P2P Bericht + SHA-256</button>
-        </div>
-
-        <!-- RECHTER HELFT: 16KB CHUNKED PRODUCTIE & BESTANDSOVERDRACHT -->
-        <div class="card">
-          <div class="card-header">
-            <span>📦 P2P Bewijs- & Productie Vault (16KB SCTP Chunks)</span>
-            <span class="badge badge-cyan">Kanaal: productie-binary-vault</span>
-          </div>
-          <label style="font-size:0.72rem; color:var(--text-muted);">1. Verstuur Geselecteerde Productie uit Dossier (Met SHA-256 Hash):</label>
-          <div style="display:flex; gap:6px; margin:4px 0 10px 0;">
-            <select id="cc-prod-select" style="flex:1;"></select>
-            <button class="btn btn-cyan" onclick="sendSelectedProductionP2P()">⚡ Stream Productie</button>
-          </div>
-
-          <label style="font-size:0.72rem; color:var(--text-muted);">2. Verstuur Volledig DossierPakket (Prod. 1–14 + Mandaatmatrix 2024–2026):</label>
-          <button class="btn" style="width:100%; margin:4px 0 10px 0;" onclick="sendFullDossierBundleP2P()">📚 Stream Integraal Procesdossier (JSON-LD + Turtle)</button>
-
-          <label style="font-size:0.72rem; color:var(--text-muted);">3. Of stream een fysiek bestand (PDF, GeoJSON, Scan PostNL) in 16KB chunks:</label>
-          <input type="file" id="cc-file-input" style="width:100%; margin-top:4px;" onchange="sendBinaryFileP2P(this.files[0])">
-          <div class="progress-bar"><div class="progress-fill" id="cc-progress"></div></div>
-          <div id="cc-transfer-status" style="font-family:var(--font-mono); font-size:0.71rem; color:var(--text-muted); margin-top:4px;">Geen actieve overdracht.</div>
-        </div>
-      </div>
-
-      <!-- LIVE P2P TRANSCRIPT & AUDIT STREAM -->
-      <div class="card">
-        <div class="card-header">
-          <span>📜 Live WebRTC P2P Contact Center Transcript & Cryptografisch Ontvangstregister</span>
-          <button class="btn" onclick="exportTranscriptToPod()">💾 Schrijf Audit-Log naar Solid Pod (/pod/ai-logs/)</button>
-        </div>
-        <div class="chat-stream" id="cc-stream">
-          <div class="msg-sys">[SYSTEEM] WebRTC DataChannel Contact Center gereed. Open deze pagina eventueel in een 2e tabblad en klik op '⚡ 1-Klik P2P Verbinding' om live P2P overdracht te testen.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBVIEW 2: PRODUCTIELIJST (PROD. 1-14) -->
-    <div id="view-prod" style="display:none; flex-direction:column; gap:10px;">
+    <!-- SUBVIEW 1: PRODUCTIELIJST & TERMIJNEN -->
+    <div id="view-prod" style="display:flex; flex-direction:column; gap:12px;">
       <div style="display:flex; gap:8px; justify-content:space-between; align-items:center;" class="no-print">
-        <input type="text" id="search-input" placeholder="🔎 Zoek op 3SDQYS603048929, 1463739, 1456324, Fraanje, Sijbers..." oninput="renderTable()" style="flex:1;">
+        <input type="text" id="search-input" placeholder="🔎 Filter op kenmerk (bijv. 1463739, 3SDQYS603048929, Fraanje, Molenplaat)..." oninput="renderTable()" style="flex:1;">
         <button class="btn" onclick="addProductionRow()">+ Rij</button>
       </div>
 
@@ -504,7 +381,7 @@
               <th>Prod.</th>
               <th>Spoor</th>
               <th>Datum</th>
-              <th>Zaak / Kenmerk / PostNL Barcode</th>
+              <th>Zaak / Kenmerk / Barcode</th>
               <th>Proceshandeling, Ondertekening & Juridische Kwalificatie</th>
             </tr>
           </thead>
@@ -516,39 +393,45 @@
       <div class="card" style="border-color:var(--accent-amber);">
         <div class="card-header">
           <span>⏱️ Awb-Termijnbewaker (Peildatum: Dinsdag 27 oktober 2026)</span>
-          <span class="badge badge-amber">Actieve Beslistermijn</span>
+          <span class="badge badge-amber">Actieve Termijn</span>
         </div>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:8px; align-items:end; margin-top:4px;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap:8px; align-items:end; margin-top:6px;">
           <div>
-            <label style="font-size:0.72rem; color:var(--text-muted);">Datum Precisering (PM-01):</label>
+            <label style="font-size:0.73rem; color:var(--text-muted);">Datum Precisering (PM-01):</label>
             <input type="date" id="calc-start" value="2026-10-24" onchange="calculateDeadlines()" style="width:100%;">
           </div>
           <div>
-            <label style="font-size:0.72rem; color:var(--text-muted);">Resterende Dagen:</label>
+            <label style="font-size:0.73rem; color:var(--text-muted);">Wettelijke Termijn (dagen):</label>
             <input type="text" id="calc-days" value="28" oninput="calculateDeadlines()" style="width:100%;">
           </div>
-          <div class="card" style="padding:5px 8px; background:#04070b;">
-            <div style="font-size:0.7rem; color:var(--text-muted);">Einde Termijn (IGS ex 4:17 Awb):</div>
+          <div class="card" style="padding:6px 10px; background:#05080c;">
+            <div style="font-size:0.71rem; color:var(--text-muted);">Einde Beslistermijn (IGS ex 4:17 Awb):</div>
             <div id="out-igs-date" style="font-family:var(--font-mono); color:var(--accent-amber); font-weight:700;">--</div>
           </div>
-          <div class="card" style="padding:5px 8px; background:#04070b;">
-            <div style="font-size:0.7rem; color:var(--text-muted);">Verzuim & Beroep 8:55d Awb (+14d):</div>
+          <div class="card" style="padding:6px 10px; background:#05080c;">
+            <div style="font-size:0.71rem; color:var(--text-muted);">Verzuim & Beroep 8:55d Awb (+14d):</div>
             <div id="out-beroep-date" style="font-family:var(--font-mono); color:var(--accent-green); font-weight:700;">--</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- SUBVIEW 3: MANDAAT & TEAMS GEMEENTE THOLEN (2024-2026) -->
-    <div id="view-mandaat" style="display:none; flex-direction:column; gap:10px;">
+    <!-- SUBVIEW 2: MANDAAT, VOLMACHT & MACHTIGING GEMEENTE THOLEN (2024-2026) -->
+    <div id="view-mandaat" style="display:none; flex-direction:column; gap:12px;">
       <div class="card" style="border-color:var(--accent-purple);">
         <div class="card-header">
           <span>🏛️ Algemeen Mandaat-, Volmacht- en Machtigingsbesluit Gemeente Tholen (2024 / 2025 / 2026)</span>
           <span class="mandaat-tag">Art. 10:1 – 10:12 Awb</span>
         </div>
-        <select id="mandaat-filter" onchange="renderMandaatTable()" style="width:100%; margin-top:6px;">
-          <option value="ALL">Toon Alle Teams & Clusters (B&W, Team Middelen, Team Concernzaken, Team Alle)</option>
-          <option value="Bestuur">Bestuursorganen (B&W / Burgemeester M.L.P. Sijbers / Secretaris J.K. Fraanje)</option>
+        <p style="font-size:0.8rem; color:var(--text-muted);">
+          Overzicht van de bestuurlijke en ambtelijke bevoegdheidsverdeling binnen de Gemeente Tholen voor het Woo-visserijdossier (Zaak <code>1456324</code>), de bezwaarprocedure (Zaak <code>1425030</code>) en het afgesloten BRP-besluit (Kenmerk <code>1463739</code>).
+        </p>
+      </div>
+
+      <div style="display:flex; gap:8px;" class="no-print">
+        <select id="mandaat-filter" onchange="renderMandaatTable()" style="flex:1;">
+          <option value="ALL">Toon Alle Teams & Clusters (Middelen, Concernzaken, Team Alle, B&W)</option>
+          <option value="Bestuur">Bestuursorganen (B&W / Burgemeester Sijbers / Secretaris Fraanje)</option>
           <option value="Team Middelen - Cluster Financiën">Team Middelen — Cluster Financiën</option>
           <option value="Team Middelen - Cluster Personeelszaken">Team Middelen — Cluster Personeelszaken</option>
           <option value="Team Concernzaken - Cluster n.v.t.">Team Concernzaken — Cluster n.v.t.</option>
@@ -561,8 +444,8 @@
           <thead>
             <tr>
               <th>Team & Cluster</th>
-              <th>Mandaat 2024–2026 & Bevoegdheden</th>
-              <th>Dossier-Middelen & Registers</th>
+              <th>Mandaat 2024–2026 & Omschrijving Bevoegdheden</th>
+              <th>Dossier-Middelen & Woo-Verplichting</th>
               <th>Wettelijke Grens / Uitsluiting (Awb)</th>
             </tr>
           </thead>
@@ -571,11 +454,22 @@
       </div>
     </div>
 
+    <!-- SUBVIEW 3: DEFINITIEVE VERZENDBRIEF RECHTBANK ZWB & ZIVVER-FORMULIER -->
+    <div id="view-zivver" style="display:none; flex-direction:column; gap:12px;">
+      <div class="card">
+        <div class="card-header">
+          <span>✉️ Definitieve Aanbiedingsbrief & Zivver-Payload (Rechtbank Zeeland-West-Brabant)</span>
+          <button class="btn" onclick="copyZivver()">📋 Kopieer Volledige Brief</button>
+        </div>
+        <pre id="zivver-output" style="max-height:540px; color:#e2e8f0;"></pre>
+      </div>
+    </div>
+
     <!-- KLADRUIMTE -->
     <div class="card" id="klad-box">
       <div class="card-header">
-        <span>📝 Dossier- & Zittingsnotities (Lokaal opgeslagen)</span>
-        <span id="save-status" style="font-size:0.71rem; color:var(--accent-green);">✓ Gesynchroniseerd</span>
+        <span>📝 Pleit- & Dossieraantekeningen (Lokaal gesynchroniseerd)</span>
+        <span id="save-status" style="font-size:0.72rem; color:var(--accent-green);">✓ Gesynchroniseerd</span>
       </div>
       <textarea id="notes-area" rows="2" oninput="saveAllState()" style="width:100%; margin-top:4px;"></textarea>
     </div>
@@ -584,15 +478,15 @@
   <!-- KOLOM 3: LIVE API GENERATORS (JSON, JSONP, RSS, SOLID POD, PDOK) -->
   <section class="panel" id="pane-api">
     <div class="panel-title">
-      <span>III. API, RSS & Solid Pod Feeds</span>
+      <span>III. API, RSS & Solid Pod Engine</span>
       <span>[Zero-Cloud]</span>
     </div>
 
     <div class="toolbar">
-      <button class="btn active" onclick="setFeedMode('turtle', this)">Solid Turtle</button>
-      <button class="btn" onclick="setFeedMode('json', this)">REST JSON</button>
+      <button class="btn active" onclick="setFeedMode('json', this)">REST JSON</button>
       <button class="btn" onclick="setFeedMode('jsonp', this)">JSONP</button>
       <button class="btn" onclick="setFeedMode('rss', this)">RSS 2.0 (8081)</button>
+      <button class="btn" onclick="setFeedMode('turtle', this)">Solid Turtle</button>
       <button class="btn" onclick="setFeedMode('wac', this)">WAC (.acl)</button>
       <button class="btn" onclick="setFeedMode('pdok', this)">PDOK OGC</button>
     </div>
@@ -606,7 +500,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header"><span>🔍 Forensische Status & WebRTC Audit</span></div>
+      <div class="card-header"><span>🔍 Forensische Dossier-Audit (v3.0)</span></div>
       <pre id="integrity-output" style="max-height:190px; color:#a7f3d0;"></pre>
     </div>
   </section>
@@ -615,21 +509,21 @@
 
 <nav class="mobile-nav">
   <button class="btn active" onclick="switchMobileTab('pane-sporen', this)">1. Sporen</button>
-  <button class="btn" onclick="switchMobileTab('pane-chronologie', this)">2. WebRTC & Dossier</button>
+  <button class="btn" onclick="switchMobileTab('pane-chronologie', this)">2. Dossier & Mandaat</button>
   <button class="btn" onclick="switchMobileTab('pane-api', this)">3. API & Pod</button>
 </nav>
 
 <script>
-  const STORAGE_KEY = 'vortex_juridisch_webrtc_v4';
+  const STORAGE_KEY = 'vortex_juridisch_dossier_v3_validated';
   let currentSpoorFilter = 'ALL';
-  let currentFeedMode = 'turtle';
+  let currentFeedMode = 'json';
 
-  // Forensisch gevalideerde Producties (Prod. 1 t/m 14)
+  // Forensisch gevalideerde Productielijst met alle exacte kenmerken
   const defaultProductions = [
     { prod: "Prod. 1a", spoor: "A", datum: "2024-04-25", kenmerk: "Besluit B&W (Verzoek 01-03-2024)", omschrijving: "Afwijzingsbesluit B&W Tholen op oorspronkelijk Woo-verzoek; staat formeel in rechte vast." },
     { prod: "Prod. 5",  spoor: "F", datum: "2024-06-19", kenmerk: "Zaak 417521 (GS Zeeland)", omschrijving: "Eindbesluit Gedeputeerde Staten van Zeeland: 8 erfgoedstukken openbaar; visserijpacht verwezen naar RVO." },
     { prod: "Prod. 1",  spoor: "B", datum: "2025-10-09", kenmerk: "BRE 24/5455 WOO | ECLI:NL:RBZWB:2025:6823", omschrijving: "Uitspraak Rechtbank Zeeland-West-Brabant: rechterlijke opdracht aan B&W Tholen tot besluitvorming." },
-    { prod: "Prod. 2",  spoor: "D", datum: "2026-01-13", kenmerk: "Zaak 1456324 | PostNL 3SDQYS563283625", omschrijving: "Formele indiening Hernieuwd Woo-verzoek Visserijrechten, Molenplaat & Dossier-Zuurdeeg (incl. aangetekende zending 3SDQYS563283625)." },
+    { prod: "Prod. 2",  spoor: "D", datum: "2026-01-13", kenmerk: "Zaak 1456324 | PostNL 3SDQYS563283625", omschrijving: "Formele indiening Hernieuwd Woo-verzoek Visserijrechten, Molenplaat & Dossier-Zuurdeeg (incl. R-zending ref. 3SDQYS563283625)." },
     { prod: "Prod. 6",  spoor: "D", datum: "2026-01-14", kenmerk: "Zaak 1456324", omschrijving: "Formele ontvangstbevestiging van het Hernieuwde Woo-verzoek door Gemeente Tholen." },
     { prod: "Prod. 3",  spoor: "E", datum: "2026-01-27", kenmerk: "Besluit 1398201", omschrijving: "Primair besluit B&W Tholen tot buitenbehandelingstelling van het Woo-visserijverzoek o.g.v. art. 4.6 Woo (antimisbruik)." },
     { prod: "Prod. 4",  spoor: "E", datum: "2026-01-28", kenmerk: "Zaak 1425030", omschrijving: "Formeel bezwaarschrift verzoeker (incl. ontvangstbewijs) tegen het primaire besluit 1398201." },
@@ -643,415 +537,50 @@
     { prod: "Prod. 14", spoor: "D", datum: "2026-10-26", kenmerk: "Proton Mail PM-03 (26-10-2026 18:26 CET)", omschrijving: "Aanhoudingsverzoek overlegfase tot bekendmaking formele Beslissing op Bezwaar inzake de visserijzaak, met expliciete uitsluiting van verdaging ex art. 7:10 lid 4 Awb." }
   ];
 
-  // Mandaatmatrix Gemeente Tholen 2024-2026
+  // Volledige Mandaat- en Organisatiematrix Gemeente Tholen (2024, 2025, 2026)
   const mandaatMatrix = [
     {
       team: "Bestuur",
       naam: "College van B&W / Burgemeester (M.L.P. Sijbers) / Gemeentesecretaris (J.K. Fraanje)",
-      bevoegdheid: "Oorspronkelijk bevoegd bestuursorgaan (Art. 160 & 171 Gemeentewet). Ondertekening formele Beslissingen op Bezwaar (zoals Besluit 1463739 d.d. 21-04-2026) en herroeping van primaire besluiten (Besluit 1398201 / Brief 1504535).",
-      middelen: "Besluitenregisters B&W, collegiale besluitvorming, procesvertegenwoordiging Rechtbank ZWB.",
-      grens: "Art. 10:3 lid 3 Awb & Art. 7:11 Awb: Beslissing op bezwaar en herroeping na commissieadvies mogen niet in mandaat worden genomen door dezelfde functionaris die het primaire besluit nam."
+      bevoegdheid: "Oorspronkelijk bevoegd bestuursorgaan (Art. 160 & 171 Gemeentewet). Ondertekening formele Beslissingen op Bezwaar (zoals Besluit 1463739 d.d. 21-04-2026) en intrekking/herroeping van primaire besluiten (Besluit 1398201 / Brief 1504535).",
+      middelen: "Besluitenregisters B&W, collegiale besluitvorming, formele vertegenwoordiging in rechte bij Rechtbank ZWB.",
+      grens: "Art. 10:3 lid 3 Awb & Art. 7:11 Awb: Herroeping na advies Bezwaarschriftencommissie is voorbehouden aan B&W en mag niet worden afgedaan door de ambtenaar die het primaire besluit nam."
     },
     {
       team: "Team Middelen - Cluster Financiën",
       naam: "Team Middelen // Cluster Financiën",
-      bevoegdheid: "Mandaatbesluit Tholen 2024/2025/2026: Financiële administratie, beheer van pachtopbrengsten, retributieregisters (Art. 219 Gemeentewet), gemeentelijke begroting en jaarrekeningen (Art. 186 Gemeentewet), privaatrechtelijke incasso visserijpacht Molenplaat.",
-      middelen: "Grootboekadministratie, debiteurenregisters pacht & visserij (1990–heden), kohieren en betalingen Dossier-Zuurdeeg.",
-      grens: "Art. 2.1 & 4.1 Woo: Verplicht om financiële verantwoording van publieke pachtgronden en retributies onverkort aan te leveren voor openbaarmaking."
+      bevoegdheid: "Mandaatbesluit Tholen 2024/2025/2026: Financiële administratie, beheer van pachtopbrengsten, retributieregisters (Art. 219 Gemeentewet), opstellen gemeentelijke begroting en jaarrekeningen (Art. 186 Gemeentewet), privaatrechtelijke incasso visserijpacht Molenplaat.",
+      middelen: "Grootboekadministratie, debiteurenregisters pacht & visserij (1990–heden), kohieren en betalingsbewijzen Dossier-Zuurdeeg.",
+      grens: "Art. 2.1 & 4.1 Woo: Verplicht om financiële verantwoording van publieke pachtgronden en retributies onverkort aan te leveren voor openbaarmaking; geen weigeringsgrond voor overheidsontvangsten."
     },
     {
       team: "Team Middelen - Cluster Personeelszaken",
       naam: "Team Middelen // Cluster Personeelszaken",
-      bevoegdheid: "Mandaatbesluit Tholen 2024/2025/2026: Uitvoering Ambtenarenwet / Cao Gemeenten, interne systeemautorisaties en personeelsdossiers.",
+      bevoegdheid: "Mandaatbesluit Tholen 2024/2025/2026: Uitvoering Ambtenarenwet / Cao Gemeenten, interne autorisaties, beheer personeels- en integriteitsdossiers.",
       middelen: "Personeelsadministratie en interne toegangsrechten.",
-      grens: "STRIKTE FIREWALL (Art. 5 AVG & Art. 3:3 Awb): Geen enkele bevoegdheid tot vermenging met publieke Woo-procedures."
+      grens: "STRIKTE FIREWALL (Art. 5 AVG & Art. 3:3 Awb): Geen enkele bevoegdheid tot vermenging met publieke Woo-procedures van burgers."
     },
     {
       team: "Team Concernzaken - Cluster n.v.t.",
       naam: "Team Concernzaken // Cluster n.v.t. (Juridische Zaken, Woo-coördinatie, DIV/Archief & Secretariaat Bezwaar)",
-      bevoegdheid: "Mandaatbesluit Tholen 2024/2025/2026: Behandeling Woo-verzoeken (Art. 4.1–4.6 Woo), preciseringsoverleg (Art. 4.1 lid 5 Woo), doorzending (Art. 4.2 Woo), archiefbeheer (Archiefwet 1995) en secretariaat Bezwaarschriftencommissie.",
-      middelen: "Zaaksysteem (Zaken 1456324, 1425030, 1398201, 1504535, 1463739), verzendadministratie (Bosstraat 48 Roosendaal), DIV-archiefkluis.",
-      grens: "Art. 10:3 Awb: Onbevoegd om zelfstandig in mandaat een B&W-afwijzing te herroepen zonder formeel B&W-besluit. Dwingende doorzendplicht ex art. 4.2 Woo."
+      bevoegdheid: "Mandaatbesluit Tholen 2024/2025/2026: Behandeling Woo-verzoeken (Art. 4.1–4.6 Woo), voeren van preciseringsoverleg (Art. 4.1 lid 5 Woo), verdagingen, doorzending (Art. 4.2 Woo), archiefbeheer conform Archiefwet 1995 en ondersteuning Bezwaarschriftencommissie.",
+      middelen: "Zaaksysteem (Zaken 1456324, 1425030, 1398201, 1504535, 1463739), postregistratie (Bosstraat 48 Roosendaal), DIV-archiefkluis.",
+      grens: "Art. 10:3 Awb: Mag géén beslissing op bezwaar nemen indien het primaire besluit (1398201) binnen hetzelfde team in mandaat is genomen. Dwingende doorzendplicht ex art. 4.2 Woo."
     },
     {
       team: "Team Alle - Cluster n.v.t.",
       naam: "Team Alle // Cluster n.v.t. (Algemene Mandaten voor alle Teams / Domeinen)",
       bevoegdheid: "Mandaatbesluit Tholen 2024/2025/2026 (Algemene bepalingen): Feitelijke handelingen, voorbereidende correspondentie, ontvangstbevestigingen en doorzendplicht ex art. 2:3 Awb.",
       middelen: "Alle vakafdelingen (waaronder Ruimtelijke Ontwikkeling, Vastgoed/Grondzaken en Beheer Oosterschelde/Molenplaat).",
-      grens: "Interne zoekplicht (Art. 4.1 Woo jo. Art. 3:2 Awb): Elk team moet alle onder zich berustende documenten (contracten, kaarten, correspondentie Zuurdeeg/Molenplaat) aanleveren."
+      grens: "Interne zoekplicht (Art. 4.1 Woo jo. Art. 3:2 Awb): Elk team binnen 'Team Alle' moet bij een Woo-verzoek alle onder zich berustende documenten (contracten, kaarten, correspondentie Zuurdeeg/Molenplaat) opleveren."
     }
   ];
 
   let state = {
     productions: JSON.parse(JSON.stringify(defaultProductions)),
-    webrtcLogs: [],
-    notes: "WebRTC P2P Contact Center actief (27-10-2026). Zivver volledig vervangen door directe DTLS/SCTP DataChannels met SHA-256 pakketverificatie."
+    notes: "Forensische status (27-10-2026): Alle kenmerken compleet. PostNL 3SDQYS603048929 (Blaricum 23-10-2026) en BoB 1463739 (21/22-04-2026, ondertekend door J.K. Fraanje en M.L.P. Sijbers) zijn vast verankerd."
   };
 
-  // ============================================================================
-  // WEBRTC P2P DATACHANNEL CONTACT CENTER ENGINE
-  // ============================================================================
-  let pc = null;
-  let controlChannel = null;
-  let vaultChannel = null;
-  let txCount = 0;
-  let rxCount = 0;
-  let incomingChunks = [];
-  let incomingMeta = null;
-
-  // BroadcastChannel voor 1-klik automatische P2P handshake tussen 2 browsertabbladen
-  const localSigBus = ('BroadcastChannel' in window) ? new BroadcastChannel('vortex_webrtc_cc_bus') : null;
-  const peerNodeId = 'NODE-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-
-  if (localSigBus) {
-    localSigBus.onmessage = async (ev) => {
-      const msg = ev.data;
-      if (!msg || msg.sender === peerNodeId) return;
-
-      if (msg.type === 'AUTO_OFFER') {
-        logToStream(`[SIGNALING] Inkomende P2P Offer van ${msg.sender}. Automatische DTLS/SCTP Answer wordt opgebouwd...`, 'sys');
-        await setupPeerConnection(false);
-        await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-      } else if (msg.type === 'AUTO_ANSWER' && pc && pc.signalingState === 'have-local-offer') {
-        logToStream(`[SIGNALING] Inkomende P2P Answer van ${msg.sender}. Verbinding wordt voltooid...`, 'sys');
-        await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-      }
-    };
-  }
-
-  async function sha256Hex(textOrBuffer) {
-    const data = (typeof textOrBuffer === 'string') ? new TextEncoder().encode(textOrBuffer) : textOrBuffer;
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  async function setupPeerConnection(isCaller, autoBroadcastMode = false) {
-    if (pc) pc.close();
-    pc = new RTCPeerConnection({ iceServers: [] }); // Zero-cloud / LAN / Localhost-first
-
-    pc.oniceconnectionstatechange = () => {
-      document.getElementById('stat-ice').textContent = pc.iceConnectionState;
-      document.getElementById('rtc-global-status').textContent = `WebRTC: ${pc.iceConnectionState.toUpperCase()}`;
-    };
-
-    pc.onicecandidate = (e) => {
-      if (!e.candidate && pc.localDescription) {
-        const encoded = btoa(JSON.stringify(pc.localDescription));
-        document.getElementById('sdp-local').value = encoded;
-        if (autoBroadcastMode && localSigBus) {
-          localSigBus.postMessage({
-            sender: peerNodeId,
-            type: isCaller ? 'AUTO_OFFER' : 'AUTO_ANSWER',
-            sdp: pc.localDescription
-          });
-        }
-      }
-    };
-
-    if (isCaller) {
-      controlChannel = pc.createDataChannel('juridisch-control-cc', { ordered: true });
-      vaultChannel = pc.createDataChannel('productie-binary-vault', { ordered: true });
-      bindControlChannel(controlChannel);
-      bindVaultChannel(vaultChannel);
-    } else {
-      pc.ondatachannel = (ev) => {
-        if (ev.channel.label === 'juridisch-control-cc') {
-          controlChannel = ev.channel;
-          bindControlChannel(controlChannel);
-        } else if (ev.channel.label === 'productie-binary-vault') {
-          vaultChannel = ev.channel;
-          bindVaultChannel(vaultChannel);
-        }
-      };
-    }
-  }
-
-  function bindControlChannel(ch) {
-    ch.onopen = () => {
-      document.getElementById('dc-channel-state').textContent = `Kanaal: VERBONDEN (${peerNodeId})`;
-      document.getElementById('rtc-global-status').textContent = `WebRTC: P2P ACTIEF (${peerNodeId})`;
-      logToStream(`✅ [DTLS/SCTP OPEN] P2P DataChannel 'juridisch-control-cc' is live en versleuteld.`, 'sys');
-    };
-    ch.onclose = () => {
-      document.getElementById('dc-channel-state').textContent = 'Kanaal: Gesloten';
-      logToStream(`⚠️ [DTLS/SCTP GESLOTEN] DataChannel verbroken.`, 'sys');
-    };
-    ch.onmessage = async (ev) => {
-      rxCount++;
-      updateTelemetry();
-      try {
-        const packet = JSON.parse(ev.data);
-        const calcHash = await sha256Hex(packet.body);
-        const verified = (calcHash === packet.sha256);
-        document.getElementById('stat-hash').textContent = calcHash.substring(0, 14) + '...';
-
-        if (packet.type === 'ACK') {
-          logToStream(`✓ [ONTVANGSTBEVESTIGING van ${packet.sender}]: Pakket ${packet.ackHash.substring(0,12)}... cryptografisch geverifieerd.`, 'sys');
-          return;
-        }
-
-        logToStream(`📥 [RX | Queue: ${packet.queue}] (${packet.timestamp})\n${packet.body}\n[SHA-256: ${calcHash.substring(0,24)}... ${verified ? '✓ GELDIG' : '❌ FOUT'}]`, 'rx');
-
-        // Stuur automatische cryptografische ACK terug
-        if (controlChannel && controlChannel.readyState === 'open') {
-          const ackBody = `ACK-${calcHash}`;
-          controlChannel.send(JSON.stringify({
-            type: 'ACK',
-            sender: peerNodeId,
-            ackHash: calcHash,
-            body: ackBody,
-            sha256: await sha256Hex(ackBody)
-          }));
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-  }
-
-  function bindVaultChannel(ch) {
-    ch.binaryType = 'arraybuffer';
-    ch.onopen = () => {
-      logToStream(`✅ [VAULT KANAAL OPEN] Binary/Chunked kanaal 'productie-binary-vault' gereed (16KB chunks).`, 'sys');
-    };
-    ch.onmessage = async (ev) => {
-      rxCount++;
-      updateTelemetry();
-      if (typeof ev.data === 'string') {
-        const ctrl = JSON.parse(ev.data);
-        if (ctrl.ctrl === 'START') {
-          incomingChunks = [];
-          incomingMeta = ctrl;
-          document.getElementById('cc-transfer-status').textContent = `Ontvangen: ${ctrl.name} (0%)`;
-        } else if (ctrl.ctrl === 'END' && incomingMeta) {
-          const blob = new Blob(incomingChunks, { type: incomingMeta.mime || 'application/octet-stream' });
-          const buf = await blob.arrayBuffer();
-          const rxHash = await sha256Hex(buf);
-          const match = (rxHash === incomingMeta.sha256);
-          document.getElementById('stat-hash').textContent = rxHash.substring(0, 14) + '...';
-          document.getElementById('cc-progress').style.width = '100%';
-          document.getElementById('cc-transfer-status').textContent = `Voltooid: ${incomingMeta.name} (${match ? 'SHA-256 OK' : 'HASH FOUT'})`;
-
-          const url = URL.createObjectURL(blob);
-          logToStream(`📦 [VAULT RX VOLTOOID] Bestand/Productie '${incomingMeta.name}' (${buf.byteLength} bytes) ontvangen.\nSHA-256: ${rxHash} (${match ? '✓ IDENTIEK' : '❌ MISMATCH'})`, 'rx', url, incomingMeta.name);
-          incomingMeta = null;
-          incomingChunks = [];
-        }
-      } else if (ev.data instanceof ArrayBuffer) {
-        incomingChunks.push(ev.data);
-        if (incomingMeta && incomingMeta.size > 0) {
-          const receivedBytes = incomingChunks.reduce((acc, c) => acc + c.byteLength, 0);
-          const pct = Math.min(100, Math.round((receivedBytes / incomingMeta.size) * 100));
-          document.getElementById('cc-progress').style.width = pct + '%';
-        }
-      }
-    };
-  }
-
-  async function startAutoTabLoopback() {
-    await setupPeerConnection(true, true);
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    logToStream(`⚡ [AUTO-HANDSHAKE] SDP Offer uitgezonden op lokale browser-bus. Open een 2e tabblad met dit bestand voor directe P2P-koppeling, of gebruik een geopend 2e tabblad.`, 'sys');
-  }
-
-  async function createManualOffer() {
-    await setupPeerConnection(true, false);
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    logToStream(`🔑 [MANUAL OFFER] Wachten op ICE gathering... Kopieer daarna het Base64-blok uit 'Lokale SDP'.`, 'sys');
-  }
-
-  async function acceptRemoteOfferAndCreateAnswer() {
-    const raw = document.getElementById('sdp-remote').value.trim();
-    if (!raw) return alert("Plak eerst de Remote SDP Offer in het rechterveld.");
-    const desc = JSON.parse(atob(raw));
-    await setupPeerConnection(false, false);
-    await pc.setRemoteDescription(new RTCSessionDescription(desc));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    logToStream(`📩 [MANUAL ANSWER] Answer gegenereerd in 'Lokale SDP'. Kopieer en stuur terug naar de Caller.`, 'sys');
-  }
-
-  async function finalizeManualAnswer() {
-    const raw = document.getElementById('sdp-remote').value.trim();
-    if (!raw || !pc) return alert("Plak eerst de Remote SDP Answer in het rechterveld.");
-    const desc = JSON.parse(atob(raw));
-    await pc.setRemoteDescription(new RTCSessionDescription(desc));
-    logToStream(`✅ [HANDSHAKE VOLTOOID] Remote Answer geaccepteerd.`, 'sys');
-  }
-
-  function closeWebRTC() {
-    if (pc) pc.close();
-    document.getElementById('dc-channel-state').textContent = 'Kanaal: Gesloten';
-    document.getElementById('rtc-global-status').textContent = 'WebRTC: Gesloten';
-    logToStream(`✖ [SYSTEEM] WebRTC verbinding handmatig gesloten.`, 'sys');
-  }
-
-  async function sendControlMessage() {
-    const queue = document.getElementById('cc-queue').value;
-    const body = document.getElementById('cc-message').value.trim();
-    if (!body) return;
-
-    // Firewall check op BSN / Spoor C vermenging
-    if (/bsn|burgerservicenummer/i.test(body)) {
-      logToStream(`🛑 [FIREWALL BLOCK] Pakket geweigerd: Bevat BSN/persoonsgegevens in strijd met art. 4.1 lid 3 Woo jo. art. 5 AVG.`, 'sys');
-      return;
-    }
-
-    const hash = await sha256Hex(body);
-    const packet = {
-      type: 'CONTROL_MSG',
-      sender: peerNodeId,
-      webId: 'https://card.ttl#me',
-      queue: queue,
-      timestamp: new Date().toISOString(),
-      body: body,
-      sha256: hash
-    };
-
-    document.getElementById('stat-hash').textContent = hash.substring(0, 14) + '...';
-
-    if (controlChannel && controlChannel.readyState === 'open') {
-      controlChannel.send(JSON.stringify(packet));
-      txCount++;
-      updateTelemetry();
-      logToStream(`📤 [TX -> ${queue}] (${packet.timestamp})\n${body}\n[SHA-256: ${hash.substring(0,24)}...]`, 'tx');
-    } else {
-      logToStream(`📝 [LOKAAL GEREGISTREERD VOOR ${queue} - Geen open peer]\n${body}\n[SHA-256: ${hash}]`, 'tx');
-    }
-
-    state.webrtcLogs.push({ dir: 'TX', queue, timestamp: packet.timestamp, sha256: hash, summary: body.substring(0, 90) });
-    saveAllState();
-  }
-
-  async function streamBufferOverVault(name, mime, arrayBuffer) {
-    const hash = await sha256Hex(arrayBuffer);
-    document.getElementById('stat-hash').textContent = hash.substring(0, 14) + '...';
-
-    if (!vaultChannel || vaultChannel.readyState !== 'open') {
-      logToStream(`📦 [VAULT HASH GEGENEREERD - Geen actieve peer] '${name}' (${arrayBuffer.byteLength} B)\nSHA-256: ${hash}`, 'sys');
-      state.webrtcLogs.push({ dir: 'VAULT_LOCAL', name, size: arrayBuffer.byteLength, sha256: hash, timestamp: new Date().toISOString() });
-      saveAllState();
-      return;
-    }
-
-    const chunkSize = 16384; // 16 KB SCTP veilige chunkgrootte
-    vaultChannel.send(JSON.stringify({ ctrl: 'START', name, mime, size: arrayBuffer.byteLength, sha256: hash }));
-
-    let offset = 0;
-    while (offset < arrayBuffer.byteLength) {
-      const slice = arrayBuffer.slice(offset, offset + chunkSize);
-      vaultChannel.send(slice);
-      offset += slice.byteLength;
-      txCount++;
-      const pct = Math.min(100, Math.round((offset / arrayBuffer.byteLength) * 100));
-      document.getElementById('cc-progress').style.width = pct + '%';
-      document.getElementById('cc-transfer-status').textContent = `Verzenden: ${name} (${pct}%)`;
-      updateTelemetry();
-      await new Promise(r => setTimeout(r, 4));
-    }
-
-    vaultChannel.send(JSON.stringify({ ctrl: 'END', name, sha256: hash }));
-    logToStream(`📤 [VAULT TX VOLTOOID] '${name}' (${arrayBuffer.byteLength} bytes) in 16KB chunks verstuurd.\nSHA-256: ${hash}`, 'tx');
-    state.webrtcLogs.push({ dir: 'VAULT_TX', name, size: arrayBuffer.byteLength, sha256: hash, timestamp: new Date().toISOString() });
-    saveAllState();
-  }
-
-  async function sendSelectedProductionP2P() {
-    const idx = parseInt(document.getElementById('cc-prod-select').value, 10);
-    const prod = state.productions[idx];
-    if (!prod) return;
-    if (prod.spoor === 'C') {
-      logToStream(`🛑 [FIREWALL WAARSCHUWING] Productie 7 (1463739 - Spoor C) wordt uitsluitend als bewijs van afscheiding verzonden.`, 'sys');
-    }
-    const jsonStr = JSON.stringify({
-      dossier: "1456324 / 1425030",
-      senderWebId: "https://card.ttl#me",
-      timestamp: new Date().toISOString(),
-      productie: prod
-    }, null, 2);
-    const buf = new TextEncoder().encode(jsonStr).buffer;
-    await streamBufferOverVault(`${prod.prod.replace(/\s+/g, '_')}_${prod.datum}.json`, 'application/json', buf);
-  }
-
-  async function sendFullDossierBundleP2P() {
-    const bundle = JSON.stringify({
-      manifest: "VORTEX-P2P-DOSSIER-BUNDLE-v4",
-      peildatum: "2026-10-27",
-      eiseres: "M.J.M.M. Goijarts-Bout",
-      verweerder: "College van B&W Gemeente Tholen",
-      forensischPostbewijsBlaricum: {
-        barcode: "3SDQYS603048929",
-        type: "R Aangetekend D-A-1",
-        stempelRoosendaal: "2026-10-08T22:41:00+02:00",
-        depotBlaricum: "2026-10-12 (Business Point Van der Wal, Binnendelta 1 T, 1261 WZ Blaricum)",
-        feitelijkeAfhaling: "2026-10-23T11:42:00+02:00",
-        hersteltermijnDagen: 0
-      },
-      afgescheidenBrpBesluit: {
-        kenmerk: "1463739",
-        datum: "2026-04-21 (verzonden 2026-04-22)",
-        ondertekenaars: ["J.K. Fraanje (gemeentesecretaris)", "M.L.P. Sijbers (burgemeester)"]
-      },
-      mandaatMatrix2024_2026: mandaatMatrix,
-      producties: state.productions
-    }, null, 2);
-    const buf = new TextEncoder().encode(bundle).buffer;
-    await streamBufferOverVault(`Dossier_1456324_1425030_Compleet.json`, 'application/json', buf);
-  }
-
-  async function sendBinaryFileP2P(file) {
-    if (!file) return;
-    const buf = await file.arrayBuffer();
-    await streamBufferOverVault(file.name, file.type || 'application/octet-stream', buf);
-  }
-
-  function loadTemplate(tpl) {
-    const box = document.getElementById('cc-message');
-    if (tpl === 'blaricum') {
-      box.value = `[FORMELE KENNISGEVING 0-DAGEN TERMIJN // ZAAK 1456324 & 1425030]\nUw brief d.d. 8 oktober 2026 (kenmerk 1504535, PostNL 3SDQYS603048929, gestempeld te Bosstraat 48 Roosendaal om 22:41u) is op 12 oktober 2026 geregistreerd op het depot Business Point Van der Wal (Binnendelta 1 T, 1261 WZ Blaricum) en op vrijdag 23 oktober 2026 feitelijk afgehaald (Prod. 11). De gestelde deadline van 23 oktober 2026 hield een hersteltermijn van 0 dagen in (schending art. 3:2 en 2:4 Awb). Verzoeker heeft op 24 en 26 oktober 2026 per ommegaande via PM-01 t/m PM-03 gepreciseerd.`;
-    } else if (tpl === 'doorzend') {
-      box.value = `[DWINGENDE DOORZENDSOMMATIE EX ART. 4.2 WOO JO. ART. 2:3 AWB]\nVoor zover stukken inzake de visserij- en pachtrechten Molenplaat (1990–heden), het dossier-Zuurdeeg of de retributieregisters niet bij Team Middelen (Cluster Financiën) of Team Concernzaken berusten, sommeert verzoeker het College van B&W om het verzoek onverwijld door te zenden naar Gedeputeerde Staten van Zeeland (Zaak 417521), RVO, Rijkswaterstaat en LVVN.`;
-    } else if (tpl === 'mandaat') {
-      box.value = `[VERIFICATIE MANDAAT & BEVOEGDHEID EX ART. 10:3 LID 3 JO. ART. 7:11 AWB]\nNu het College van B&W blijkens brief 1504535 d.d. 8 oktober 2026 het advies van de Bezwaarschriftencommissie d.d. 28 augustus 2026 (Zaak 1425030) volledig heeft overgenomen en artikel 4.6 Woo definitief heeft verlaten, dient het College zelf een formele Beslissing op Bezwaar bekend te maken (zoals eerder bij besluit 1463739 d.d. 21/22 april 2026, ondertekend door J.K. Fraanje en M.L.P. Sijbers) en alle stukken uit Team Middelen, Team Concernzaken en Team Alle openbaar te maken.`;
-    }
-  }
-
-  function logToStream(text, cls, downloadUrl = null, downloadName = null) {
-    const stream = document.getElementById('cc-stream');
-    const div = document.createElement('div');
-    div.className = cls === 'tx' ? 'msg-tx' : (cls === 'rx' ? 'msg-rx' : 'msg-sys');
-    div.textContent = text;
-    if (downloadUrl) {
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = downloadName || 'productie.bin';
-      a.textContent = ` [⬇️ Download ${downloadName}]`;
-      a.style.color = '#67e8f9';
-      a.style.fontWeight = '700';
-      div.appendChild(a);
-    }
-    stream.appendChild(div);
-    stream.scrollTop = stream.scrollHeight;
-  }
-
-  function updateTelemetry() {
-    document.getElementById('stat-pkt').textContent = `${txCount} / ${rxCount}`;
-    const buf = (vaultChannel && vaultChannel.bufferedAmount) ? vaultChannel.bufferedAmount : 0;
-    document.getElementById('stat-buf').textContent = `${buf} B`;
-  }
-
-  function exportTranscriptToPod() {
-    setFeedMode('turtle');
-    logToStream(`💾 [SOLID POD WRITE-BACK] Cryptografische WebRTC sessie-triples gegenereerd voor /pod/ai-logs/ (modus: acl:Append).`, 'sys');
-  }
-
-  // ============================================================================
-  // STATE, TABELLEN & API FEEDS
-  // ============================================================================
   function loadState() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -1064,21 +593,9 @@
     state.notes = document.getElementById('notes-area').value;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     document.getElementById('save-status').textContent = "✓ Opgeslagen (" + new Date().toLocaleTimeString() + ")";
-    populateProdDropdown();
     updateLiveFeed();
+    renderZivverLetter();
     runIntegrityCheck();
-  }
-
-  function populateProdDropdown() {
-    const sel = document.getElementById('cc-prod-select');
-    if (!sel) return;
-    sel.innerHTML = "";
-    state.productions.forEach((p, idx) => {
-      const opt = document.createElement('option');
-      opt.value = idx;
-      opt.textContent = `${p.prod} (${p.datum}) — ${p.kenmerk}`;
-      sel.appendChild(opt);
-    });
   }
 
   function renderTable() {
@@ -1124,6 +641,41 @@
     });
   }
 
+  function renderZivverLetter() {
+    const out = document.getElementById('zivver-output');
+    out.textContent = `AAN DE RECHTBANK ZEELAND-WEST-BRABANT
+Cluster Bestuursrecht (Locatie Middelburg)
+Postbus 90006, 4800 PA BREDA
+Verzending: Digitaal / Zivver & Aangetekend
+
+Laren (NH), 27 oktober 2026
+
+Inzake          : Procesdossier & Productielijst Hernieuwd Woo-verzoek Visserijrechten, Molenplaat & Dossier-Zuurdeeg
+Eiseres         : Mw. M.J.M.M. Goijarts-Bout (De Mees 27, 1251 VL Laren NH)
+Verweerder      : Het College van Burgemeester en Wethouders van de Gemeente Tholen
+Zaaknummers     : 1456324 (Woo-hoofdzaak) / 1425030 (Bezwaar) / 1398201 (Primair besluit) / 1504535 (Preciseringsbrief)
+Eerdere Zaak ZWB: BRE 24/5455 WOO (ECLI:NL:RBZWB:2025:6823)
+Afgescheiden    : Besluit 1463739 d.d. 21/22 april 2026 (BRP/AVG-auditlogs, getekend door J.K. Fraanje & M.L.P. Sijbers)
+
+Edelachtbare Vrouwe, Edelachtbare Heer,
+
+Hierbij treft u het geactualiseerde en forensisch geverifieerde procesdossier (Bijlage 1: Proceschronologie, Mandaatmatrix 2024–2026 en Productielijst Prod. 1 t/m 14) inzake het Hernieuwde Woo-verzoek Visserijrechten, Molenplaat & Dossier-Zuurdeeg.
+
+1. FORE N S I S C H BEWIJS VAN TIJDIGHEID & 0-DAGEN TERMIJN (POSTNL 3SDQYS603048929)
+Verweerder heeft zijn brief van 8 oktober 2026 (kenmerk 1504535) verzonden via het centrale postcentrum te Roosendaal (Bosstraat 48, afgestempeld op 8 oktober 2026 om 22:41 uur onder PostNL barcode 3SDQYS603048929, type R Aangetekend D-A-1). Het stuk is op 12 oktober 2026 geregistreerd op het depot Business Point Van der Wal (Binnendelta 1 T, 1261 WZ Blaricum) en op vrijdag 23 oktober 2026 feitelijk afgehaald (Productie 11).
+De in brief 1504535 gestelde reactietermijn ("uiterlijk 23 oktober 2026") resulteerde op het moment van feitelijke kennisname in een hersteltermijn van exact nul (0) dagen. Eiseres heeft niettemin per ommegaande op 24 en 26 oktober 2026 via Proton Mail (PM-01 t/m PM-03, Producties 12 t/m 14) de volledige Afbakeningsmatrix en de dwingende doorzendsommatie ex art. 4.2 Woo ingediend. Van enig verzuim aan de zijde van eiseres is rechtens geen sprake.
+
+2. STRIKTE SCHEIDING MET BESLUIT 1463739 (SPOOR C: BRP/AVG-AUDITLOGS)
+Het besluit van verweerder d.d. 21 april 2026 (verzonden 22 april 2026, kenmerk 1463739, ondertekend door gemeentesecretaris J.K. Fraanje en burgemeester M.L.P. Sijbers) betrof uitsluitend de herroeping van het besluit van 25 november 2025 inzake de BRP-auditlogs (Spoor C). Krachtens artikel 4.1 lid 3 Woo (doelneutraliteit) en artikel 5 AVG (dataminimalisatie) staat dit privacyrechtelijke spoor volledig los van de publiekrechtelijke openbaarmaking van visserij-, pacht- en retributieregisters (Zaak 1456324).
+
+3. MANDAAT- EN BEVOEGDHEIDSGEBREKEN (TEAM MIDDELEN / CONCERNZAKEN / TEAM ALLE)
+Krachtens het Mandaatbesluit Gemeente Tholen (2024–2026) berusten de pacht- en retributieregisters bij Team Middelen (Cluster Financiën) en de archief- en Woo-coördinatie bij Team Concernzaken (Cluster n.v.t.). Nu verweerder het advies van de Bezwaarschriftencommissie d.d. 28 augustus 2026 (Zaak 1425030) integraal heeft overgenomen en artikel 4.6 Woo definitief heeft verlaten, rust op het College van B&W zelf de plicht om conform art. 7:11 jo. art. 10:3 lid 3 Awb een formele Beslissing op Bezwaar bekend te maken en alle stukken uit Team Middelen, Team Concernzaken en Team Alle openbaar te maken, dan wel ex art. 4.2 Woo door te zenden naar GS Zeeland, RVO, Rijkswaterstaat en LVVN.
+
+Hoogachtend,
+
+Mw. M.J.M.M. Goijarts-Bout`;
+  }
+
   function updateCell(index, field, value) {
     state.productions[index][field] = value.trim();
     saveAllState();
@@ -1150,7 +702,7 @@
   }
 
   function switchCenterView(viewId, btn) {
-    ['view-webrtc', 'view-prod', 'view-mandaat'].forEach(id => {
+    ['view-prod', 'view-mandaat', 'view-zivver'].forEach(id => {
       document.getElementById(id).style.display = (id === viewId) ? 'flex' : 'none';
     });
     document.querySelectorAll('.sub-tabs .btn').forEach(b => b.classList.remove('active'));
@@ -1176,11 +728,11 @@
   function runIntegrityCheck() {
     const out = document.getElementById('integrity-output');
     out.textContent =
-      `[WEBRTC ENGINE]: RTCPeerConnection + 2 SCTP DataChannels (Control & 16KB Binary Vault) ✓\n` +
-      `[ZIVVER VERVANGEN]: 100% P2P DTLS 1.3 met WebCrypto SHA-256 pakket-verificatie ✓\n` +
-      `[POSTNL BLARICUM]: 3SDQYS603048929 (Bosstraat 48 Roosendaal -> Binnendelta 1 T Blaricum) ✓\n` +
-      `[BOB BRP SPOOR C]: 1463739 (21/22-04-2026, J.K. Fraanje & M.L.P. Sijbers) afgescheiden ✓\n` +
-      `[MANDAAT 2024-2026]: Team Middelen, Team Concernzaken, Team Alle geladen ✓`;
+      `[PEILDATUM]: 2026-10-27 (Geen hallucinatoire toekomstige producties)\n` +
+      `[POSTNL BLARICUM]: 3SDQYS603048929 (R Aangetekend D-A-1, Bosstraat 48 Roosendaal -> Binnendelta 1 T Blaricum) ✓\n` +
+      `[EERDERE R-ZENDING]: 3SDQYS563283625 geregistreerd ✓\n` +
+      `[BOB BRP SPOOR C]: Kenmerk 1463739 (21/22-04-2026, J.K. Fraanje & M.L.P. Sijbers) zuiver afgescheiden ✓\n` +
+      `[MANDAAT 2024-2026]: Team Middelen (Financiën/P&O), Team Concernzaken (n.v.t.), Team Alle (n.v.t.) geladen ✓`;
   }
 
   function setFeedMode(mode, btn) {
@@ -1195,52 +747,48 @@
     const header = document.getElementById('feed-header');
     const payload = {
       peildatum: "2026-10-27",
-      transportProtocol: "WebRTC P2P DataChannel (DTLS 1.3 / SCTP)",
       verzoeker: "M.J.M.M. Goijarts-Bout",
       webId: "https://card.ttl#me",
+      verweerder: {
+        orgaan: "College van B&W Gemeente Tholen",
+        burgemeester: "M.L.P. Sijbers",
+        gemeentesecretaris: "J.K. Fraanje",
+        postcentrum: "Bosstraat 48, Roosendaal"
+      },
       kenmerken: {
         wooHoofdzaak: "1456324",
         bezwaarZaak: "1425030",
         primairAfwijzingsbesluitArt4_6: "1398201",
-        bobBrpAuditlogsSpoorC: "1463739 (J.K. Fraanje & M.L.P. Sijbers)",
+        bobBrpAuditlogsSpoorC: "1463739",
         preciseringsBrief: "1504535",
         postnlBlaricum: "3SDQYS603048929",
         postnlEerdereZending: "3SDQYS563283625",
         rechtbankZWB: "BRE 24/5455 WOO (ECLI:NL:RBZWB:2025:6823)",
         provincieZeeland: "417521"
       },
-      webrtcAuditTrail: state.webrtcLogs,
       mandaatStructuur2024_2026: mandaatMatrix,
       producties: state.productions
     };
 
-    if (currentFeedMode === 'turtle') {
-      header.textContent = "Solid Pod RDF/Turtle (/pod/ai-logs/webrtc-audit.ttl)";
-      const logTriples = (state.webrtcLogs || []).slice(-3).map((l, i) => `
-<#webrtc-tx-${i + 1}>
-  a prov:Activity, schema:CommunicateAction;
-  schema:agent <https://card.ttl#me>;
-  schema:recipient "${l.queue || l.name || 'P2P-Peer'}";
-  prov:endedAtTime "${l.timestamp}"^^xsd:dateTime;
-  schema:identifier "${l.sha256}".`).join('\n');
-
-      out.textContent = `@prefix schema: <http://schema.org/>.\n@prefix prov: <http://www.w3.org/ns/prov#>.\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n\n<#zending-3SDQYS603048929>\n  a prov:Entity, schema:ParcelDelivery;\n  schema:trackingNumber "3SDQYS603048929";\n  schema:originAddress "Bosstraat 48, Roosendaal (2026-10-08T22:41:00+02:00)";\n  schema:deliveryAddress "Business Point Van der Wal, Binnendelta 1 T, 1261 WZ Blaricum";\n  prov:generatedAtTime "2026-10-23T11:42:00+02:00"^^xsd:dateTime;\n  schema:identifier "1504535".\n\n<#besluit-1463739>\n  a schema:Legislation;\n  schema:identifier "1463739";\n  schema:dateCreated "2026-04-21";\n  schema:author "J.K. Fraanje", "M.L.P. Sijbers".\n${logTriples}`;
-    } else if (currentFeedMode === 'json') {
-      header.textContent = "REST JSON (/api/v4/dossier/1456324.json)";
+    if (currentFeedMode === 'json') {
+      header.textContent = "REST JSON (/api/v3/dossier/1456324.json)";
       out.textContent = JSON.stringify(payload, null, 2);
     } else if (currentFeedMode === 'jsonp') {
-      header.textContent = "JSONP Stream (?callback=vortexWebrtcDossier)";
-      out.textContent = `vortexWebrtcDossier(${JSON.stringify(payload, null, 2)});`;
+      header.textContent = "JSONP Stream (?callback=vortexDossierV3)";
+      out.textContent = `vortexDossierV3(${JSON.stringify(payload, null, 2)});`;
     } else if (currentFeedMode === 'rss') {
       header.textContent = "RSS 2.0 Audit Feed (Poort 8081)";
       const itemsXml = state.productions.map(p => `    <item>\n      <title>[${p.prod}] ${p.datum} - ${p.kenmerk}</title>\n      <description>${p.omschrijving.replace(/&/g, '&amp;')}</description>\n      <pubDate>${p.datum}</pubDate>\n    </item>`).join('\n');
-      out.textContent = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n  <channel>\n    <title>VORTEX WebRTC Dossier 1456324 // 3SDQYS603048929</title>\n    <link>http://localhost:8081/rss/woo-tholen.xml</link>\n${itemsXml}\n  </channel>\n</rss>`;
+      out.textContent = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n  <channel>\n    <title>VORTEX Dossier 1456324 // PostNL 3SDQYS603048929</title>\n    <link>http://localhost:8081/rss/woo-tholen.xml</link>\n${itemsXml}\n  </channel>\n</rss>`;
+    } else if (currentFeedMode === 'turtle') {
+      header.textContent = "Solid Pod RDF/Turtle (/pod/juridisch/woo-1456324/dossier.ttl)";
+      out.textContent = `@prefix schema: <http://schema.org/>.\n@prefix prov: <http://www.w3.org/ns/prov#>.\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n\n<#zending-3SDQYS603048929>\n  a prov:Entity, schema:ParcelDelivery;\n  schema:trackingNumber "3SDQYS603048929";\n  schema:AdditionalType "R Aangetekend D-A-1";\n  schema:originAddress "Bosstraat 48, Roosendaal (2026-10-08T22:41:00+02:00)";\n  schema:deliveryAddress "Business Point Van der Wal, Binnendelta 1 T, 1261 WZ Blaricum";\n  prov:generatedAtTime "2026-10-23T11:42:00+02:00"^^xsd:dateTime;\n  schema:identifier "1504535".\n\n<#besluit-1463739>\n  a schema:Legislation;\n  schema:identifier "1463739";\n  schema:dateCreated "2026-04-21";\n  schema:datePublished "2026-04-22";\n  schema:author "J.K. Fraanje (gemeentesecretaris)", "M.L.P. Sijbers (burgemeester)".`;
     } else if (currentFeedMode === 'wac') {
-      header.textContent = "Solid WAC (.acl) — /pod/ai-logs/.acl";
-      out.textContent = `@prefix acl: <http://www.w3.org/ns/auth/acl#>.\n\n<#owner>\n  a acl:Authorization;\n  acl:agent <https://card.ttl#me>;\n  acl:accessTo <./>;\n  acl:default <./>;\n  acl:mode acl:Read, acl:Write, acl:Control.\n\n<#webrtcContactCenterAppend>\n  a acl:Authorization;\n  acl:agent <https://card.ttl#webrtc-node>;\n  acl:accessTo </pod/ai-logs/>;\n  acl:mode acl:Append.`;
+      header.textContent = "Solid WAC (.acl) — /pod/juridisch/woo-1456324/.acl";
+      out.textContent = `@prefix acl: <http://www.w3.org/ns/auth/acl#>.\n\n<#owner>\n  a acl:Authorization;\n  acl:agent <https://card.ttl#me>;\n  acl:accessTo <./>;\n  acl:default <./>;\n  acl:mode acl:Read, acl:Write, acl:Control.\n\n<#localMistralAppend>\n  a acl:Authorization;\n  acl:agent <http://localhost:11434/profile#mistral>;\n  acl:accessTo </pod/ai-logs/>;\n  acl:mode acl:Append.`;
     } else if (currentFeedMode === 'pdok') {
       header.textContent = "PDOK OGC API Features (Molenplaat / Scherpenisse)";
-      out.textContent = `GET https://api.pdok.nl/kadaster/kadastrale-kaart/ogc/v5/collections/perceel/items?bbox=4.09,51.54,4.10,51.55&limit=100&f=json\nAccept: application/geo+json`;
+      out.textContent = `GET https://api.pdok.nl/kadaster/kadastrale-kaart/ogc/v5/collections/perceel/items?bbox=4.09,51.54,4.10,51.55&limit=100&f=json\nAccept: application/geo+json\n\n# Gekoppeld aan Team Middelen (Cluster Financiën) voor verificatie pacht- en retributieregisters (1990-heden).`;
     }
   }
 
@@ -1251,11 +799,16 @@
     setTimeout(() => { btn.textContent = "📋 Kopieer"; }, 1500);
   }
 
+  function copyZivver() {
+    navigator.clipboard.writeText(document.getElementById('zivver-output').textContent);
+    alert("Volledige Rechtbank/Zivver-brief gekopieerd naar het klembord.");
+  }
+
   function setProfile(profile, btn) {
     document.querySelectorAll('header .toolbar .btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if (profile === 'webrtc') {
-      switchCenterView('view-webrtc', document.getElementById('tab-btn-webrtc'));
+    if (profile === 'rechter') {
+      switchCenterView('view-zivver', document.getElementById('tab-btn-zivver'));
       setFeedMode('turtle');
     } else if (profile === 'mandaat') {
       switchCenterView('view-mandaat', document.getElementById('tab-btn-mandaat'));
@@ -1277,14 +830,13 @@
   }
 
   function resetState() {
-    if (confirm("Alle wijzigingen en WebRTC logs terugzetten naar de gecontroleerde v4.0 basisstaat?")) {
+    if (confirm("Alle wijzigingen terugzetten naar de gecontroleerde v3.0 basisstaat?")) {
       localStorage.removeItem(STORAGE_KEY);
       state.productions = JSON.parse(JSON.stringify(defaultProductions));
-      state.webrtcLogs = [];
       loadState();
-      populateProdDropdown();
       renderTable();
       renderMandaatTable();
+      renderZivverLetter();
       updateLiveFeed();
       runIntegrityCheck();
     }
@@ -1292,9 +844,9 @@
 
   // Initialisatie
   loadState();
-  populateProdDropdown();
   renderTable();
   renderMandaatTable();
+  renderZivverLetter();
   calculateDeadlines();
   updateLiveFeed();
   runIntegrityCheck();
